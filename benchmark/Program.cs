@@ -1,9 +1,11 @@
-﻿namespace Ferris.Json.Benchmark;
+﻿using BenchmarkDotNet.Running;
+
+namespace Ferris.Json.Benchmark;
 
 class Program
 {
     static void Main(string[] args)
     {
-        Console.WriteLine("Hello, World!");
+        var summary = BenchmarkRunner.Run<ObjectMapperBenchmarks>();
     }
 }

@@ -9,10 +9,12 @@
 
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" Version="0.14.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\src\Ferris.Json.csproj" />
+    <ProjectReference Include="..\test\Ferris.Json.Test.csproj" />
   </ItemGroup>
 
 </Project>
