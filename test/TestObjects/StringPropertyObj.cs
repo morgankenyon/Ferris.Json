@@ -1,6 +1,6 @@
 ﻿namespace Ferris.Json.Test.TestObjects;
 
-public class SinglePropertyTest
+public class StringPropertyObj
 {
     public string Property { get; set; }
 }

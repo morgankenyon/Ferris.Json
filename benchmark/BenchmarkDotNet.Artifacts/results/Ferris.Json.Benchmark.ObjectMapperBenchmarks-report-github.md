@@ -8,7 +8,8 @@ Intel Core i7-8565U CPU 1.80GHz (Whiskey Lake), 1 CPU, 8 logical and 4 physical 
 
 
 ```
-| Method                   | Mean     | Error    | StdDev   | Code Size | Gen0   | Allocated |
-|------------------------- |---------:|---------:|---------:|----------:|-------:|----------:|
-| FerrisSingleProperty     | 202.9 ns |  9.97 ns | 28.29 ns |   3,377 B | 0.0515 |     216 B |
-| NewtonsoftSingleProperty | 384.6 ns | 12.89 ns | 35.08 ns |     904 B | 0.3223 |    1352 B |
+| Method                   | Mean     | Error    | StdDev    | Median   | Code Size | Gen0   | Allocated |
+|------------------------- |---------:|---------:|----------:|---------:|----------:|-------:|----------:|
+| FerrisSingleProperty     | 361.1 ns | 46.88 ns | 134.52 ns | 318.3 ns |   3,361 B | 0.0515 |     216 B |
+| NewtonsoftSingleProperty | 736.4 ns | 60.29 ns | 173.94 ns | 688.6 ns |     904 B | 0.3223 |    1352 B |
+| TextJsonSingleProperty   | 400.8 ns |  7.88 ns |  16.09 ns | 401.8 ns |   2,256 B | 0.0153 |      64 B |

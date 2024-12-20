@@ -8,21 +8,26 @@ namespace Ferris.Json.Benchmark;
 [DisassemblyDiagnoser]
 public class ObjectMapperBenchmarks
 {
-    private SinglePropertyTest singlePropertyTest = new SinglePropertyTest
+    private StringPropertyObj singlePropertyTest = new StringPropertyObj
     {
         Property = "Test"
     };
-    private JsonTransform transform = new JsonTransform();
 
     [Benchmark]
     public void FerrisSingleProperty()
     {
-        transform.ToJson(singlePropertyTest);
+        JsonTransformer.ToJson(singlePropertyTest);
     }
 
     [Benchmark]
     public void NewtonsoftSingleProperty()
     {
         JsonConvert.SerializeObject(singlePropertyTest);
+    }
+
+    [Benchmark]
+    public void TextJsonSingleProperty()
+    {
+        System.Text.Json.JsonSerializer.Serialize(singlePropertyTest);
     }
 }
