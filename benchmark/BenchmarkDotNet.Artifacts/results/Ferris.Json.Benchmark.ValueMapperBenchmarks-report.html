@@ -2,7 +2,7 @@
 <html lang='en'>
 <head>
 <meta charset='utf-8' />
-<title>Ferris.Json.Benchmark.ValueMapperBenchmarks-20241220-230006</title>
+<title>Ferris.Json.Benchmark.ValueMapperBenchmarks-20241221-140517</title>
 
 <style type="text/css">
 	table { border-collapse: collapse; display: block; width: 100%; overflow: auto; }
@@ -22,11 +22,14 @@ Intel Core i7-8565U CPU 1.80GHz (Whiskey Lake), 1 CPU, 8 logical and 4 physical 
 <pre><code></code></pre>
 
 <table>
-<thead><tr><th>Method            </th><th>Mean</th><th>Error</th><th>StdDev</th><th>Median</th><th>Code Size</th><th>Gen0</th><th>Allocated</th>
+<thead><tr><th>Method              </th><th>Categories</th><th>Mean</th><th>Error</th><th>StdDev</th><th>Median</th><th>Ratio</th><th>RatioSD</th><th>Gen0</th><th>Code Size</th><th>Allocated</th><th>Alloc Ratio</th>
 </tr>
-</thead><tbody><tr><td>FerrisSingleProperty</td><td>4.825 &mu;s</td><td>0.1452 &mu;s</td><td>0.4257 &mu;s</td><td>4.754 &mu;s</td><td>10,008 B</td><td>0.8545</td><td>3599 B</td>
-</tr><tr><td>NewtonsoftSingleProperty</td><td>3.538 &mu;s</td><td>0.0855 &mu;s</td><td>0.2438 &mu;s</td><td>3.451 &mu;s</td><td>1,221 B</td><td>0.8202</td><td>3432 B</td>
-</tr><tr><td>TextJsonSingleProperty</td><td>1.740 &mu;s</td><td>0.0321 &mu;s</td><td>0.0268 &mu;s</td><td>1.737 &mu;s</td><td>2,588 B</td><td>0.1507</td><td>632 B</td>
+</thead><tbody><tr><td>FerrisValueLoopMapping</td><td>Loop</td><td>141.356 &mu;s</td><td>4.9400 &mu;s</td><td>14.0141 &mu;s</td><td>140.951 &mu;s</td><td>3.13</td><td>0.38</td><td>21.4844</td><td>10,462 B</td><td>90004 B</td><td>5.70</td>
+</tr><tr><td>NewtonsoftValueLoopMapping</td><td>Loop</td><td>97.503 &mu;s</td><td>1.6050 &mu;s</td><td>2.4987 &mu;s</td><td>96.952 &mu;s</td><td>2.16</td><td>0.16</td><td>20.5078</td><td>1,370 B</td><td>85811 B</td><td>5.43</td>
+</tr><tr><td>TextJsonValueLoopMapping</td><td>Loop</td><td>45.373 &mu;s</td><td>1.1864 &mu;s</td><td>3.3850 &mu;s</td><td>44.076 &mu;s</td><td>1.01</td><td>0.10</td><td>3.7231</td><td>2,896 B</td><td>15800 B</td><td>1.00</td>
+</tr><tr><td>FerrisValueMapping</td><td>Single</td><td>10.160 &mu;s</td><td>2.2338 &mu;s</td><td>6.5866 &mu;s</td><td>6.640 &mu;s</td><td>5.50</td><td>3.57</td><td>0.8545</td><td>9,215 B</td><td>3602 B</td><td>5.70</td>
+</tr><tr><td>NewtonsoftValueMapping</td><td>Single</td><td>4.654 &mu;s</td><td>0.1680 &mu;s</td><td>0.4847 &mu;s</td><td>4.559 &mu;s</td><td>2.52</td><td>0.31</td><td>0.8087</td><td>1,221 B</td><td>3432 B</td><td>5.43</td>
+</tr><tr><td>TextJsonValueMapping</td><td>Single</td><td>1.858 &mu;s</td><td>0.0469 &mu;s</td><td>0.1359 &mu;s</td><td>1.832 &mu;s</td><td>1.01</td><td>0.10</td><td>0.1488</td><td>2,588 B</td><td>632 B</td><td>1.00</td>
 </tr></tbody></table>
 </body>
 </html>
