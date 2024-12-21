@@ -323,6 +323,19 @@ public class ValueMapperTests
         var jsonString = JsonTransformer.ToJson(obj);
 
         //Assert
-        Assert.Equal($"{{\"Property\":{{\"Property\":\"value\"}}}}", jsonString);
+        Assert.Equal("{\"Property\":{\"Property\":\"value\"}}", jsonString);
+    }
+
+    [Fact(DisplayName = "Map ValueTestObject to Json")]
+    public void JsonTransformer_MapValueTestObject()
+    {
+        //Arrange
+        var obj = TestObjs.GetValueTestObject();
+
+        //Act
+        var jsonString = JsonTransformer.ToJson(obj);
+
+        //Assert
+        Assert.Equal(TestObjs.GetValueTestObjectJson(), jsonString);
     }
 }
