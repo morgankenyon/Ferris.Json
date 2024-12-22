@@ -80,7 +80,13 @@ namespace Ferris.Json
             return new List<Token>();
         }
 
-        internal static (Token, int placeholder, string? data) GetNextTokenAndData(string json)
+        internal static List<(Token token, int placeholder, string? data)> TokenizeString(string json)
+        {
+
+        }
+
+        internal static (Token token, int placeholder, string? data) GetNextTokenAndData(
+            string json)
         {
             var token = GetNextToken(json);
 

@@ -3,6 +3,7 @@ public enum Token
 {
     Unknown,
     None,
+    EndOfInput,
     Whitespace,
     OpenBracket,
     CloseBracket,
