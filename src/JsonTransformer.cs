@@ -74,5 +74,83 @@ namespace Ferris.Json
         {
             throw new NotImplementedException();
         }
+
+        internal static List<Token> Tokenize(string json)
+        {
+            return new List<Token>();
+        }
+
+        internal static (Token, int placeholder, string? data) GetNextTokenAndData(string json)
+        {
+            var token = GetNextToken(json);
+
+            if (token == Token.PropertyName
+                || token == Token.PropertyValue)
+            {
+                var data = ExtractTokenData(token, json);
+                return (token, 0, data);
+            }
+            else if (token == Token.Unknown
+                || token == Token.None)
+            {
+                return (token, 0, null);
+            }
+
+            return (token, 1, null);
+        }
+
+        private static string ExtractNextString(Token token, string json)
+        {
+            var offset = token == Token.PropertyName ? 1 : 2;   
+            var endOfString = json.IndexOf('"', offset) - offset;
+            return json.Substring(offset, endOfString);
+        }
+
+        internal static string ExtractTokenData(Token token, string json)
+        {
+            if (token == Token.PropertyName)
+            {
+                //TODO: doesn't take escaped double strings into account
+                return ExtractNextString(token, json);
+            }
+            else if (token == Token.PropertyValue)
+            {
+                if (json[1] == '"')
+                {
+                    return ExtractNextString(token, json);
+                }
+                else
+                {
+                    var endingComma = json.IndexOf(',') - 1;
+                    return json.Substring(1, endingComma);
+                }
+            }
+            return "";
+        }
+
+        internal static Token GetNextToken(string json)
+        {
+            if (string.IsNullOrWhiteSpace(json))
+            {
+                return Token.None;
+            }
+            else if (json[0] == '{')
+            {
+                return Token.OpenBracket;
+            }
+            else if (json[0] == '}')
+            {
+                return Token.CloseBracket;
+            }
+            else if (json[0] == '"')
+            {
+                return Token.PropertyName;
+            }
+            else if (json[0] == ':')
+            {
+                return Token.PropertyValue;
+            }
+            return Token.Unknown;
+        }
     }
 }
