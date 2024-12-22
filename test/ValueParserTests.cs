@@ -43,15 +43,39 @@ public class ValueParserTests
     }
 
     [Theory(DisplayName = "Can extract token data")]
-    [InlineData("\"Property\"", "Property", Token.PropertyName)]
-    [InlineData(":283,", "283", Token.PropertyValue)]
-    [InlineData(":\"data\",", "data", Token.PropertyValue)]
-    public void JsonTransform_ExtractTokenData(string json, string expectedData, Token token)
+    [InlineData("\"Property\"", "Property", 10, Token.PropertyName)]
+    [InlineData(":283,", "283", 5, Token.PropertyValue)]
+    [InlineData(":\"data\",", "data", 8, Token.PropertyValue)]
+    [InlineData("\"Property Baby\"", "Property Baby", 15, Token.PropertyName)]
+    [InlineData(":283424,", "283424", 8, Token.PropertyValue)]
+    [InlineData(":\"data point\",", "data point", 14, Token.PropertyValue)]
+    public void JsonTransform_ExtractTokenData(
+        string json,
+        string expectedData,
+        int expectedLength,
+        Token token)
     {
         //Act
-        var data = JsonTransformer.ExtractTokenData(token, json);
+        var (data, length) = JsonTransformer.ExtractTokenData(token, json);
 
         //Assert
-        Assert.Equal(expectedData, data);
+        Assert.Multiple(() =>
+        {
+            Assert.Equal(expectedData, data);
+            Assert.Equal(expectedLength, length);
+        });
+    }
+
+    [Fact(DisplayName = "Can extract all tokens from string")]
+    public void JsonTransform_ExtractAllTokens()
+    {
+        //Arrange
+        var jsonString = "{\"name\":234}";
+
+        //Act
+        var tokenInfo = JsonTransformer.TokenizeString(jsonString);
+
+        //Assert
+        Assert.Equal(4, tokenInfo.Count);
     }
 }

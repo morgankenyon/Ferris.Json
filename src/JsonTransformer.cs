@@ -82,7 +82,20 @@ namespace Ferris.Json
 
         internal static List<(Token token, int placeholder, string? data)> TokenizeString(string json)
         {
+            List<(Token, int, string?)> tokens = new List<(Token, int, string?)>();
+            while (true)
+            {
+                var (token, placeholder, data) = GetNextTokenAndData(json);
+                if (token == Token.None || token == Token.Unknown)
+                {
+                    //LOG something
+                    return tokens;
+                }
 
+                tokens.Add((token, placeholder, data));
+            }
+
+            return tokens;
         }
 
         internal static (Token token, int placeholder, string? data) GetNextTokenAndData(
@@ -93,8 +106,8 @@ namespace Ferris.Json
             if (token == Token.PropertyName
                 || token == Token.PropertyValue)
             {
-                var data = ExtractTokenData(token, json);
-                return (token, 0, data);
+                var (data, length) = ExtractTokenData(token, json);
+                return (token, length, data);
             }
             else if (token == Token.Unknown
                 || token == Token.None)
@@ -105,14 +118,20 @@ namespace Ferris.Json
             return (token, 1, null);
         }
 
-        private static string ExtractNextString(Token token, string json)
+        private static (string data, int length) ExtractNextString(Token token, string json)
         {
-            var offset = token == Token.PropertyName ? 1 : 2;   
-            var endOfString = json.IndexOf('"', offset) - offset;
-            return json.Substring(offset, endOfString);
+            //offsets to exclude colon and double quotes when
+            //extracting strings and calculating parse position
+            var (stringOffset, parsingOffset) = 
+                token == Token.PropertyName
+                ? (1, 2)
+                : (2, 4);
+            var endOfString = json.IndexOf('"', stringOffset) - stringOffset;
+            var data = json.Substring(stringOffset, endOfString);
+            return (data, endOfString + parsingOffset);
         }
 
-        internal static string ExtractTokenData(Token token, string json)
+        internal static (string data, int length) ExtractTokenData(Token token, string json)
         {
             if (token == Token.PropertyName)
             {
@@ -128,10 +147,11 @@ namespace Ferris.Json
                 else
                 {
                     var endingComma = json.IndexOf(',') - 1;
-                    return json.Substring(1, endingComma);
+                    var data = json.Substring(1, endingComma);
+                    return (data, endingComma + 2);
                 }
             }
-            return "";
+            return ("", 0);
         }
 
         internal static Token GetNextToken(string json)
