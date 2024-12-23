@@ -97,6 +97,8 @@ namespace Ferris.Json
                 }
                 else if (token == Token.PropertyName && data != null)
                 {
+                    //also need to cover the case where it's a object instead of a value
+                    //and nulls and booleans
                     var propertyName = data;
                     offset += placeholder;
                     (token, placeholder, data) = GetNextTokenAndData(json, offset);
