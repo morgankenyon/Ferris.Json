@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Reflection;
 
 namespace Ferris.Json
 {
@@ -87,12 +88,15 @@ namespace Ferris.Json
             while (true)
             {
                 var (token, placeholder, data) = GetNextTokenAndData(json, offset);
-                if (token == Token.None || token == Token.Unknown)
+
+                tokens.Add((token, placeholder, data));
+                if (token == Token.None
+                    || token == Token.Unknown
+                    || token == Token.EndOfInput)
                 {
                     //LOG something
                     return tokens;
                 }
-                tokens.Add((token, placeholder, data));
                 offset += placeholder;
             }
 
@@ -103,7 +107,7 @@ namespace Ferris.Json
             string json,
             int offset)
         {
-            var token = GetNextToken(json, offset);
+            var (token, tokenOffset) = GetNextToken(json, offset);
 
             if (token == Token.PropertyName
                 || token == Token.PropertyValue)
@@ -117,76 +121,103 @@ namespace Ferris.Json
                 return (token, 1, null);
             }
 
-            return (token, 1, null);
+            return (token, 1 + tokenOffset, null);
         }
 
-        private static (string data, int length) ExtractNextString(Token token, string json, int offset)
+        private static (string name, int length) ExtractPropertyName(
+            string json,
+            int offset)
         {
-            //offsets to exclude colon and double quotes when
-            //extracting strings and calculating parse position
-            var (stringOffset, parsingOffset) = 
-                token == Token.PropertyName
-                ? (1, 2)
-                : (2, 4);
-            var endOfString = json.IndexOf('"', stringOffset + offset) - stringOffset - offset;
-            var data = json.Substring(stringOffset + offset, endOfString);
-            return (data, endOfString + parsingOffset);
+            var (nameOffset, parsingOffset) = (1, 2);
+            var localOffset = nameOffset + offset;
+            var endOfName = json.IndexOf('"', localOffset) - localOffset;
+            var data = json.Substring(localOffset, endOfName);
+            return (data, endOfName + parsingOffset);
+        }
+
+        private static (string data, int length) ExtractPropertyStringValue(
+            string json,
+            int offset)
+        {
+            var (valueOffset, parsingOffset) = (2, 4);
+            var localOffset = valueOffset + offset;
+            //does not handle escaped double quotes
+            var endOfValue = json.IndexOf('"', localOffset) - localOffset;
+            var data = json.Substring(localOffset, endOfValue);
+            return (data, endOfValue + parsingOffset);
+        }
+
+        private static (string data, int length) ExtractPropertyNumberValue(
+            string json,
+            int offset)
+        {
+            var localOffset = 1 + offset;
+            var skipChars = 2; //one for colon, one for comma
+            //there could be no comma here if it's the last property in an object
+            var endingChar = json.IndexOf(',', localOffset) - localOffset;
+            if (endingChar < 0)
+            {
+                endingChar = json.IndexOf('}', localOffset) - localOffset;
+                skipChars--; //if no comma, detract one
+            }
+            var data = json.Substring(localOffset, endingChar);
+            return (data, endingChar + skipChars);
         }
 
         internal static (string data, int length) ExtractTokenData(Token token, string json, int offset)
         {
-            var subString = json.Substring(offset);
             if (token == Token.PropertyName)
             {
                 //TODO: doesn't take escaped double strings into account
-                return ExtractNextString(token, json, offset);
+                return ExtractPropertyName(json, offset);
             }
             else if (token == Token.PropertyValue)
             {
-                if (subString[1] == '"')
+                if (json[1 + offset] == '"')
                 {
-                    return ExtractNextString(token, json, offset);
+                    return ExtractPropertyStringValue(json, offset);
                 }
                 else
                 {
-                    //there could be no comma here if it's the last property in an object
-                    var endingComma = json.IndexOf(',', offset) - 1 - offset;
-                    var data = json.Substring(1 + offset, endingComma);
-                    return (data, endingComma + 2);
+                    return ExtractPropertyNumberValue(json, offset);
                 }
             }
             return ("", 0);
         }
 
-        internal static Token GetNextToken(string json, int offset)
+        internal static (Token token, int tokenOffset) GetNextToken(string json, int offset)
         {
             if (offset >= json.Length)
             {
-                return Token.EndOfInput;
+                return (Token.EndOfInput, 0);
             }
 
             var substring = json.Substring(offset);
             if (string.IsNullOrWhiteSpace(substring))
             {
-                return Token.EndOfInput;
+                return (Token.EndOfInput, 0);
             }
-            else if (substring[0] == '{')
+            else if (json[offset] == '{')
             {
-                return Token.OpenBracket;
+                return (Token.OpenBracket, 0);
             }
-            else if (substring[0] == '}')
+            else if (json[offset] == '}')
             {
-                return Token.CloseBracket;
+                return (Token.CloseBracket, 0);
             }
-            else if (substring[0] == '"')
+            else if (json[offset] == '"')
             {
-                return Token.PropertyName;
+                return (Token.PropertyName, 0);
             }
-            else if (substring[0] == ':')
+            else if (json[offset] == ':')
             {
-                return Token.PropertyValue;
+                if (json[offset + 1] == '{')
+                {
+                    return (Token.OpenBracket, 1);
+                }
+                return (Token.PropertyValue, 0);
             }
-            return Token.Unknown;
+            return (Token.Unknown, 0);
         }
     }
 }

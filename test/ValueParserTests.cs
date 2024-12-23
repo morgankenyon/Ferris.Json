@@ -2,38 +2,52 @@
 public class ValueParserTests
 {
     [Theory(DisplayName = "Can find simple tokens")]
-    [InlineData("", Token.EndOfInput)]
-    [InlineData("&", Token.Unknown)]
-    [InlineData("{", Token.OpenBracket)]
-    [InlineData("}", Token.CloseBracket)]
-    [InlineData("\"Property\"", Token.PropertyName)]
-    [InlineData(":283,", Token.PropertyValue)]
-    public void JsonTransform_GetNextToken(string json, Token expectedToken)
+    [InlineData("", Token.EndOfInput, 0)]
+    [InlineData("&", Token.Unknown, 0)]
+    [InlineData("{", Token.OpenBracket, 0)]
+    [InlineData("}", Token.CloseBracket, 0)]
+    [InlineData("\"Property\"", Token.PropertyName, 0)]
+    [InlineData(":283,", Token.PropertyValue, 0)]
+    [InlineData(":{", Token.OpenBracket, 1)]
+    public void JsonTransform_GetNextToken(
+        string json,
+        Token expectedToken,
+        int expectedTokenOffset)
     {
         //Act
-        var token = JsonTransformer.GetNextToken(json, 0);
+        var (token, tokenOffset) = JsonTransformer.GetNextToken(json, 0);
 
         //Assert
-        Assert.Equal(expectedToken, token);
+        Assert.Multiple(() =>
+        {
+            Assert.Equal(expectedToken, token);
+            Assert.Equal(expectedTokenOffset, tokenOffset);
+        });
     }
 
     [Theory(DisplayName = "Can find simple token with offset")]
-    [InlineData("{", 1, Token.EndOfInput)]
-    [InlineData("{&", 1, Token.Unknown)]
-    [InlineData("{\"n\":{", 5, Token.OpenBracket)]
-    [InlineData("{}", 1, Token.CloseBracket)]
-    [InlineData("{\"Property\"", 1, Token.PropertyName)]
-    [InlineData("{\"Property\":283,", 11, Token.PropertyValue)]
+    [InlineData("{", 1, Token.EndOfInput, 0)]
+    [InlineData("{&", 1, Token.Unknown, 0)]
+    [InlineData("{\"n\":{", 5, Token.OpenBracket, 0)]
+    [InlineData("{}", 1, Token.CloseBracket, 0)]
+    [InlineData("{\"Property\"", 1, Token.PropertyName, 0)]
+    [InlineData("{\"Property\":283,", 11, Token.PropertyValue, 0)]
+    [InlineData("{\"Property\":{", 11, Token.OpenBracket, 1)]
     public void JsonTransform_GetNextTokenWithOffset(
         string json,
         int offset,
-        Token expectedToken)
+        Token expectedToken,
+        int expectedTokenOffset)
     {
         //Act
-        var token = JsonTransformer.GetNextToken(json, offset);
+        var (token, tokenOffset) = JsonTransformer.GetNextToken(json, offset);
 
         //Assert
-        Assert.Equal(expectedToken, token);
+        Assert.Multiple(() =>
+        {
+            Assert.Equal(expectedToken, token);
+            Assert.Equal(expectedTokenOffset, tokenOffset);
+        });
     }
 
     [Theory(DisplayName = "Can find values to appropriate tokens")]
@@ -110,14 +124,15 @@ public class ValueParserTests
     }
 
     [Theory(DisplayName = "Can extract token data")]
-    //[InlineData("{\"Property\"", 1, "Property", 10, Token.PropertyName)]
-    //[InlineData("{:283,", 1, "283", 5, Token.PropertyValue)]
-    //[InlineData("{\"val\":\"data\",", 6, "data", 8, Token.PropertyValue)]
-    //[InlineData("{\"Property Baby\"", 1, "Property Baby", 15, Token.PropertyName)]
-    //[InlineData("{\"val\":283424,", 6, "283424", 8, Token.PropertyValue)]
-    [InlineData("{\"val\":283424", 6, "283424", 7, Token.PropertyValue)]
-    //[InlineData("{\"bobby\":\"data point\",", 8, "data point", 14, Token.PropertyValue)]
-    //[InlineData("{\"name\"", 1, "name", 6, Token.PropertyName)]
+    [InlineData("{\"Property\"", 1, "Property", 10, Token.PropertyName)]
+    [InlineData("{:283,", 1, "283", 5, Token.PropertyValue)]
+    [InlineData("{\"val\":\"data\",", 6, "data", 8, Token.PropertyValue)]
+    [InlineData("{\"Property Baby\"", 1, "Property Baby", 15, Token.PropertyName)]
+    [InlineData("{\"val\":283424,", 6, "283424", 8, Token.PropertyValue)]
+    [InlineData("{\"val\":283424}", 6, "283424", 7, Token.PropertyValue)]
+    [InlineData("{\"bobby\":\"data point\",", 8, "data point", 14, Token.PropertyValue)]
+    [InlineData("{\"name\"", 1, "name", 6, Token.PropertyName)]
+    ////[InlineData("{\"val\":283424", 6, "283424", 7, Token.PropertyValue)] //error case to cover
     public void JsonTransform_ExtractTokenDataWithOffset(
         string json,
         int offset,
@@ -136,8 +151,8 @@ public class ValueParserTests
         });
     }
 
-    [Fact(DisplayName = "Can extract all tokens from string")]
-    public void JsonTransform_ExtractAllTokens()
+    [Fact(DisplayName = "Can extract simple tokens from string")]
+    public void JsonTransform_ExtractSimpleTokens()
     {
         //Arrange
         var jsonString = "{\"name\":234}";
@@ -146,6 +161,48 @@ public class ValueParserTests
         var tokenInfo = JsonTransformer.TokenizeString(jsonString);
 
         //Assert
-        Assert.Equal(4, tokenInfo.Count);
+        Assert.Equal(5, tokenInfo.Count);
+
+        var tokens = tokenInfo.Select(ti => ti.token).ToList();
+        var expectedTokens = new List<Token> {
+            Token.OpenBracket,
+            Token.PropertyName,
+            Token.PropertyValue,
+            Token.CloseBracket,
+            Token.EndOfInput
+        };
+
+        Assert.Equal(expectedTokens, tokens);
+    }
+
+    [Fact(DisplayName = "Can extract more complex tokens from string")]
+    public void JsonTransform_ExtractMoreComplexTokens()
+    {
+        //Arrange
+        var jsonString = "{\"name\":234,\"value\":\"baby\",\"second\":{\"level\":23}}";
+
+        //Act
+        var tokenInfo = JsonTransformer.TokenizeString(jsonString);
+
+        //Assert
+        Assert.Equal(12, tokenInfo.Count);
+
+        var tokens = tokenInfo.Select(ti => ti.token).ToList();
+        var expectedTokens = new List<Token> {
+            Token.OpenBracket,
+            Token.PropertyName,
+            Token.PropertyValue,
+            Token.PropertyName,
+            Token.PropertyValue,
+            Token.PropertyName,
+            Token.OpenBracket,
+            Token.PropertyName,
+            Token.PropertyValue,
+            Token.CloseBracket,
+            Token.CloseBracket,
+            Token.EndOfInput
+        };
+
+        Assert.Equal(expectedTokens, tokens);
     }
 }
