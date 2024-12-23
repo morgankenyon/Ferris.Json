@@ -73,7 +73,43 @@ namespace Ferris.Json
 
         public static T ToObject<T>(string json)
         {
-            throw new NotImplementedException();
+            Type type = typeof(T);
+
+            PropertyInfo[] properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+
+            var propertiesDict = properties.ToDictionary(p => p.Name, p => p);
+            //properties.Where(p => p.MemberType == )
+            T instance = Activator.CreateInstance<T>();
+            //foreach (PropertyInfo property in properties)
+            //{
+
+            //}
+
+            var offset = 0;
+
+            while (true)
+            {
+                var (token, placeholder, data) = GetNextTokenAndData(json, offset);
+
+                if (token == Token.EndOfInput)
+                {
+                    break;
+                }
+                else if (token == Token.PropertyName && data != null)
+                {
+                    var propertyName = data;
+                    offset += placeholder;
+                    (token, placeholder, data) = GetNextTokenAndData(json, offset);
+
+                    if (propertiesDict.TryGetValue(propertyName, out var propertyInfo))
+                    {
+                        propertyInfo.SetValue(instance, data);
+                    }
+                }
+                offset += placeholder;
+            }
+
+            return instance;
         }
 
         internal static List<Token> Tokenize(string json)

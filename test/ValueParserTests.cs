@@ -1,4 +1,6 @@
-﻿namespace Ferris.Json.Test;
+﻿using Ferris.Json.Test.TestObjects;
+
+namespace Ferris.Json.Test;
 public class ValueParserTests
 {
     [Theory(DisplayName = "Can find simple tokens")]
@@ -204,5 +206,21 @@ public class ValueParserTests
         };
 
         Assert.Equal(expectedTokens, tokens);
+    }
+
+    [Fact(DisplayName = "Can match tokens to object")]
+    public void JsonTransform_ToObject_SimpleCase()
+    {
+        //Arrange
+        var jsonString = "{\"Property\":\"testValue\"}";
+
+        //Act
+        var obj = JsonTransformer.ToObject<StringPropertyObj>(jsonString);
+
+        //Assert
+        Assert.True(obj is StringPropertyObj);
+
+        var stringProp = obj as StringPropertyObj;
+        Assert.Equal("testValue", stringProp.Property);
     }
 }
