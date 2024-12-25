@@ -4,9 +4,28 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PackageId>Ferris.Json</PackageId>
+    <Title>Ferris.Json</Title>
+    <Version>0.1.0</Version>
+    <Authors>Morgan Kenyon</Authors>
+    <Description>A library for serializing and deserializing json.</Description>
+    <Summary>A library for serializing and deserializing json.</Summary>
+    <PackageProjectUrl>https://github.com/morgankenyon/Ferris.Json</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/morgankenyon/Ferris.Json.git</RepositoryUrl> 
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>json,serialization</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Copyright>Copyright © Morgan Kenyon 2024</Copyright>
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
     <ItemGroup>
 	    <InternalsVisibleTo Include="Ferris.Json.Test" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="../README.md" Pack="true" PackagePath=""/>
     </ItemGroup>
 </Project>

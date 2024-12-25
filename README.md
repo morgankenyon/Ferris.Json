@@ -1,8 +1,27 @@
 # Ferris.Json
 
-A json parsing library in C# to hone my performance skills.
+A library for serializing and deserializing json.
 
 Current status: not ready to be used for anything.
+
+## Usages
+
+### Serializing
+```csharp
+var obj = new TestObject
+{
+    Property = "string"
+};
+
+var jsonString = JsonTransformer.Serialize(obj);
+```
+
+### Deserializing
+```csharp
+var jsonString = "{\"Property\":\"string\"}"
+
+var obj = JsonTransformer.Deserialize(jsonString);
+```
 
 ## Code structure
 

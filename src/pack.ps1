@@ -1,0 +1,1 @@
+dotnet pack Ferris.Json.csproj -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg
