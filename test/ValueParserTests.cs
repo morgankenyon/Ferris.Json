@@ -210,13 +210,13 @@ public class ValueParserTests
     }
 
     [Fact(DisplayName = "Can parse json string to object")]
-    public void JsonTransform_ToObject_SingleStringProperty()
+    public void JsonTransform_Deserialize_SingleStringProperty()
     {
         //Arrange
         var jsonString = "{\"Property\":\"testValue\"}";
 
         //Act
-        var obj = JsonTransformer.ToObject<StringPropertyObj>(jsonString);
+        var obj = JsonTransformer.Deserialize<StringPropertyObj>(jsonString);
 
         //Assert
         Assert.True(obj is StringPropertyObj);
@@ -226,14 +226,14 @@ public class ValueParserTests
     }
 
     [Fact(DisplayName = "Can parse json number to integer")]
-    public void JsonTransform_ToObject_SingleIntProperty()
+    public void JsonTransform_Deserialize_SingleIntProperty()
     {
         //Arrange
         var maxValue = int.MaxValue;
         var jsonString = $"{{\"Property\":{maxValue}}}";
 
         //Act
-        var obj = JsonTransformer.ToObject<IntPropertyObj>(jsonString);
+        var obj = JsonTransformer.Deserialize<IntPropertyObj>(jsonString);
 
         //Assert
         Assert.True(obj is IntPropertyObj);
@@ -243,14 +243,14 @@ public class ValueParserTests
     }
 
     [Fact(DisplayName = "Can parse json number to uint")]
-    public void JsonTransform_ToObject_SingleUIntProperty()
+    public void JsonTransform_Deserialize_SingleUIntProperty()
     {
         //Arrange
         var maxValue = uint.MaxValue;
         var jsonString = $"{{\"Property\":{maxValue}}}";
 
         //Act
-        var obj = JsonTransformer.ToObject<UIntPropertyObj>(jsonString);
+        var obj = JsonTransformer.Deserialize<UIntPropertyObj>(jsonString);
 
         //Assert
         Assert.True(obj is UIntPropertyObj);
@@ -260,14 +260,14 @@ public class ValueParserTests
     }
 
     [Fact(DisplayName = "Can parse json number to float")]
-    public void JsonTransform_ToObject_SingleFloatProperty()
+    public void JsonTransform_Deserialize_SingleFloatProperty()
     {
         //Arrange
         var maxValue = float.MaxValue;
         var jsonString = $"{{\"Property\":{maxValue}}}";
 
         //Act
-        var obj = JsonTransformer.ToObject<FloatPropertyObj>(jsonString);
+        var obj = JsonTransformer.Deserialize<FloatPropertyObj>(jsonString);
 
         //Assert
         Assert.True(obj is FloatPropertyObj);
@@ -277,14 +277,14 @@ public class ValueParserTests
     }
 
     [Fact(DisplayName = "Can parse json number to double")]
-    public void JsonTransform_ToObject_SingleDoubleProperty()
+    public void JsonTransform_Deserialize_SingleDoubleProperty()
     {
         //Arrange
         var maxValue = double.MaxValue;
         var jsonString = $"{{\"Property\":{maxValue}}}";
 
         //Act
-        var obj = JsonTransformer.ToObject<DoublePropertyObj>(jsonString);
+        var obj = JsonTransformer.Deserialize<DoublePropertyObj>(jsonString);
 
         //Assert
         Assert.True(obj is DoublePropertyObj);
@@ -294,13 +294,13 @@ public class ValueParserTests
     }
 
     [Fact(DisplayName = "Can parse json bool to object")]
-    public void JsonTransform_ToObject_SingleBoolProperty()
+    public void JsonTransform_Deserialize_SingleBoolProperty()
     {
         //Arrange
         var jsonString = "{\"Property\":true}";
 
         //Act
-        var obj = JsonTransformer.ToObject<BoolPropertyObj>(jsonString);
+        var obj = JsonTransformer.Deserialize<BoolPropertyObj>(jsonString);
 
         //Assert
         Assert.True(obj is BoolPropertyObj);
@@ -310,14 +310,14 @@ public class ValueParserTests
     }
 
     [Fact(DisplayName = "Can parse json number to byte")]
-    public void JsonTransform_ToObject_SingleByteProperty()
+    public void JsonTransform_Deserialize_SingleByteProperty()
     {
         //Arrange
         var maxValue = byte.MaxValue;
         var jsonString = $"{{\"Property\":{maxValue}}}";
 
         //Act
-        var obj = JsonTransformer.ToObject<BytePropertyObj>(jsonString);
+        var obj = JsonTransformer.Deserialize<BytePropertyObj>(jsonString);
 
         //Assert
         Assert.True(obj is BytePropertyObj);
@@ -327,14 +327,14 @@ public class ValueParserTests
     }
 
     [Fact(DisplayName = "Can parse json number to sbyte")]
-    public void JsonTransform_ToObject_SingleSByteProperty()
+    public void JsonTransform_Deserialize_SingleSByteProperty()
     {
         //Arrange
         var maxValue = sbyte.MaxValue;
         var jsonString = $"{{\"Property\":{maxValue}}}";
 
         //Act
-        var obj = JsonTransformer.ToObject<SBytePropertyObj>(jsonString);
+        var obj = JsonTransformer.Deserialize<SBytePropertyObj>(jsonString);
 
         //Assert
         Assert.True(obj is SBytePropertyObj);
@@ -344,13 +344,13 @@ public class ValueParserTests
     }
 
     [Fact(DisplayName = "Can parse json char to object")]
-    public void JsonTransform_ToObject_SingleCharProperty()
+    public void JsonTransform_Deserialize_SingleCharProperty()
     {
         //Arrange
         var jsonString = "{\"Property\":\"a\"}";
 
         //Act
-        var obj = JsonTransformer.ToObject<CharPropertyObj>(jsonString);
+        var obj = JsonTransformer.Deserialize<CharPropertyObj>(jsonString);
 
         //Assert
         Assert.True(obj is CharPropertyObj);
@@ -360,14 +360,14 @@ public class ValueParserTests
     }
 
     [Fact(DisplayName = "Can parse json number to decimal")]
-    public void JsonTransform_ToObject_SingleDecimalProperty()
+    public void JsonTransform_Deserialize_SingleDecimalProperty()
     {
         //Arrange
         var maxValue = decimal.MaxValue;
         var jsonString = $"{{\"Property\":{maxValue}}}";
 
         //Act
-        var obj = JsonTransformer.ToObject<DecimalPropertyObj>(jsonString);
+        var obj = JsonTransformer.Deserialize<DecimalPropertyObj>(jsonString);
 
         //Assert
         Assert.True(obj is DecimalPropertyObj);
@@ -377,14 +377,14 @@ public class ValueParserTests
     }
 
     [Fact(DisplayName = "Can parse json number to long")]
-    public void JsonTransform_ToObject_SingleLongProperty()
+    public void JsonTransform_Deserialize_SingleLongProperty()
     {
         //Arrange
         var maxValue = long.MaxValue;
         var jsonString = $"{{\"Property\":{maxValue}}}";
 
         //Act
-        var obj = JsonTransformer.ToObject<LongPropertyObj>(jsonString);
+        var obj = JsonTransformer.Deserialize<LongPropertyObj>(jsonString);
 
         //Assert
         Assert.True(obj is LongPropertyObj);
@@ -394,14 +394,14 @@ public class ValueParserTests
     }
 
     [Fact(DisplayName = "Can parse json number to ulong")]
-    public void JsonTransform_ToObject_SingleULongProperty()
+    public void JsonTransform_Deserialize_SingleULongProperty()
     {
         //Arrange
         var maxValue = ulong.MaxValue;
         var jsonString = $"{{\"Property\":{maxValue}}}";
 
         //Act
-        var obj = JsonTransformer.ToObject<ULongPropertyObj>(jsonString);
+        var obj = JsonTransformer.Deserialize<ULongPropertyObj>(jsonString);
 
         //Assert
         Assert.True(obj is ULongPropertyObj);
@@ -411,14 +411,14 @@ public class ValueParserTests
     }
 
     [Fact(DisplayName = "Can parse json number to int128")]
-    public void JsonTransform_ToObject_SingleInt128Property()
+    public void JsonTransform_Deserialize_SingleInt128Property()
     {
         //Arrange
         var maxValue = Int128.MaxValue;
         var jsonString = $"{{\"Property\":{maxValue}}}";
 
         //Act
-        var obj = JsonTransformer.ToObject<Int128PropertyObj>(jsonString);
+        var obj = JsonTransformer.Deserialize<Int128PropertyObj>(jsonString);
 
         //Assert
         Assert.True(obj is Int128PropertyObj);
@@ -428,14 +428,14 @@ public class ValueParserTests
     }
 
     [Fact(DisplayName = "Can parse json number to uint128")]
-    public void JsonTransform_ToObject_SingleUInt128Property()
+    public void JsonTransform_Deserialize_SingleUInt128Property()
     {
         //Arrange
         var maxValue = UInt128.MaxValue;
         var jsonString = $"{{\"Property\":{maxValue}}}";
 
         //Act
-        var obj = JsonTransformer.ToObject<UInt128PropertyObj>(jsonString);
+        var obj = JsonTransformer.Deserialize<UInt128PropertyObj>(jsonString);
 
         //Assert
         Assert.True(obj is UInt128PropertyObj);
@@ -445,14 +445,14 @@ public class ValueParserTests
     }
 
     [Fact(DisplayName = "Can parse json number to short")]
-    public void JsonTransform_ToObject_SingleShortProperty()
+    public void JsonTransform_Deserialize_SingleShortProperty()
     {
         //Arrange
         var maxValue = short.MaxValue;
         var jsonString = $"{{\"Property\":{maxValue}}}";
 
         //Act
-        var obj = JsonTransformer.ToObject<ShortPropertyObj>(jsonString);
+        var obj = JsonTransformer.Deserialize<ShortPropertyObj>(jsonString);
 
         //Assert
         Assert.True(obj is ShortPropertyObj);
@@ -462,14 +462,14 @@ public class ValueParserTests
     }
 
     [Fact(DisplayName = "Can parse json number to ushort")]
-    public void JsonTransform_ToObject_SingleUShortProperty()
+    public void JsonTransform_Deserialize_SingleUShortProperty()
     {
         //Arrange
         var maxValue = ushort.MaxValue;
         var jsonString = $"{{\"Property\":{maxValue}}}";
 
         //Act
-        var obj = JsonTransformer.ToObject<UShortPropertyObj>(jsonString);
+        var obj = JsonTransformer.Deserialize<UShortPropertyObj>(jsonString);
 
         //Assert
         Assert.True(obj is UShortPropertyObj);
@@ -479,13 +479,13 @@ public class ValueParserTests
     }
 
     [Fact(DisplayName = "Can parse json to value test object")]
-    public void JsonTransform_ToObject_ValueTestObject()
+    public void JsonTransform_Deserialize_ValueTestObject()
     {
         //Arrange
         var json = TestObjs.GetValueTestObjectJson();
 
         //Act
-        var obj = JsonTransformer.ToObject<ValueTestObject>(json);
+        var obj = JsonTransformer.Deserialize<ValueTestObject>(json);
 
         //Assert
         obj.BoolProp.Should().BeTrue();

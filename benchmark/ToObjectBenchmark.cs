@@ -13,7 +13,7 @@ public class ToObjectBenchmark
     [BenchmarkCategory("Single")]
     public void FerrisValueMapping()
     {
-        var obj = JsonTransformer.ToObject<StringPropertyObj>(jsonString);
+        var obj = JsonTransformer.Deserialize<StringPropertyObj>(jsonString);
         count += obj.Property.GetHashCode();
     }
 

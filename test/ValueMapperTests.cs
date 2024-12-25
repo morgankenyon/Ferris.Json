@@ -16,7 +16,7 @@ public class ValueMapperTests
         };
 
         //Act
-        var jsonString = JsonTransformer.ToJson(obj);
+        var jsonString = JsonTransformer.Serialize(obj);
 
         //Assert
         Assert.Equal($"{{\"Property\":{value.ToString().ToLower()}}}", jsonString);
@@ -32,7 +32,7 @@ public class ValueMapperTests
         };
 
         //Act
-        var jsonString = JsonTransformer.ToJson(obj);
+        var jsonString = JsonTransformer.Serialize(obj);
 
         //Assert
         Assert.Equal("{\"Property\":77}", jsonString);
@@ -48,7 +48,7 @@ public class ValueMapperTests
         };
 
         //Act
-        var jsonString = JsonTransformer.ToJson(obj);
+        var jsonString = JsonTransformer.Serialize(obj);
 
         //Assert
         Assert.Equal("{\"Property\":79}", jsonString);
@@ -64,7 +64,7 @@ public class ValueMapperTests
         };
 
         //Act
-        var jsonString = JsonTransformer.ToJson(obj);
+        var jsonString = JsonTransformer.Serialize(obj);
 
         //Assert
         Assert.Equal("{\"Property\":\"M\"}", jsonString);
@@ -80,7 +80,7 @@ public class ValueMapperTests
         };
 
         //Act
-        var jsonString = JsonTransformer.ToJson(obj);
+        var jsonString = JsonTransformer.Serialize(obj);
 
         //Assert
         Assert.Equal("{\"Property\":23.29}", jsonString);
@@ -96,7 +96,7 @@ public class ValueMapperTests
         };
 
         //Act
-        var jsonString = JsonTransformer.ToJson(obj);
+        var jsonString = JsonTransformer.Serialize(obj);
 
         //Assert
         Assert.Equal("{\"Property\":23.1}", jsonString);
@@ -112,7 +112,7 @@ public class ValueMapperTests
         };
 
         //Act
-        var jsonString = JsonTransformer.ToJson(obj);
+        var jsonString = JsonTransformer.Serialize(obj);
 
         //Assert
         Assert.Equal("{\"Property\":23.1}", jsonString);
@@ -128,7 +128,7 @@ public class ValueMapperTests
         };
 
         //Act
-        var jsonString = JsonTransformer.ToJson(obj);
+        var jsonString = JsonTransformer.Serialize(obj);
 
         //Assert
         Assert.Equal("{\"Property\":23}", jsonString);
@@ -144,7 +144,7 @@ public class ValueMapperTests
         };
 
         //Act
-        var jsonString = JsonTransformer.ToJson(obj);
+        var jsonString = JsonTransformer.Serialize(obj);
 
         //Assert
         Assert.Equal("{\"Property\":223}", jsonString);
@@ -160,7 +160,7 @@ public class ValueMapperTests
         };
 
         //Act
-        var jsonString = JsonTransformer.ToJson(obj);
+        var jsonString = JsonTransformer.Serialize(obj);
 
         //Assert
         Assert.Equal("{\"Property\":83}", jsonString);
@@ -176,7 +176,7 @@ public class ValueMapperTests
         };
 
         //Act
-        var jsonString = JsonTransformer.ToJson(obj);
+        var jsonString = JsonTransformer.Serialize(obj);
 
         //Assert
         Assert.Equal("{\"Property\":2277}", jsonString);
@@ -192,7 +192,7 @@ public class ValueMapperTests
         };
 
         //Act
-        var jsonString = JsonTransformer.ToJson(obj);
+        var jsonString = JsonTransformer.Serialize(obj);
 
         //Assert
         Assert.Equal("{\"Property\":832839272}", jsonString);
@@ -208,7 +208,7 @@ public class ValueMapperTests
         };
 
         //Act
-        var jsonString = JsonTransformer.ToJson(obj);
+        var jsonString = JsonTransformer.Serialize(obj);
 
         //Assert
         Assert.Equal("{\"Property\":2283283927277}", jsonString);
@@ -224,7 +224,7 @@ public class ValueMapperTests
         };
 
         //Act
-        var jsonString = JsonTransformer.ToJson(obj);
+        var jsonString = JsonTransformer.Serialize(obj);
 
         //Assert
         Assert.Equal("{\"Property\":828392722342422424}", jsonString);
@@ -240,7 +240,7 @@ public class ValueMapperTests
         };
 
         //Act
-        var jsonString = JsonTransformer.ToJson(obj);
+        var jsonString = JsonTransformer.Serialize(obj);
 
         //Assert
         Assert.Equal("{\"Property\":8328392722342422424}", jsonString);
@@ -256,7 +256,7 @@ public class ValueMapperTests
         };
 
         //Act
-        var jsonString = JsonTransformer.ToJson(obj);
+        var jsonString = JsonTransformer.Serialize(obj);
 
         //Assert
         Assert.Equal("{\"Property\":22}", jsonString);
@@ -272,7 +272,7 @@ public class ValueMapperTests
         };
 
         //Act
-        var jsonString = JsonTransformer.ToJson(obj);
+        var jsonString = JsonTransformer.Serialize(obj);
 
         //Assert
         Assert.Equal("{\"Property\":2283}", jsonString);
@@ -288,7 +288,7 @@ public class ValueMapperTests
         };
 
         //Act
-        var jsonString = JsonTransformer.ToJson(obj);
+        var jsonString = JsonTransformer.Serialize(obj);
 
         //Assert
         Assert.Equal("{\"Property\":\"FirstTest\"}", jsonString);
@@ -301,7 +301,7 @@ public class ValueMapperTests
         var obj = new StringPropertyObj();
 
         //Act
-        var jsonString = JsonTransformer.ToJson(obj);
+        var jsonString = JsonTransformer.Serialize(obj);
 
         //Assert
         Assert.Equal("""{"Property":null}""", jsonString);
@@ -320,7 +320,7 @@ public class ValueMapperTests
         };
 
         //Act
-        var jsonString = JsonTransformer.ToJson(obj);
+        var jsonString = JsonTransformer.Serialize(obj);
 
         //Assert
         Assert.Equal("{\"Property\":{\"Property\":\"value\"}}", jsonString);
@@ -333,7 +333,7 @@ public class ValueMapperTests
         var obj = TestObjs.GetValueTestObject();
 
         //Act
-        var jsonString = JsonTransformer.ToJson(obj);
+        var jsonString = JsonTransformer.Serialize(obj);
 
         //Assert
         Assert.Equal(TestObjs.GetValueTestObjectJson(), jsonString);

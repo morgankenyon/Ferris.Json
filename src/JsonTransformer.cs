@@ -5,7 +5,7 @@ namespace Ferris.Json
 {
     public static class JsonTransformer
     {
-        public static string ToJson(object obj)
+        public static string Serialize(object obj)
         {
             var properties = obj.GetType().GetProperties();
 
@@ -71,7 +71,7 @@ namespace Ferris.Json
             return combinedProperties;
         }
 
-        public static T ToObject<T>(string json)
+        public static T Deserialize<T>(string json)
         {
             Type type = typeof(T);
 

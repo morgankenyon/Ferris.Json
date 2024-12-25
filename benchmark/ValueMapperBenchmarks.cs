@@ -19,7 +19,7 @@ public class ValueMapperBenchmarks
     [BenchmarkCategory("Single")]
     public void FerrisValueMapping()
     {
-        var json = JsonTransformer.ToJson(testObj);
+        var json = JsonTransformer.Serialize(testObj);
         count += json.GetHashCode();
     }
 
@@ -45,7 +45,7 @@ public class ValueMapperBenchmarks
     {
         for (int i = 0; i < N; i++)
         {
-            var json = JsonTransformer.ToJson(testObj);
+            var json = JsonTransformer.Serialize(testObj);
             count += json.GetHashCode();
         }
     }
