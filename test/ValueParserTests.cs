@@ -18,7 +18,7 @@ public class ValueParserTests
         int expectedTokenOffset)
     {
         //Act
-        var (token, tokenOffset) = JsonTransformer.GetNextToken(json, 0);
+        var (token, tokenOffset) = JsonTransformer.GetNextToken(json);
 
         //Assert
         Assert.Multiple(() =>
@@ -28,30 +28,32 @@ public class ValueParserTests
         });
     }
 
-    [Theory(DisplayName = "Can find simple token with offset")]
-    [InlineData("{", 1, Token.EndOfInput, 0)]
-    [InlineData("{&", 1, Token.Unknown, 0)]
-    [InlineData("{\"n\":{", 5, Token.OpenBracket, 0)]
-    [InlineData("{}", 1, Token.CloseBracket, 0)]
-    [InlineData("{\"Property\"", 1, Token.PropertyName, 0)]
-    [InlineData("{\"Property\":283,", 11, Token.PropertyValue, 0)]
-    [InlineData("{\"Property\":{", 11, Token.OpenBracket, 1)]
-    public void JsonTransform_GetNextTokenWithOffset(
-        string json,
-        int offset,
-        Token expectedToken,
-        int expectedTokenOffset)
-    {
-        //Act
-        var (token, tokenOffset) = JsonTransformer.GetNextToken(json, offset);
+    //This was leftover from when I was using strings versus
+    //ReadOnlySpan<char>, see if we still need these tests
+    //[Theory(DisplayName = "Can find simple token with offset")]
+    //[InlineData("{", 1, Token.EndOfInput, 0)]
+    //[InlineData("{&", 1, Token.Unknown, 0)]
+    //[InlineData("{\"n\":{", 5, Token.OpenBracket, 0)]
+    //[InlineData("{}", 1, Token.CloseBracket, 0)]
+    //[InlineData("{\"Property\"", 1, Token.PropertyName, 0)]
+    //[InlineData("{\"Property\":283,", 11, Token.PropertyValue, 0)]
+    //[InlineData("{\"Property\":{", 11, Token.OpenBracket, 1)]
+    //public void JsonTransform_GetNextTokenWithOffset(
+    //    string json,
+    //    int offset,
+    //    Token expectedToken,
+    //    int expectedTokenOffset)
+    //{
+    //    //Act
+    //    var (token, tokenOffset) = JsonTransformer.GetNextToken(json, offset);
 
-        //Assert
-        Assert.Multiple(() =>
-        {
-            Assert.Equal(expectedToken, token);
-            Assert.Equal(expectedTokenOffset, tokenOffset);
-        });
-    }
+    //    //Assert
+    //    Assert.Multiple(() =>
+    //    {
+    //        Assert.Equal(expectedToken, token);
+    //        Assert.Equal(expectedTokenOffset, tokenOffset);
+    //    });
+    //}
 
     [Theory(DisplayName = "Can find values to appropriate tokens")]
     [InlineData("", 1, null, Token.EndOfInput)]
@@ -67,7 +69,7 @@ public class ValueParserTests
         Token expectedToken)
     {
         //Act
-        var (token, placeholder, data) = JsonTransformer.GetNextTokenAndData(json, 0);
+        var (token, placeholder, data) = JsonTransformer.GetNextTokenAndData(json);
 
         //Assert
         Assert.Multiple(() =>
@@ -78,18 +80,19 @@ public class ValueParserTests
         });
     }
 
+    //This was leftover from when I was using strings versus
+    //ReadOnlySpan<char>, see if this is still needed
     [Theory(DisplayName = "Can find offset values")]
-    [InlineData("{\"name\"", 0, Token.OpenBracket, 1, null)]
-    [InlineData("{\"name\"", 1, Token.PropertyName, 6, "name")]
+    [InlineData("{\"name\"", Token.OpenBracket, 1, null)]
+    [InlineData("\"name\"", Token.PropertyName, 6, "name")]
     public void JsonTransform_GetNextTokenAndToken_IncorpratesOffset(
         string json,
-        int offset,
         Token expectedToken,
         int expectedPlaceholder,
         string expectedData)
     {
         //Act
-        var (token, placeholder, data) = JsonTransformer.GetNextTokenAndData(json, offset);
+        var (token, placeholder, data) = JsonTransformer.GetNextTokenAndData(json);
 
         //Assert
         Assert.Multiple(() =>
@@ -98,7 +101,6 @@ public class ValueParserTests
             Assert.Equal(expectedPlaceholder, placeholder);
             Assert.Equal(expectedData, data);
         });
-
     }
 
     [Theory(DisplayName = "Can extract token data")]
@@ -116,7 +118,7 @@ public class ValueParserTests
         Token token)
     {
         //Act
-        var (data, length) = JsonTransformer.ExtractTokenData(token, json, 0);
+        var (data, length) = JsonTransformer.ExtractTokenData(token, json);
 
         //Assert
         Assert.Multiple(() =>
@@ -126,33 +128,34 @@ public class ValueParserTests
         });
     }
 
-    [Theory(DisplayName = "Can extract token data")]
-    [InlineData("{\"Property\"", 1, "Property", 10, Token.PropertyName)]
-    [InlineData("{:283,", 1, "283", 5, Token.PropertyValue)]
-    [InlineData("{\"val\":\"data\",", 6, "data", 8, Token.PropertyValue)]
-    [InlineData("{\"Property Baby\"", 1, "Property Baby", 15, Token.PropertyName)]
-    [InlineData("{\"val\":283424,", 6, "283424", 8, Token.PropertyValue)]
-    [InlineData("{\"val\":283424}", 6, "283424", 7, Token.PropertyValue)]
-    [InlineData("{\"bobby\":\"data point\",", 8, "data point", 14, Token.PropertyValue)]
-    [InlineData("{\"name\"", 1, "name", 6, Token.PropertyName)]
-    ////[InlineData("{\"val\":283424", 6, "283424", 7, Token.PropertyValue)] //error case to cover
-    public void JsonTransform_ExtractTokenDataWithOffset(
-        string json,
-        int offset,
-        string expectedData,
-        int expectedLength,
-        Token token)
-    {
-        //Act
-        var (data, length) = JsonTransformer.ExtractTokenData(token, json, offset);
+    //Leftover from using strings instead of ReadOnlySpan<char>
+    //[Theory(DisplayName = "Can extract token data")]
+    //[InlineData("{\"Property\"", 1, "Property", 10, Token.PropertyName)]
+    //[InlineData("{:283,", 1, "283", 5, Token.PropertyValue)]
+    //[InlineData("{\"val\":\"data\",", 6, "data", 8, Token.PropertyValue)]
+    //[InlineData("{\"Property Baby\"", 1, "Property Baby", 15, Token.PropertyName)]
+    //[InlineData("{\"val\":283424,", 6, "283424", 8, Token.PropertyValue)]
+    //[InlineData("{\"val\":283424}", 6, "283424", 7, Token.PropertyValue)]
+    //[InlineData("{\"bobby\":\"data point\",", 8, "data point", 14, Token.PropertyValue)]
+    //[InlineData("{\"name\"", 1, "name", 6, Token.PropertyName)]
+    //////[InlineData("{\"val\":283424", 6, "283424", 7, Token.PropertyValue)] //error case to cover
+    //public void JsonTransform_ExtractTokenDataWithOffset(
+    //    string json,
+    //    int offset,
+    //    string expectedData,
+    //    int expectedLength,
+    //    Token token)
+    //{
+    //    //Act
+    //    var (data, length) = JsonTransformer.ExtractTokenData(token, json, offset);
 
-        //Assert
-        Assert.Multiple(() =>
-        {
-            Assert.Equal(expectedData, data);
-            Assert.Equal(expectedLength, length);
-        });
-    }
+    //    //Assert
+    //    Assert.Multiple(() =>
+    //    {
+    //        Assert.Equal(expectedData, data);
+    //        Assert.Equal(expectedLength, length);
+    //    });
+    //}
 
     [Fact(DisplayName = "Can extract simple tokens from string")]
     public void JsonTransform_ExtractSimpleTokens()
@@ -521,5 +524,23 @@ public class ValueParserTests
 
         var prop = obj as DateTimePropertyObj;
         prop.Property.Should().BeAfter(maxValue.AddSeconds(-1));
+    }
+
+    [Fact(DisplayName = "Can parse nested json")]
+    public void JsonTransform_Deserialize_ParseNestedString()
+    {
+        //Arrange
+        var maxValue = DateTime.MaxValue;
+        var jsonString = "{\"Property\":{\"Property\":\"maxValue\"}}";
+
+        //Act
+        var obj = JsonTransformer.Deserialize<NestedStringObj>(jsonString);
+
+        //Assert
+        Assert.True(obj is NestedStringObj);
+
+        var prop = obj as NestedStringObj;
+        prop.Property.Should().NotBeNull();
+        prop.Property.Property.Should().Be("maxValue");
     }
 }
