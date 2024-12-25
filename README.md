@@ -20,7 +20,7 @@ var jsonString = JsonTransformer.Serialize(obj);
 ```csharp
 var jsonString = "{\"Property\":\"string\"}"
 
-var obj = JsonTransformer.Deserialize(jsonString);
+var obj = JsonTransformer.Deserialize<TestObject>(jsonString);
 ```
 
 ## Code structure
