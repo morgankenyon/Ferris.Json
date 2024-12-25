@@ -208,8 +208,8 @@ public class ValueParserTests
         Assert.Equal(expectedTokens, tokens);
     }
 
-    [Fact(DisplayName = "Can match tokens to object")]
-    public void JsonTransform_ToObject_SimpleCase()
+    [Fact(DisplayName = "Can parse json string to object")]
+    public void JsonTransform_ToObject_SingleStringProperty()
     {
         //Arrange
         var jsonString = "{\"Property\":\"testValue\"}";
@@ -222,5 +222,21 @@ public class ValueParserTests
 
         var stringProp = obj as StringPropertyObj;
         Assert.Equal("testValue", stringProp.Property);
+    }
+
+    [Fact(DisplayName = "Can parse json number to object")]
+    public void JsonTransform_ToObject_SingleIntProperty()
+    {
+        //Arrange
+        var jsonString = "{\"Property\":293}";
+
+        //Act
+        var obj = JsonTransformer.ToObject<IntPropertyObj>(jsonString);
+
+        //Assert
+        Assert.True(obj is IntPropertyObj);
+
+        var intProp = obj as IntPropertyObj;
+        Assert.Equal(293, intProp.Property);
     }
 }

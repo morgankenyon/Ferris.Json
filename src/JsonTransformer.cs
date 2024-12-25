@@ -105,7 +105,18 @@ namespace Ferris.Json
 
                     if (propertiesDict.TryGetValue(propertyName, out var propertyInfo))
                     {
-                        propertyInfo.SetValue(instance, data);
+                        var propertyType = propertyInfo.PropertyType;
+                        if (propertyType == typeof(string))
+                        {
+                            propertyInfo.SetValue(instance, data);
+                        }
+                        else if (propertyType == typeof(Int32))
+                        {
+                            if (Int32.TryParse(data, out var result))
+                            {
+                                propertyInfo.SetValue(instance, result);
+                            }
+                        }
                     }
                 }
                 offset += placeholder;
