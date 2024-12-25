@@ -1,4 +1,5 @@
 ﻿using Ferris.Json.Test.TestObjects;
+using FluentAssertions;
 
 namespace Ferris.Json.Test;
 public class ValueParserTests
@@ -224,11 +225,12 @@ public class ValueParserTests
         Assert.Equal("testValue", stringProp.Property);
     }
 
-    [Fact(DisplayName = "Can parse json number to object")]
+    [Fact(DisplayName = "Can parse json number to integer")]
     public void JsonTransform_ToObject_SingleIntProperty()
     {
         //Arrange
-        var jsonString = "{\"Property\":293}";
+        var maxValue = int.MaxValue;
+        var jsonString = $"{{\"Property\":{maxValue}}}";
 
         //Act
         var obj = JsonTransformer.ToObject<IntPropertyObj>(jsonString);
@@ -237,6 +239,270 @@ public class ValueParserTests
         Assert.True(obj is IntPropertyObj);
 
         var intProp = obj as IntPropertyObj;
-        Assert.Equal(293, intProp.Property);
+        Assert.Equal(maxValue, intProp.Property);
+    }
+
+    [Fact(DisplayName = "Can parse json number to uint")]
+    public void JsonTransform_ToObject_SingleUIntProperty()
+    {
+        //Arrange
+        var maxValue = uint.MaxValue;
+        var jsonString = $"{{\"Property\":{maxValue}}}";
+
+        //Act
+        var obj = JsonTransformer.ToObject<UIntPropertyObj>(jsonString);
+
+        //Assert
+        Assert.True(obj is UIntPropertyObj);
+
+        var intProp = obj as UIntPropertyObj;
+        intProp.Property.Should().Be(maxValue);
+    }
+
+    [Fact(DisplayName = "Can parse json number to float")]
+    public void JsonTransform_ToObject_SingleFloatProperty()
+    {
+        //Arrange
+        var maxValue = float.MaxValue;
+        var jsonString = $"{{\"Property\":{maxValue}}}";
+
+        //Act
+        var obj = JsonTransformer.ToObject<FloatPropertyObj>(jsonString);
+
+        //Assert
+        Assert.True(obj is FloatPropertyObj);
+
+        var floatProp = obj as FloatPropertyObj;
+        floatProp.Property.Should().BeApproximately(maxValue, 0.01f);
+    }
+
+    [Fact(DisplayName = "Can parse json number to double")]
+    public void JsonTransform_ToObject_SingleDoubleProperty()
+    {
+        //Arrange
+        var maxValue = double.MaxValue;
+        var jsonString = $"{{\"Property\":{maxValue}}}";
+
+        //Act
+        var obj = JsonTransformer.ToObject<DoublePropertyObj>(jsonString);
+
+        //Assert
+        Assert.True(obj is DoublePropertyObj);
+
+        var prop = obj as DoublePropertyObj;
+        prop.Property.Should().BeApproximately(maxValue, 0.01);
+    }
+
+    [Fact(DisplayName = "Can parse json bool to object")]
+    public void JsonTransform_ToObject_SingleBoolProperty()
+    {
+        //Arrange
+        var jsonString = "{\"Property\":true}";
+
+        //Act
+        var obj = JsonTransformer.ToObject<BoolPropertyObj>(jsonString);
+
+        //Assert
+        Assert.True(obj is BoolPropertyObj);
+
+        var prop = obj as BoolPropertyObj;
+        prop.Property.Should().BeTrue();
+    }
+
+    [Fact(DisplayName = "Can parse json number to byte")]
+    public void JsonTransform_ToObject_SingleByteProperty()
+    {
+        //Arrange
+        var maxValue = byte.MaxValue;
+        var jsonString = $"{{\"Property\":{maxValue}}}";
+
+        //Act
+        var obj = JsonTransformer.ToObject<BytePropertyObj>(jsonString);
+
+        //Assert
+        Assert.True(obj is BytePropertyObj);
+
+        var prop = obj as BytePropertyObj;
+        prop.Property.Should().Be(maxValue);
+    }
+
+    [Fact(DisplayName = "Can parse json number to sbyte")]
+    public void JsonTransform_ToObject_SingleSByteProperty()
+    {
+        //Arrange
+        var maxValue = sbyte.MaxValue;
+        var jsonString = $"{{\"Property\":{maxValue}}}";
+
+        //Act
+        var obj = JsonTransformer.ToObject<SBytePropertyObj>(jsonString);
+
+        //Assert
+        Assert.True(obj is SBytePropertyObj);
+
+        var prop = obj as SBytePropertyObj;
+        prop.Property.Should().Be(maxValue);
+    }
+
+    [Fact(DisplayName = "Can parse json char to object")]
+    public void JsonTransform_ToObject_SingleCharProperty()
+    {
+        //Arrange
+        var jsonString = "{\"Property\":\"a\"}";
+
+        //Act
+        var obj = JsonTransformer.ToObject<CharPropertyObj>(jsonString);
+
+        //Assert
+        Assert.True(obj is CharPropertyObj);
+
+        var prop = obj as CharPropertyObj;
+        prop.Property.Should().Be('a');
+    }
+
+    [Fact(DisplayName = "Can parse json number to decimal")]
+    public void JsonTransform_ToObject_SingleDecimalProperty()
+    {
+        //Arrange
+        var maxValue = decimal.MaxValue;
+        var jsonString = $"{{\"Property\":{maxValue}}}";
+
+        //Act
+        var obj = JsonTransformer.ToObject<DecimalPropertyObj>(jsonString);
+
+        //Assert
+        Assert.True(obj is DecimalPropertyObj);
+
+        var prop = obj as DecimalPropertyObj;
+        prop.Property.Should().Be(maxValue);
+    }
+
+    [Fact(DisplayName = "Can parse json number to long")]
+    public void JsonTransform_ToObject_SingleLongProperty()
+    {
+        //Arrange
+        var maxValue = long.MaxValue;
+        var jsonString = $"{{\"Property\":{maxValue}}}";
+
+        //Act
+        var obj = JsonTransformer.ToObject<LongPropertyObj>(jsonString);
+
+        //Assert
+        Assert.True(obj is LongPropertyObj);
+
+        var prop = obj as LongPropertyObj;
+        prop.Property.Should().Be(maxValue);
+    }
+
+    [Fact(DisplayName = "Can parse json number to ulong")]
+    public void JsonTransform_ToObject_SingleULongProperty()
+    {
+        //Arrange
+        var maxValue = ulong.MaxValue;
+        var jsonString = $"{{\"Property\":{maxValue}}}";
+
+        //Act
+        var obj = JsonTransformer.ToObject<ULongPropertyObj>(jsonString);
+
+        //Assert
+        Assert.True(obj is ULongPropertyObj);
+
+        var prop = obj as ULongPropertyObj;
+        prop.Property.Should().Be(maxValue);
+    }
+
+    [Fact(DisplayName = "Can parse json number to int128")]
+    public void JsonTransform_ToObject_SingleInt128Property()
+    {
+        //Arrange
+        var maxValue = Int128.MaxValue;
+        var jsonString = $"{{\"Property\":{maxValue}}}";
+
+        //Act
+        var obj = JsonTransformer.ToObject<Int128PropertyObj>(jsonString);
+
+        //Assert
+        Assert.True(obj is Int128PropertyObj);
+
+        var prop = obj as Int128PropertyObj;
+        prop.Property.Should().Be(maxValue);
+    }
+
+    [Fact(DisplayName = "Can parse json number to uint128")]
+    public void JsonTransform_ToObject_SingleUInt128Property()
+    {
+        //Arrange
+        var maxValue = UInt128.MaxValue;
+        var jsonString = $"{{\"Property\":{maxValue}}}";
+
+        //Act
+        var obj = JsonTransformer.ToObject<UInt128PropertyObj>(jsonString);
+
+        //Assert
+        Assert.True(obj is UInt128PropertyObj);
+
+        var prop = obj as UInt128PropertyObj;
+        prop.Property.Should().Be(maxValue);
+    }
+
+    [Fact(DisplayName = "Can parse json number to short")]
+    public void JsonTransform_ToObject_SingleShortProperty()
+    {
+        //Arrange
+        var maxValue = short.MaxValue;
+        var jsonString = $"{{\"Property\":{maxValue}}}";
+
+        //Act
+        var obj = JsonTransformer.ToObject<ShortPropertyObj>(jsonString);
+
+        //Assert
+        Assert.True(obj is ShortPropertyObj);
+
+        var prop = obj as ShortPropertyObj;
+        prop.Property.Should().Be(maxValue);
+    }
+
+    [Fact(DisplayName = "Can parse json number to ushort")]
+    public void JsonTransform_ToObject_SingleUShortProperty()
+    {
+        //Arrange
+        var maxValue = ushort.MaxValue;
+        var jsonString = $"{{\"Property\":{maxValue}}}";
+
+        //Act
+        var obj = JsonTransformer.ToObject<UShortPropertyObj>(jsonString);
+
+        //Assert
+        Assert.True(obj is UShortPropertyObj);
+
+        var prop = obj as UShortPropertyObj;
+        prop.Property.Should().Be(maxValue);
+    }
+
+    [Fact(DisplayName = "Can parse json to value test object")]
+    public void JsonTransform_ToObject_ValueTestObject()
+    {
+        //Arrange
+        var json = TestObjs.GetValueTestObjectJson();
+
+        //Act
+        var obj = JsonTransformer.ToObject<ValueTestObject>(json);
+
+        //Assert
+        obj.BoolProp.Should().BeTrue();
+        obj.ByteProp.Should().Be(byte.MaxValue);
+        obj.SByteProp.Should().Be(sbyte.MaxValue);
+        obj.CharProp.Should().Be(char.MaxValue);
+        obj.DecimalProp.Should().Be(decimal.MaxValue);
+        obj.DoubleProp.Should().Be(double.MaxValue);
+        obj.FloatProp.Should().Be(float.MaxValue);
+        obj.IntProp.Should().Be(int.MaxValue);
+        obj.UIntProp.Should().Be(uint.MaxValue);
+        obj.LongProp.Should().Be(long.MaxValue);
+        obj.ULongProp.Should().Be(ulong.MaxValue);
+        obj.Int128Prop.Should().Be(Int128.MaxValue);
+        obj.UInt128Prop.Should().Be(UInt128.MaxValue);
+        obj.ShortProp.Should().Be(short.MaxValue);
+        obj.UShortProp.Should().Be(ushort.MaxValue);
+        obj.StringProp.Should().Be("maxValue");
     }
 }

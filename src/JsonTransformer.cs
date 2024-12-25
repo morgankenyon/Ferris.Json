@@ -110,11 +110,169 @@ namespace Ferris.Json
                         {
                             propertyInfo.SetValue(instance, data);
                         }
-                        else if (propertyType == typeof(Int32))
+                        else if (propertyType == typeof(int))
                         {
-                            if (Int32.TryParse(data, out var result))
+                            if (int.TryParse(data, out var result))
                             {
                                 propertyInfo.SetValue(instance, result);
+                            }
+                            else
+                            {
+                                //add error message
+                            }
+                        }
+                        else if (propertyType == typeof(uint))
+                        {
+                            if (uint.TryParse(data, out var result))
+                            {
+                                propertyInfo.SetValue(instance, result);
+                            }
+                            else
+                            {
+                                //add error message
+                            }
+                        }
+                        else if (propertyType == typeof(float))
+                        {
+                            if (float.TryParse(data, out var result))
+                            {
+                                propertyInfo.SetValue(instance, result);
+                            }
+                            else
+                            {
+                                //add error message
+                            }
+                        }
+                        else if (propertyType == typeof(double))
+                        {
+                            if (double.TryParse(data, out var result))
+                            {
+                                propertyInfo.SetValue(instance, result);
+                            }
+                            else
+                            {
+                                //add error message
+                            }
+                        }
+                        else if (propertyType == typeof(bool))
+                        {
+                            if (bool.TryParse(data, out var result))
+                            {
+                                propertyInfo.SetValue(instance, result);
+                            }
+                            else
+                            {
+                                //add error message
+                            }
+                        }
+                        else if (propertyType == typeof(byte))
+                        {
+                            if (byte.TryParse(data, out var result))
+                            {
+                                propertyInfo.SetValue(instance, result);
+                            }
+                            else
+                            {
+                                //add error message
+                            }
+                        }
+                        else if (propertyType == typeof(sbyte))
+                        {
+                            if (sbyte.TryParse(data, out var result))
+                            {
+                                propertyInfo.SetValue(instance, result);
+                            }
+                            else
+                            {
+                                //add error message
+                            }
+                        }
+                        else if (propertyType == typeof(char))
+                        {
+                            if (char.TryParse(data, out var result))
+                            {
+                                propertyInfo.SetValue(instance, result);
+                            }
+                            else
+                            {
+                                //add error message
+                            }
+                        }
+                        else if (propertyType == typeof(decimal))
+                        {
+                            if (decimal.TryParse(data, out var result))
+                            {
+                                propertyInfo.SetValue(instance, result);
+                            }
+                            else
+                            {
+                                //add error message
+                            }
+                        }
+                        else if (propertyType == typeof(long))
+                        {
+                            if (long.TryParse(data, out var result))
+                            {
+                                propertyInfo.SetValue(instance, result);
+                            }
+                            else
+                            {
+                                //add error message
+                            }
+                        }
+                        else if (propertyType == typeof(ulong))
+                        {
+                            if (ulong.TryParse(data, out var result))
+                            {
+                                propertyInfo.SetValue(instance, result);
+                            }
+                            else
+                            {
+                                //add error message
+                            }
+                        }
+                        else if (propertyType == typeof(Int128))
+                        {
+                            if (Int128.TryParse(data, out var result))
+                            {
+                                propertyInfo.SetValue(instance, result);
+                            }
+                            else
+                            {
+                                //add error message
+                            }
+                        }
+                        else if (propertyType == typeof(UInt128))
+                        {
+                            if (UInt128.TryParse(data, out var result))
+                            {
+                                propertyInfo.SetValue(instance, result);
+                            }
+                            else
+                            {
+                                //add error message
+                            }
+                        }
+                        else if (propertyType == typeof(short))
+                        {
+                            if (short.TryParse(data, out var result))
+                            {
+                                propertyInfo.SetValue(instance, result);
+                            }
+                            else
+                            {
+                                //add error message
+                            }
+                        }
+                        else if (propertyType == typeof(ushort))
+                        {
+                            if (ushort.TryParse(data, out var result))
+                            {
+                                propertyInfo.SetValue(instance, result);
+                            }
+                            else
+                            {
+                                //add error message
                             }
                         }
                     }

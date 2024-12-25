@@ -7,26 +7,26 @@ public static class TestObjs
         return new ValueTestObject
         {
             BoolProp = true,
-            ByteProp = 23,
-            SByteProp = 2,
-            CharProp = 'c',
-            DecimalProp = 4.5m,
-            DoubleProp = 232.2,
-            FloatProp = 42.2f,
-            IntProp = 244,
-            UIntProp = 2424242442,
+            ByteProp = byte.MaxValue,
+            SByteProp = sbyte.MaxValue,
+            CharProp = char.MaxValue,
+            DecimalProp = decimal.MaxValue,
+            DoubleProp = double.MaxValue,
+            FloatProp = float.MaxValue,
+            IntProp = int.MaxValue,
+            UIntProp = uint.MaxValue,
             //NIntProp = 89283,
             //NUIntProp = 8292832,
-            LongProp = 28392832,
-            ULongProp = 38294294792,
-            Int128Prop = 283829922348,
-            UInt128Prop = 757281108,
-            ShortProp = 23,
-            UShortProp = 23422,
-            StringProp = "testString"
+            LongProp = long.MaxValue,
+            ULongProp = ulong.MaxValue,
+            Int128Prop = Int128.MaxValue,
+            UInt128Prop = UInt128.MaxValue,
+            ShortProp = short.MaxValue,
+            UShortProp = ushort.MaxValue,
+            StringProp = "maxValue"
         };
     }
 
-    public static string GetValueTestObjectJson() => """{"BoolProp":true,"ByteProp":23,"SByteProp":2,"CharProp":"c","DecimalProp":4.5,"DoubleProp":232.2,"FloatProp":42.2,"IntProp":244,"UIntProp":2424242442,"LongProp":28392832,"ULongProp":38294294792,"Int128Prop":283829922348,"UInt128Prop":757281108,"ShortProp":23,"UShortProp":23422,"StringProp":"testString"}""";
+    public static string GetValueTestObjectJson() => $"{{\"BoolProp\":true,\"ByteProp\":{byte.MaxValue},\"SByteProp\":{sbyte.MaxValue},\"CharProp\":\"{char.MaxValue}\",\"DecimalProp\":{decimal.MaxValue},\"DoubleProp\":{double.MaxValue},\"FloatProp\":{float.MaxValue},\"IntProp\":{int.MaxValue},\"UIntProp\":{uint.MaxValue},\"LongProp\":{long.MaxValue},\"ULongProp\":{ulong.MaxValue},\"Int128Prop\":{Int128.MaxValue},\"UInt128Prop\":{UInt128.MaxValue},\"ShortProp\":{short.MaxValue},\"UShortProp\":{ushort.MaxValue},\"StringProp\":\"maxValue\"}}";
 
 }

@@ -65,7 +65,7 @@ public class ShortPropertyObj
 }
 public class UShortPropertyObj
 {
-    public short Property { get; set; }
+    public ushort Property { get; set; }
 }
 
 public class StringPropertyObj
