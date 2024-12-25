@@ -111,6 +111,7 @@ public class ValueParserTests
     [InlineData(":283424,", "283424", 8, Token.PropertyValue)]
     [InlineData(":\"data point\",", "data point", 14, Token.PropertyValue)]
     [InlineData("\"name\"", "name", 6, Token.PropertyName)]
+    [InlineData(":\"maxValue\"},", "maxValue", 11, Token.PropertyValue)]
     public void JsonTransform_ExtractTokenData(
         string json,
         string expectedData,
@@ -542,5 +543,26 @@ public class ValueParserTests
         var prop = obj as NestedStringObj;
         prop.Property.Should().NotBeNull();
         prop.Property.Property.Should().Be("maxValue");
+    }
+
+    [Fact(DisplayName = "Can parse more complex json")]
+    public void JsonTransform_Deserialize_ParseMultipleNestedString()
+    {
+        //Arrange
+        var maxValue = DateTime.MaxValue;
+        var jsonString = "{\"StringProp\":{\"Property\":\"maxValue\"},\"IntPro\":{\"Property\":234},\"Number\":4242}";
+
+        //Act
+        var obj = JsonTransformer.Deserialize<NestedMultipleObj>(jsonString);
+
+        //Assert
+        Assert.True(obj is NestedMultipleObj);
+
+        var prop = obj as NestedMultipleObj;
+        prop.StringProp.Should().NotBeNull();
+        prop.StringProp.Property.Should().Be("maxValue");
+        prop.IntProp.Should().NotBeNull();
+        prop.IntProp.Property.Should().Be(234);
+        prop.Number.Should().Be(4242);
     }
 }

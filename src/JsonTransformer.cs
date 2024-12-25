@@ -80,15 +80,21 @@ namespace Ferris.Json
         {
             Type type = typeof(T);
 
-            return Deserialize<T>(type, json);
+            var spanData = Deserialize(type, json);
+
+            var result = spanData.Value;
+
+            //might have to found a better way to do this
+            var convertedValue = Convert.ChangeType(result, type);
+            return (T)convertedValue;
         }
 
-        private static T Deserialize<T>(Type type, ReadOnlySpan<char> jsonSpan)
+        private static SpanData Deserialize(Type type, ReadOnlySpan<char> jsonSpan)
         {
             PropertyInfo[] properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
             var propertiesDict = properties.ToDictionary(p => p.Name, p => p);
-            T instance = Activator.CreateInstance<T>();
+            var instance = Activator.CreateInstance(type);
 
             while (true)
             {
@@ -111,17 +117,45 @@ namespace Ferris.Json
                         && data != null
                         && propertiesDict.TryGetValue(propertyName, out var propertyInfo))
                     {
-                        MapValue<T>(propertyInfo, instance, data);
+                        MapValue(propertyInfo, instance, data);
+                    }
+                    else if (token == Token.OpenBracket
+                        && propertiesDict.TryGetValue(propertyName, out var objectInfo))
+                    {
+                        if (jsonSpan[0] == ':')
+                        {
+                            jsonSpan = jsonSpan.Slice(1);
+                        }
+                        var spanData = Deserialize(objectInfo.PropertyType, jsonSpan);
+                        var obj = spanData.Value;
+                        jsonSpan = spanData.JsonSpan;
+
+                        if (objectInfo.PropertyType.IsInstanceOfType(obj)
+                            && spanData.Value != null)
+                        {
+                            objectInfo.SetValue(instance, spanData.Value!);
+                        }
+
+                        //When going into nested objects, the jsonSpan fundamentally changes
+                        //since the (token, tokenLength, data) was calculated. So continuing
+                        //on the loop doesn't end well when trying to take a slice
+                        continue;
                     }
 
                 }
+                else if (token == Token.CloseBracket)
+                {
+                    jsonSpan = jsonSpan.Slice(tokenLength);
+                    break;
+                }
+
                 jsonSpan = jsonSpan.Slice(tokenLength);
             }
 
-            return instance;
+            return new SpanData(jsonSpan, instance);
         }
 
-        private static void MapValue<T>(PropertyInfo propertyInfo, T instance, string data)
+        private static void MapValue(PropertyInfo propertyInfo, object instance, string data)
         {
             var propertyType = propertyInfo.PropertyType;
             if (propertyType == typeof(string))
