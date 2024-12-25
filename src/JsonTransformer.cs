@@ -60,6 +60,12 @@ namespace Ferris.Json
                 {
                     jsonProperties.Add($"\"{property.Name}\":{propertyValue!.ToString()!.ToLower()}");
                 }
+                else if (type == typeof(System.DateTime))
+                {
+                    var dateTime = (DateTime)propertyValue;
+                    var dateString = dateTime.ToString("s", System.Globalization.CultureInfo.InvariantCulture);
+                    jsonProperties.Add($"\"{property.Name}\":\"{dateString}\"");
+                }
                 else
                 {
                     jsonProperties.Add($"\"{property.Name}\":\"{propertyValue}\"");
@@ -275,6 +281,18 @@ namespace Ferris.Json
                                 //add error message
                             }
                         }
+                        else if (propertyType == typeof(DateTime))
+                        {
+                            if (DateTime.TryParse(data, out var result))
+                            {
+                                propertyInfo.SetValue(instance, result);
+                            }
+                            else
+                            {
+                                //add error message
+                            }
+                        }
+                        //add else statement
                     }
                 }
                 offset += placeholder;

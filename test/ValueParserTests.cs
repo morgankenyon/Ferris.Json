@@ -505,4 +505,21 @@ public class ValueParserTests
         obj.UShortProp.Should().Be(ushort.MaxValue);
         obj.StringProp.Should().Be("maxValue");
     }
+
+    [Fact(DisplayName = "Can parse json date to DateTime")]
+    public void JsonTransform_Deserialize_SingleDateTimeProperty()
+    {
+        //Arrange
+        var maxValue = DateTime.MaxValue;
+        var jsonString = $"{{\"Property\":{maxValue}}}";
+
+        //Act
+        var obj = JsonTransformer.Deserialize<DateTimePropertyObj>(jsonString);
+
+        //Assert
+        Assert.True(obj is DateTimePropertyObj);
+
+        var prop = obj as DateTimePropertyObj;
+        prop.Property.Should().BeAfter(maxValue.AddSeconds(-1));
+    }
 }

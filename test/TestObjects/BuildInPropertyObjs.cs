@@ -72,3 +72,13 @@ public class StringPropertyObj
 {
     public string Property { get; set; }
 }
+
+public class StringNullablePropertyObj
+{
+    public string? Property { get; set; }
+}
+
+public class DateTimePropertyObj
+{
+    public DateTime Property { get; set; }
+}

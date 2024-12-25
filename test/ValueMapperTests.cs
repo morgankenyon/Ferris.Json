@@ -338,4 +338,34 @@ public class ValueMapperTests
         //Assert
         Assert.Equal(TestObjs.GetValueTestObjectJson(), jsonString);
     }
+
+    [Fact(DisplayName = "Map nullable string property to Json")]
+    public void JsonTransformer_MapNullableStringProperty()
+    {
+        //Arrange
+        var obj = new StringNullablePropertyObj();
+
+        //Act
+        var jsonString = JsonTransformer.Serialize(obj);
+
+        //Assert
+        Assert.Equal("""{"Property":null}""", jsonString);
+    }
+
+    [Fact(DisplayName = "Map datetime property to Json")]
+    public void JsonTransformer_MapDateTimeProperty()
+    {
+        //Arrange
+        var obj = new DateTimePropertyObj
+        {
+            Property = DateTime.MinValue,
+        };
+
+        //Act
+        var jsonString = JsonTransformer.Serialize(obj);
+
+        //Assert
+        var dateString = obj.Property.ToString("s", System.Globalization.CultureInfo.InvariantCulture);
+        Assert.Equal($"{{\"Property\":\"{dateString}\"}}", jsonString);
+    }
 }
