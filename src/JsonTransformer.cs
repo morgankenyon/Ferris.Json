@@ -21,61 +21,80 @@ namespace Ferris.Json
             return combinedProperties;
         }
 
-        internal static string MapProperties(PropertyInfo[] properties, object obj)
+        internal static string MapProperties(PropertyInfo[] propertyInfos, object obj)
         {
-            var jsonProperties = new List<string>(properties.Length);
-            foreach (var property in properties)
+            var jsonProperties = new List<string>(propertyInfos.Length);
+            foreach (var propertyInfo in propertyInfos)
             {
-                var propertyValue = property.GetValue(obj);
-                var type = property.PropertyType;
-                var childProperties = type.GetProperties();
+                var propertyValue = propertyInfo.GetValue(obj);
+                var propertyType = propertyInfo.PropertyType;
+                //var childPropertyInfos = propertyType.GetProperties();
                 if (propertyValue == null)
                 {
-                    jsonProperties.Add($"\"{property.Name}\":null");
+                    jsonProperties.Add($"\"{propertyInfo.Name}\":null");
                 }
-                else if (type == typeof(System.String)
-                    || type == typeof(System.Char))
+                else if (propertyType == typeof(System.String)
+                    || propertyType == typeof(System.Char))
                 {
-                    jsonProperties.Add($"\"{property.Name}\":\"{propertyValue}\"");
+                    jsonProperties.Add($"\"{propertyInfo.Name}\":\"{propertyValue}\"");
                 }
-                else if (type.BaseType == typeof(object)
-                    && childProperties.Length > 0)
+                else if (typeof(System.Collections.IEnumerable).IsAssignableFrom(propertyType))
                 {
-                    var childJson = MapProperties(childProperties, propertyValue);
-                    jsonProperties.Add($"\"{property.Name}\":{childJson}");
+                    var generatedListJson = new List<string>();
+                    var listValue = propertyInfo.GetValue(obj);
+
+                    if (listValue is System.Collections.IEnumerable enumerable)
+                    {
+                        foreach (var item in enumerable)
+                        {
+                            var listItemProperties = item.GetType().GetProperties();
+                            var listItemJson = MapProperties(listItemProperties, item);
+                            generatedListJson.Add(listItemJson);
+                        }
+                    }
+                    var joinedChildren = string.Join(",", generatedListJson);
+                    jsonProperties.Add($"\"{propertyInfo.Name}\":[{joinedChildren}]");
                 }
-                else if (type == typeof(System.Int16)
-                    || type == typeof(System.UInt16)
-                    || type == typeof(System.Int32)
-                    || type == typeof(System.UInt32)
-                    || type == typeof(System.Int64)
-                    || type == typeof(System.UInt64)
-                    || type == typeof(System.Int128)
-                    || type == typeof(System.UInt128)
-                    || type == typeof(System.Single)
-                    || type == typeof(System.Double)
-                    || type == typeof(System.Byte)
-                    || type == typeof(System.SByte)
-                    || type == typeof(System.Decimal)
-                    || type == typeof(System.IntPtr)
-                    || type == typeof(System.UIntPtr)
+                else if (propertyType.BaseType == typeof(object)
+                    && propertyType.GetProperties().Length > 0)
+                {
+                    //calls GetProperties() twice, potential performance regression
+                    var childPropertyInfos = propertyType.GetProperties();
+                    var childJson = MapProperties(childPropertyInfos, propertyValue);
+                    jsonProperties.Add($"\"{propertyInfo.Name}\":{childJson}");
+                }
+                else if (propertyType == typeof(System.Int16)
+                    || propertyType == typeof(System.UInt16)
+                    || propertyType == typeof(System.Int32)
+                    || propertyType == typeof(System.UInt32)
+                    || propertyType == typeof(System.Int64)
+                    || propertyType == typeof(System.UInt64)
+                    || propertyType == typeof(System.Int128)
+                    || propertyType == typeof(System.UInt128)
+                    || propertyType == typeof(System.Single)
+                    || propertyType == typeof(System.Double)
+                    || propertyType == typeof(System.Byte)
+                    || propertyType == typeof(System.SByte)
+                    || propertyType == typeof(System.Decimal)
+                    || propertyType == typeof(System.IntPtr)
+                    || propertyType == typeof(System.UIntPtr)
                     )
                 {
-                    jsonProperties.Add($"\"{property.Name}\":{propertyValue}");
+                    jsonProperties.Add($"\"{propertyInfo.Name}\":{propertyValue}");
                 }
-                else if (type == typeof(System.Boolean))
+                else if (propertyType == typeof(System.Boolean))
                 {
-                    jsonProperties.Add($"\"{property.Name}\":{propertyValue!.ToString()!.ToLower()}");
+                    jsonProperties.Add($"\"{propertyInfo.Name}\":{propertyValue!.ToString()!.ToLower()}");
                 }
-                else if (type == typeof(System.DateTime))
+                else if (propertyType == typeof(System.DateTime))
                 {
                     var dateTime = (DateTime)propertyValue;
                     var dateString = dateTime.ToString("s", System.Globalization.CultureInfo.InvariantCulture);
-                    jsonProperties.Add($"\"{property.Name}\":\"{dateString}\"");
+                    jsonProperties.Add($"\"{propertyInfo.Name}\":\"{dateString}\"");
                 }
                 else
                 {
-                    jsonProperties.Add($"\"{property.Name}\":\"{propertyValue}\"");
+                    jsonProperties.Add($"\"{propertyInfo.Name}\":\"{propertyValue}\"");
                 }
             }
 
@@ -349,6 +368,14 @@ namespace Ferris.Json
             else if (jsonSpan[0] == ',')
             {
                 return (Token.Comma, 0);
+            }
+            else if (jsonSpan[0] == '[')
+            {
+                return (Token.OpenBracket, 0);
+            }
+            else if (jsonSpan[0] == ']')
+            {
+                return (Token.CloseBracket, 0);
             }
             else if (previousToken == Token.Colon)
             {

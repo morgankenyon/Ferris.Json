@@ -2,13 +2,15 @@
 using FluentAssertions;
 
 namespace Ferris.Json.Test;
-public class ValueParserTests
+public class DeserializationTests
 {
     [Theory(DisplayName = "Can find simple tokens")]
     [InlineData("", Token.None, Token.EndOfInput, 0)]
     [InlineData("&", Token.None, Token.Unknown, 0)]
     [InlineData("{", Token.None, Token.OpenBrace, 0)]
     [InlineData("}", Token.PropertyValue, Token.CloseBrace, 0)]
+    [InlineData("[", Token.None, Token.OpenBracket, 0)]
+    [InlineData("]", Token.PropertyValue, Token.CloseBracket, 0)]
     [InlineData(",", Token.PropertyValue, Token.Comma, 0)]
     [InlineData("\"Property\"", Token.Comma, Token.PropertyName, 0)]
     [InlineData("283,", Token.Colon, Token.PropertyValue, 0)]

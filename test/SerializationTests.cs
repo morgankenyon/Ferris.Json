@@ -1,8 +1,9 @@
 using Ferris.Json.Test.TestObjects;
+using FluentAssertions;
 
 namespace Ferris.Json.Test;
 
-public class ValueMapperTests
+public class SerializationTests
 {
     [Theory(DisplayName = "Map bool property to Json")]
     [InlineData(true)]
@@ -367,5 +368,83 @@ public class ValueMapperTests
         //Assert
         var dateString = obj.Property.ToString("s", System.Globalization.CultureInfo.InvariantCulture);
         Assert.Equal($"{{\"Property\":\"{dateString}\"}}", jsonString);
+    }
+
+    [Fact(DisplayName = "Map list property to json array")]
+    public void JsonTransformer_MapListProperty()
+    {
+        //Arrange
+        var obj = new ListTestObj
+        {
+            Strings = new List<StringPropertyObj>
+            {
+                new StringPropertyObj
+                {
+                    Property = "FirstString"
+                },
+                new StringPropertyObj
+                {
+                    Property = "SecondString"
+                }
+            }
+        };
+
+        //Act
+        var jsonString = JsonTransformer.Serialize(obj);
+
+        //Assert
+        jsonString.Should().Be("""{"Strings":[{"Property":"FirstString"},{"Property":"SecondString"}]}""");
+    }
+
+    [Fact(DisplayName = "Map linkedlist property to json array")]
+    public void JsonTransformer_MapLinkedListProperty()
+    {
+        //Arrange
+        var strings = new LinkedList<StringPropertyObj>();
+        strings.AddLast(new StringPropertyObj
+        {
+            Property = "FirstString"
+        });
+        strings.AddLast(new StringPropertyObj
+        {
+            Property = "SecondString"
+        });
+        var obj = new LinkedListObj
+        {
+            Strings = strings
+        };
+
+        //Act
+        var jsonString = JsonTransformer.Serialize(obj);
+
+        //Assert
+        jsonString.Should().Be("""{"Strings":[{"Property":"FirstString"},{"Property":"SecondString"}]}""");
+    }
+
+    [Fact(DisplayName = "Map mixed list property to json array")]
+    public void JsonTransformer_MapMixedListProperty()
+    {
+        //Arrange
+        var obj = new MixedListTestObj
+        {
+            Strings = new List<StringPropertyObj>
+            {
+                new StringPropertyObj
+                {
+                    Property = "FirstString"
+                },
+                new StringPropertyObj
+                {
+                    Property = "SecondString"
+                }
+            },
+            Property = "prop"
+        };
+
+        //Act
+        var jsonString = JsonTransformer.Serialize(obj);
+
+        //Assert
+        jsonString.Should().Be("""{"Strings":[{"Property":"FirstString"},{"Property":"SecondString"}],"Property":"prop"}""");
     }
 }

@@ -10,5 +10,7 @@ internal enum Token
     PropertyName,
     PropertyValue,
     Comma,
-    Colon
+    Colon,
+    OpenBracket,
+    CloseBracket
 }
