@@ -7,8 +7,8 @@ public class ValueParserTests
     [Theory(DisplayName = "Can find simple tokens")]
     [InlineData("", Token.None, Token.EndOfInput, 0)]
     [InlineData("&", Token.None, Token.Unknown, 0)]
-    [InlineData("{", Token.None, Token.OpenBracket, 0)]
-    [InlineData("}", Token.PropertyValue, Token.CloseBracket, 0)]
+    [InlineData("{", Token.None, Token.OpenBrace, 0)]
+    [InlineData("}", Token.PropertyValue, Token.CloseBrace, 0)]
     [InlineData(",", Token.PropertyValue, Token.Comma, 0)]
     [InlineData("\"Property\"", Token.Comma, Token.PropertyName, 0)]
     [InlineData("283,", Token.Colon, Token.PropertyValue, 0)]
@@ -35,11 +35,11 @@ public class ValueParserTests
     //[Theory(DisplayName = "Can find simple token with offset")]
     //[InlineData("{", 1, Token.EndOfInput, 0)]
     //[InlineData("{&", 1, Token.Unknown, 0)]
-    //[InlineData("{\"n\":{", 5, Token.OpenBracket, 0)]
-    //[InlineData("{}", 1, Token.CloseBracket, 0)]
+    //[InlineData("{\"n\":{", 5, Token.OpenBrace, 0)]
+    //[InlineData("{}", 1, Token.CloseBrace, 0)]
     //[InlineData("{\"Property\"", 1, Token.PropertyName, 0)]
     //[InlineData("{\"Property\":283,", 11, Token.PropertyValue, 0)]
-    //[InlineData("{\"Property\":{", 11, Token.OpenBracket, 1)]
+    //[InlineData("{\"Property\":{", 11, Token.OpenBrace, 1)]
     //public void JsonTransform_GetNextTokenWithOffset(
     //    string json,
     //    int offset,
@@ -60,9 +60,9 @@ public class ValueParserTests
     [Theory(DisplayName = "Can find values to appropriate tokens")]
     [InlineData("", Token.None, 1, null, Token.EndOfInput)]
     [InlineData("&", Token.None, 1, null, Token.Unknown)]
-    [InlineData("{", Token.None, 1, null, Token.OpenBracket)]
-    [InlineData("}", Token.PropertyValue, 1, null, Token.CloseBracket)]
-    [InlineData("\"Property\"", Token.OpenBracket, 10, "Property", Token.PropertyName)]
+    [InlineData("{", Token.None, 1, null, Token.OpenBrace)]
+    [InlineData("}", Token.PropertyValue, 1, null, Token.CloseBrace)]
+    [InlineData("\"Property\"", Token.OpenBrace, 10, "Property", Token.PropertyName)]
     [InlineData("283,", Token.Colon, 3, "283", Token.PropertyValue)]
     [InlineData("\"data\",", Token.Colon, 6, "data", Token.PropertyValue)]
     internal void JsonTransform_GetNextTokenAndData(string json,
@@ -86,8 +86,8 @@ public class ValueParserTests
     //This was leftover from when I was using strings versus
     //ReadOnlySpan<char>, see if this is still needed
     [Theory(DisplayName = "Can find offset values")]
-    [InlineData("{\"name\"", Token.Colon, Token.OpenBracket, 1, null)]
-    [InlineData("\"name\"", Token.OpenBracket, Token.PropertyName, 6, "name")]
+    [InlineData("{\"name\"", Token.Colon, Token.OpenBrace, 1, null)]
+    [InlineData("\"name\"", Token.OpenBrace, Token.PropertyName, 6, "name")]
     internal void JsonTransform_GetNextTokenAndToken_IncorpratesOffset(
         string json,
         Token previousToken,
@@ -174,11 +174,11 @@ public class ValueParserTests
 
         //Assert
         var expectedTokens = new List<Token> {
-            Token.OpenBracket,
+            Token.OpenBrace,
             Token.PropertyName,
             Token.Colon,
             Token.PropertyValue,
-            Token.CloseBracket,
+            Token.CloseBrace,
             Token.EndOfInput
         };
         Assert.Equal(expectedTokens.Count, tokenInfo.Count);
@@ -199,19 +199,19 @@ public class ValueParserTests
 
         //Assert
         var expectedTokens = new List<Token> {
-            Token.OpenBracket,
+            Token.OpenBrace,
             Token.PropertyName,
             Token.Colon,
-            Token.OpenBracket,
+            Token.OpenBrace,
             Token.PropertyName,
             Token.Colon,
             Token.PropertyValue,
-            Token.CloseBracket,
+            Token.CloseBrace,
             Token.Comma,
             Token.PropertyName,
             Token.Colon,
             Token.PropertyValue,
-            Token.CloseBracket,
+            Token.CloseBrace,
             Token.EndOfInput
         };
         Assert.Equal(expectedTokens.Count, tokenInfo.Count);
@@ -232,7 +232,7 @@ public class ValueParserTests
 
         //Assert
         var expectedTokens = new List<Token> {
-            Token.OpenBracket,
+            Token.OpenBrace,
             Token.PropertyName,
             Token.Colon,
             Token.PropertyValue,
@@ -243,12 +243,12 @@ public class ValueParserTests
             Token.Comma,
             Token.PropertyName,
             Token.Colon,
-            Token.OpenBracket,
+            Token.OpenBrace,
             Token.PropertyName,
             Token.Colon,
             Token.PropertyValue,
-            Token.CloseBracket,
-            Token.CloseBracket,
+            Token.CloseBrace,
+            Token.CloseBrace,
             Token.EndOfInput
         };
         Assert.Equal(expectedTokens.Count, tokenInfo.Count);

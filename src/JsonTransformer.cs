@@ -104,7 +104,7 @@ namespace Ferris.Json
         }
 
         private static bool IsLineEndingToken(Token token) =>
-            token.IsComma() || token.IsCloseBracket();
+            token.IsComma() || token.IsCloseBrace();
 
         private static SpanData Deserialize(Type type, ReadOnlySpan<char> jsonSpan)
         {
@@ -145,7 +145,7 @@ namespace Ferris.Json
                     }
                 }
 
-                if (token.IsOpenBracket() && previousToken.IsColon())
+                if (token.IsOpenBrace() && previousToken.IsColon())
                 {
                     var (colonToken, colonData) = propertyStack.Pop();
                     var (propertyNameToken, propertyName) = propertyStack.Pop();
@@ -174,9 +174,10 @@ namespace Ferris.Json
                         //need some type of error message
                     }
                 }
-                else if (token.IsCloseBracket())
+                else if (token.IsCloseBrace())
                 {
-                    if (propertyStack.TryPeek(out var openBracketProperty))
+                    if (propertyStack.TryPeek(out var openBraceProperty) 
+                        && openBraceProperty.token.IsOpenBrace())
                     {
                         propertyStack.Pop();
                     }
@@ -274,14 +275,14 @@ namespace Ferris.Json
             //also doesn't handle whitespace
             //need to handle invalid json at some point
             var endingComma = jsonSpan.IndexOf(',');
-            var endingBracket = jsonSpan.IndexOf('}');
+            var endingBrace = jsonSpan.IndexOf('}');
             var endingChar = -1;
             if (endingComma < 0)
-                endingChar = endingBracket;
-            else if (endingBracket < 0)
+                endingChar = endingBrace;
+            else if (endingBrace < 0)
                 endingChar = endingComma;
             else
-                endingChar = Math.Min(endingComma, endingBracket);
+                endingChar = Math.Min(endingComma, endingBrace);
 
             var data = jsonSpan.Slice(0, endingChar);
             //don't pull in ending token
@@ -324,11 +325,11 @@ namespace Ferris.Json
             //}
             if (jsonSpan[0] == '{')
             {
-                return (Token.OpenBracket, 0);
+                return (Token.OpenBrace, 0);
             }
             else if (jsonSpan[0] == '}')
             {
-                return (Token.CloseBracket, 0);
+                return (Token.CloseBrace, 0);
             }
             else if (jsonSpan[0] == '"')
             {

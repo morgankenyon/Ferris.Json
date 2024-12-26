@@ -9,10 +9,10 @@ internal static class TokenExtensions
         token == Token.EndOfInput;
     internal static bool IsWhitespace(this Token token) =>
         token == Token.Whitespace;
-    internal static bool IsOpenBracket(this Token token) =>
-        token == Token.OpenBracket;
-    internal static bool IsCloseBracket(this Token token) =>
-        token == Token.CloseBracket;
+    internal static bool IsOpenBrace(this Token token) =>
+        token == Token.OpenBrace;
+    internal static bool IsCloseBrace(this Token token) =>
+        token == Token.CloseBrace;
     internal static bool IsPropertyName(this Token token) =>
         token == Token.PropertyName;
     internal static bool IsPropertyValue(this Token token) =>
