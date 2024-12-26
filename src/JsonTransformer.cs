@@ -89,267 +89,112 @@ namespace Ferris.Json
             return (T)convertedValue;
         }
 
+        private static bool IsLineEndingToken(Token token) =>
+            token.IsComma() || token.IsCloseBracket();
+
         private static SpanData Deserialize(Type type, ReadOnlySpan<char> jsonSpan)
         {
+            var propertyStack = new Stack<(Token token, object? data)>();
             PropertyInfo[] properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
             var propertiesDict = properties.ToDictionary(p => p.Name, p => p);
             var instance = Activator.CreateInstance(type);
 
+            if (instance == null)
+            {
+                //need some general error case here
+                return new SpanData(jsonSpan, null);
+            }
+            var previousToken = Token.None;
             while (true)
             {
-                var (token, tokenLength, data) = GetNextTokenAndData(jsonSpan);
+                var (token, tokenLength, data) = GetNextTokenAndData(previousToken, jsonSpan);
 
-                if (token == Token.EndOfInput)
+                if (token.IsEndOfInput())
                 {
                     break;
                 }
-                else if (token == Token.PropertyName && data != null)
+
+                if (IsLineEndingToken(token) && previousToken.IsPropertyValue())
                 {
-                    jsonSpan = jsonSpan.Slice(tokenLength);
-                    //also need to cover the case where it's a object instead of a value
-                    //and nulls and booleans
-                    var propertyName = data;
+                    var (_, propertyData) = propertyStack.Pop();
+                    var (colonToken, _) = propertyStack.Pop();
+                    var (propertyNameToken, propertyName) = propertyStack.Pop();
 
-                    (token, tokenLength, data) = GetNextTokenAndData(jsonSpan);
-
-                    if (token == Token.PropertyValue
-                        && data != null
-                        && propertiesDict.TryGetValue(propertyName, out var propertyInfo))
+                    if (colonToken == Token.Colon
+                        && propertyNameToken == Token.PropertyName
+                        && propertyData != null
+                        && propertyName != null
+                        && propertiesDict.TryGetValue((string)propertyName, out var propertyInfo))
                     {
-                        MapValue(propertyInfo, instance, data);
+                        Libs.MapValue(propertyInfo, instance, propertyData);
                     }
-                    else if (token == Token.OpenBracket
-                        && propertiesDict.TryGetValue(propertyName, out var objectInfo))
+                }
+
+                if (token.IsOpenBracket() && previousToken.IsColon())
+                {
+                    var (colonToken, colonData) = propertyStack.Pop();
+                    var (propertyNameToken, propertyName) = propertyStack.Pop();
+
+                    if (colonToken.IsColon()
+                        && propertyNameToken.IsPropertyName()
+                        && propertyName != null
+                        && propertiesDict.TryGetValue((string)propertyName, out var objectInfo))
                     {
-                        if (jsonSpan[0] == ':')
-                        {
-                            jsonSpan = jsonSpan.Slice(1);
-                        }
                         var spanData = Deserialize(objectInfo.PropertyType, jsonSpan);
-                        var obj = spanData.Value;
+
+                        //push thing back on the stack for mapping value function
+                        //to work correctly
+                        propertyStack.Push((propertyNameToken, propertyName));
+                        propertyStack.Push((colonToken, colonData));
+                        propertyStack.Push((Token.PropertyValue, spanData.Value));
+                        previousToken = Token.PropertyValue;
                         jsonSpan = spanData.JsonSpan;
 
-                        if (objectInfo.PropertyType.IsInstanceOfType(obj)
-                            && spanData.Value != null)
-                        {
-                            objectInfo.SetValue(instance, spanData.Value!);
-                        }
-
-                        //When going into nested objects, the jsonSpan fundamentally changes
-                        //since the (token, tokenLength, data) was calculated. So continuing
-                        //on the loop doesn't end well when trying to take a slice
+                        //calling this function recursively messes up the tokenLength
+                        //calculation, popping out here instead
                         continue;
                     }
-
+                    else
+                    {
+                        //need some type of error message
+                    }
                 }
-                else if (token == Token.CloseBracket)
+                else if (token.IsCloseBracket())
                 {
+                    if (propertyStack.TryPeek(out var openBracketProperty))
+                    {
+                        propertyStack.Pop();
+                    }
+                    else
+                    {
+                        //log error case about invalid json
+                    }
                     jsonSpan = jsonSpan.Slice(tokenLength);
                     break;
                 }
+                else if (!token.IsComma())
+                {
+                    propertyStack.Push((token, data));
+                }
 
+                previousToken = token;
                 jsonSpan = jsonSpan.Slice(tokenLength);
             }
 
             return new SpanData(jsonSpan, instance);
         }
 
-        private static void MapValue(PropertyInfo propertyInfo, object instance, string data)
-        {
-            var propertyType = propertyInfo.PropertyType;
-            if (propertyType == typeof(string))
-            {
-                propertyInfo.SetValue(instance, data);
-            }
-            else if (propertyType == typeof(int))
-            {
-                if (int.TryParse(data, out var result))
-                {
-                    propertyInfo.SetValue(instance, result);
-                }
-                else
-                {
-                    //add error message
-                }
-            }
-            else if (propertyType == typeof(uint))
-            {
-                if (uint.TryParse(data, out var result))
-                {
-                    propertyInfo.SetValue(instance, result);
-                }
-                else
-                {
-                    //add error message
-                }
-            }
-            else if (propertyType == typeof(float))
-            {
-                if (float.TryParse(data, out var result))
-                {
-                    propertyInfo.SetValue(instance, result);
-                }
-                else
-                {
-                    //add error message
-                }
-            }
-            else if (propertyType == typeof(double))
-            {
-                if (double.TryParse(data, out var result))
-                {
-                    propertyInfo.SetValue(instance, result);
-                }
-                else
-                {
-                    //add error message
-                }
-            }
-            else if (propertyType == typeof(bool))
-            {
-                if (bool.TryParse(data, out var result))
-                {
-                    propertyInfo.SetValue(instance, result);
-                }
-                else
-                {
-                    //add error message
-                }
-            }
-            else if (propertyType == typeof(byte))
-            {
-                if (byte.TryParse(data, out var result))
-                {
-                    propertyInfo.SetValue(instance, result);
-                }
-                else
-                {
-                    //add error message
-                }
-            }
-            else if (propertyType == typeof(sbyte))
-            {
-                if (sbyte.TryParse(data, out var result))
-                {
-                    propertyInfo.SetValue(instance, result);
-                }
-                else
-                {
-                    //add error message
-                }
-            }
-            else if (propertyType == typeof(char))
-            {
-                if (char.TryParse(data, out var result))
-                {
-                    propertyInfo.SetValue(instance, result);
-                }
-                else
-                {
-                    //add error message
-                }
-            }
-            else if (propertyType == typeof(decimal))
-            {
-                if (decimal.TryParse(data, out var result))
-                {
-                    propertyInfo.SetValue(instance, result);
-                }
-                else
-                {
-                    //add error message
-                }
-            }
-            else if (propertyType == typeof(long))
-            {
-                if (long.TryParse(data, out var result))
-                {
-                    propertyInfo.SetValue(instance, result);
-                }
-                else
-                {
-                    //add error message
-                }
-            }
-            else if (propertyType == typeof(ulong))
-            {
-                if (ulong.TryParse(data, out var result))
-                {
-                    propertyInfo.SetValue(instance, result);
-                }
-                else
-                {
-                    //add error message
-                }
-            }
-            else if (propertyType == typeof(Int128))
-            {
-                if (Int128.TryParse(data, out var result))
-                {
-                    propertyInfo.SetValue(instance, result);
-                }
-                else
-                {
-                    //add error message
-                }
-            }
-            else if (propertyType == typeof(UInt128))
-            {
-                if (UInt128.TryParse(data, out var result))
-                {
-                    propertyInfo.SetValue(instance, result);
-                }
-                else
-                {
-                    //add error message
-                }
-            }
-            else if (propertyType == typeof(short))
-            {
-                if (short.TryParse(data, out var result))
-                {
-                    propertyInfo.SetValue(instance, result);
-                }
-                else
-                {
-                    //add error message
-                }
-            }
-            else if (propertyType == typeof(ushort))
-            {
-                if (ushort.TryParse(data, out var result))
-                {
-                    propertyInfo.SetValue(instance, result);
-                }
-                else
-                {
-                    //add error message
-                }
-            }
-            else if (propertyType == typeof(DateTime))
-            {
-                if (DateTime.TryParse(data, out var result))
-                {
-                    propertyInfo.SetValue(instance, result);
-                }
-                else
-                {
-                    //add error message
-                }
-            }
-            //add else statement
-        }
-
-        internal static List<(Token token, int placeholder, string? data)> TokenizeString(string json)
+        internal static List<(Token token, int placeholder, string? data)> TokenizeString(
+            string json)
         {
             List<(Token, int, string?)> tokens = new List<(Token, int, string?)>();
             ReadOnlySpan<char> jsonSpan = json;
 
+            var previousToken = Token.Unknown;
             while (true)
             {
-                var (token, placeholder, data) = GetNextTokenAndData(jsonSpan);
-
+                var (token, placeholder, data) = GetNextTokenAndData(previousToken, jsonSpan);
                 tokens.Add((token, placeholder, data));
                 if (token == Token.None
                     || token == Token.Unknown
@@ -359,15 +204,17 @@ namespace Ferris.Json
                     return tokens;
                 }
                 jsonSpan = jsonSpan.Slice(placeholder);
+                previousToken = token;
             }
 
             return tokens;
         }
 
         internal static (Token token, int placeholder, string? data) GetNextTokenAndData(
+            Token previousToken,
             ReadOnlySpan<char> jsonSpan)
         {
-            var (token, tokenOffset) = GetNextToken(jsonSpan);
+            var (token, tokenOffset) = GetNextToken(previousToken, jsonSpan);
 
             if (token == Token.PropertyName
                 || token == Token.PropertyValue)
@@ -396,7 +243,9 @@ namespace Ferris.Json
 
         private static (string data, int length) ExtractQuotedPropertyValue(ReadOnlySpan<char> jsonSpan)
         {
-            var (valueOffset, parsingOffset) = (2, 4);
+            //value offset is 2, colon and one double quotes
+            //parsing offset is 4, colon + two double qoutes
+            var (valueOffset, parsingOffset) = (1, 2);
             var valueSpan = jsonSpan.Slice(valueOffset);
 
             //does not handle escaped double quotes
@@ -408,17 +257,21 @@ namespace Ferris.Json
         private static (string data, int length) ExtractUnquotedPropertyValue(
             ReadOnlySpan<char> jsonSpan)
         {
-            var valueSpan = jsonSpan.Slice(1);
-            var skipChars = 2; //one for colon, one for comma
-            //there could be no comma here if it's the last property in an object
-            var endingChar = valueSpan.IndexOf(',');
-            if (endingChar < 0)
-            {
-                endingChar = valueSpan.IndexOf('}');
-                skipChars--; //if no comma, detract one
-            }
-            var data = valueSpan.Slice(0, endingChar);
-            return (data.ToString(), endingChar + skipChars);
+            //also doesn't handle whitespace
+            //need to handle invalid json at some point
+            var endingComma = jsonSpan.IndexOf(',');
+            var endingBracket = jsonSpan.IndexOf('}');
+            var endingChar = -1;
+            if (endingComma < 0)
+                endingChar = endingBracket;
+            else if (endingBracket < 0)
+                endingChar = endingComma;
+            else
+                endingChar = Math.Min(endingComma, endingBracket);
+
+            var data = jsonSpan.Slice(0, endingChar);
+            //don't pull in ending token
+            return (data.ToString(), endingChar);
         }
 
         internal static (string data, int length) ExtractTokenData(Token token, ReadOnlySpan<char> jsonSpan)
@@ -430,7 +283,7 @@ namespace Ferris.Json
             }
             else if (token == Token.PropertyValue)
             {
-                if (jsonSpan[1] == '"')
+                if (jsonSpan[0] == '"')
                 {
                     return ExtractQuotedPropertyValue(jsonSpan);
                 }
@@ -442,7 +295,7 @@ namespace Ferris.Json
             return ("", 0);
         }
 
-        internal static (Token token, int tokenOffset) GetNextToken(ReadOnlySpan<char> jsonSpan)
+        internal static (Token token, int tokenOffset) GetNextToken(Token previousToken, ReadOnlySpan<char> jsonSpan)
         {
             if (jsonSpan.Length == 0)
             {
@@ -465,14 +318,25 @@ namespace Ferris.Json
             }
             else if (jsonSpan[0] == '"')
             {
-                return (Token.PropertyName, 0);
+                if (previousToken == Token.Colon)
+                {
+                    return (Token.PropertyValue, 0);
+                }
+                else
+                {
+                    return (Token.PropertyName, 0);
+                }
             }
             else if (jsonSpan[0] == ':')
             {
-                if (jsonSpan[0 + 1] == '{')
-                {
-                    return (Token.OpenBracket, 1);
-                }
+                return (Token.Colon, 0);
+            }
+            else if (jsonSpan[0] == ',')
+            {
+                return (Token.Comma, 0);
+            }
+            else if (previousToken == Token.Colon)
+            {
                 return (Token.PropertyValue, 0);
             }
             return (Token.Unknown, 0);

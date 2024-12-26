@@ -1,5 +1,5 @@
 ﻿namespace Ferris.Json;
-public enum Token
+internal enum Token
 {
     Unknown,
     None,
@@ -8,5 +8,7 @@ public enum Token
     OpenBracket,
     CloseBracket,
     PropertyName,
-    PropertyValue
+    PropertyValue,
+    Comma,
+    Colon
 }

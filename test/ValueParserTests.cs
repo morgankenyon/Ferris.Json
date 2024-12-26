@@ -5,20 +5,22 @@ namespace Ferris.Json.Test;
 public class ValueParserTests
 {
     [Theory(DisplayName = "Can find simple tokens")]
-    [InlineData("", Token.EndOfInput, 0)]
-    [InlineData("&", Token.Unknown, 0)]
-    [InlineData("{", Token.OpenBracket, 0)]
-    [InlineData("}", Token.CloseBracket, 0)]
-    [InlineData("\"Property\"", Token.PropertyName, 0)]
-    [InlineData(":283,", Token.PropertyValue, 0)]
-    [InlineData(":{", Token.OpenBracket, 1)]
-    public void JsonTransform_GetNextToken(
+    [InlineData("", Token.None, Token.EndOfInput, 0)]
+    [InlineData("&", Token.None, Token.Unknown, 0)]
+    [InlineData("{", Token.None, Token.OpenBracket, 0)]
+    [InlineData("}", Token.PropertyValue, Token.CloseBracket, 0)]
+    [InlineData(",", Token.PropertyValue, Token.Comma, 0)]
+    [InlineData("\"Property\"", Token.Comma, Token.PropertyName, 0)]
+    [InlineData("283,", Token.Colon, Token.PropertyValue, 0)]
+    [InlineData(":{", Token.PropertyName, Token.Colon, 0)]
+    internal void JsonTransform_GetNextToken(
         string json,
+        Token previousToken,
         Token expectedToken,
         int expectedTokenOffset)
     {
         //Act
-        var (token, tokenOffset) = JsonTransformer.GetNextToken(json);
+        var (token, tokenOffset) = JsonTransformer.GetNextToken(previousToken, json);
 
         //Assert
         Assert.Multiple(() =>
@@ -56,20 +58,21 @@ public class ValueParserTests
     //}
 
     [Theory(DisplayName = "Can find values to appropriate tokens")]
-    [InlineData("", 1, null, Token.EndOfInput)]
-    [InlineData("&", 1, null, Token.Unknown)]
-    [InlineData("{", 1, null, Token.OpenBracket)]
-    [InlineData("}", 1, null, Token.CloseBracket)]
-    [InlineData("\"Property\"", 10, "Property", Token.PropertyName)]
-    [InlineData(":283,", 5, "283", Token.PropertyValue)]
-    [InlineData(":\"data\",", 8, "data", Token.PropertyValue)]
-    public void JsonTransform_GetNextTokenAndData(string json,
+    [InlineData("", Token.None, 1, null, Token.EndOfInput)]
+    [InlineData("&", Token.None, 1, null, Token.Unknown)]
+    [InlineData("{", Token.None, 1, null, Token.OpenBracket)]
+    [InlineData("}", Token.PropertyValue, 1, null, Token.CloseBracket)]
+    [InlineData("\"Property\"", Token.OpenBracket, 10, "Property", Token.PropertyName)]
+    [InlineData("283,", Token.Colon, 3, "283", Token.PropertyValue)]
+    [InlineData("\"data\",", Token.Colon, 6, "data", Token.PropertyValue)]
+    internal void JsonTransform_GetNextTokenAndData(string json,
+        Token previousToken,
         int expectedPlaceholder,
         string expectedData,
         Token expectedToken)
     {
         //Act
-        var (token, placeholder, data) = JsonTransformer.GetNextTokenAndData(json);
+        var (token, placeholder, data) = JsonTransformer.GetNextTokenAndData(previousToken, json);
 
         //Assert
         Assert.Multiple(() =>
@@ -83,16 +86,17 @@ public class ValueParserTests
     //This was leftover from when I was using strings versus
     //ReadOnlySpan<char>, see if this is still needed
     [Theory(DisplayName = "Can find offset values")]
-    [InlineData("{\"name\"", Token.OpenBracket, 1, null)]
-    [InlineData("\"name\"", Token.PropertyName, 6, "name")]
-    public void JsonTransform_GetNextTokenAndToken_IncorpratesOffset(
+    [InlineData("{\"name\"", Token.Colon, Token.OpenBracket, 1, null)]
+    [InlineData("\"name\"", Token.OpenBracket, Token.PropertyName, 6, "name")]
+    internal void JsonTransform_GetNextTokenAndToken_IncorpratesOffset(
         string json,
+        Token previousToken,
         Token expectedToken,
         int expectedPlaceholder,
         string expectedData)
     {
         //Act
-        var (token, placeholder, data) = JsonTransformer.GetNextTokenAndData(json);
+        var (token, placeholder, data) = JsonTransformer.GetNextTokenAndData(previousToken, json);
 
         //Assert
         Assert.Multiple(() =>
@@ -105,14 +109,15 @@ public class ValueParserTests
 
     [Theory(DisplayName = "Can extract token data")]
     [InlineData("\"Property\"", "Property", 10, Token.PropertyName)]
-    [InlineData(":283,", "283", 5, Token.PropertyValue)]
-    [InlineData(":\"data\",", "data", 8, Token.PropertyValue)]
+    [InlineData("283,", "283", 3, Token.PropertyValue)]
+    [InlineData("283},", "283", 3, Token.PropertyValue)]
+    [InlineData("\"data\",", "data", 6, Token.PropertyValue)]
     [InlineData("\"Property Baby\"", "Property Baby", 15, Token.PropertyName)]
-    [InlineData(":283424,", "283424", 8, Token.PropertyValue)]
-    [InlineData(":\"data point\",", "data point", 14, Token.PropertyValue)]
+    [InlineData("283424,", "283424", 6, Token.PropertyValue)]
+    [InlineData("\"data point\",", "data point", 12, Token.PropertyValue)]
     [InlineData("\"name\"", "name", 6, Token.PropertyName)]
-    [InlineData(":\"maxValue\"},", "maxValue", 11, Token.PropertyValue)]
-    public void JsonTransform_ExtractTokenData(
+    [InlineData("\"maxValue\"},", "maxValue", 10, Token.PropertyValue)]
+    internal void JsonTransform_ExtractTokenData(
         string json,
         string expectedData,
         int expectedLength,
@@ -168,16 +173,50 @@ public class ValueParserTests
         var tokenInfo = JsonTransformer.TokenizeString(jsonString);
 
         //Assert
-        Assert.Equal(5, tokenInfo.Count);
-
-        var tokens = tokenInfo.Select(ti => ti.token).ToList();
         var expectedTokens = new List<Token> {
             Token.OpenBracket,
             Token.PropertyName,
+            Token.Colon,
             Token.PropertyValue,
             Token.CloseBracket,
             Token.EndOfInput
         };
+        Assert.Equal(expectedTokens.Count, tokenInfo.Count);
+
+        var tokens = tokenInfo.Select(ti => ti.token).ToList();
+
+        Assert.Equal(expectedTokens, tokens);
+    }
+
+    [Fact(DisplayName = "Can extract tokens from nested string")]
+    public void JsonTransform_CanExtractNestedTokens()
+    {
+        //Arrange
+        var jsonString = "{\"IntProp\":{\"Property\":234},\"Number\":4242}";
+
+        //Act
+        var tokenInfo = JsonTransformer.TokenizeString(jsonString);
+
+        //Assert
+        var expectedTokens = new List<Token> {
+            Token.OpenBracket,
+            Token.PropertyName,
+            Token.Colon,
+            Token.OpenBracket,
+            Token.PropertyName,
+            Token.Colon,
+            Token.PropertyValue,
+            Token.CloseBracket,
+            Token.Comma,
+            Token.PropertyName,
+            Token.Colon,
+            Token.PropertyValue,
+            Token.CloseBracket,
+            Token.EndOfInput
+        };
+        Assert.Equal(expectedTokens.Count, tokenInfo.Count);
+
+        var tokens = tokenInfo.Select(ti => ti.token).ToList();
 
         Assert.Equal(expectedTokens, tokens);
     }
@@ -192,23 +231,29 @@ public class ValueParserTests
         var tokenInfo = JsonTransformer.TokenizeString(jsonString);
 
         //Assert
-        Assert.Equal(12, tokenInfo.Count);
-
-        var tokens = tokenInfo.Select(ti => ti.token).ToList();
         var expectedTokens = new List<Token> {
             Token.OpenBracket,
             Token.PropertyName,
+            Token.Colon,
             Token.PropertyValue,
+            Token.Comma,
             Token.PropertyName,
+            Token.Colon,
             Token.PropertyValue,
+            Token.Comma,
             Token.PropertyName,
+            Token.Colon,
             Token.OpenBracket,
             Token.PropertyName,
+            Token.Colon,
             Token.PropertyValue,
             Token.CloseBracket,
             Token.CloseBracket,
             Token.EndOfInput
         };
+        Assert.Equal(expectedTokens.Count, tokenInfo.Count);
+
+        var tokens = tokenInfo.Select(ti => ti.token).ToList();
 
         Assert.Equal(expectedTokens, tokens);
     }
@@ -542,7 +587,27 @@ public class ValueParserTests
 
         var prop = obj as NestedStringObj;
         prop.Property.Should().NotBeNull();
-        prop.Property.Property.Should().Be("maxValue");
+        prop.Property!.Property.Should().Be("maxValue");
+    }
+
+    [Fact(DisplayName = "Can parse triple property json")]
+    public void JsonTransform_Deserialize_ParseTriplePropertyJson()
+    {
+        //Arrange
+        var maxValue = DateTime.MaxValue;
+        var jsonString = "{\"IntProp\":2342,\"StringProp\":\"max\",\"DoubleProp\":232.23}";
+
+        //Act
+        var obj = JsonTransformer.Deserialize<TriplePropertyObj>(jsonString);
+
+        //Assert
+        Assert.True(obj is TriplePropertyObj);
+
+        var prop = obj as TriplePropertyObj;
+        prop.IntProp.Should().Be(2342);
+        prop.StringProp.Should().NotBeNull();
+        prop.StringProp.Should().Be("max");
+        prop.DoubleProp.Should().BeApproximately(232.23, 0.01);
     }
 
     [Fact(DisplayName = "Can parse more complex json")]
@@ -550,7 +615,7 @@ public class ValueParserTests
     {
         //Arrange
         var maxValue = DateTime.MaxValue;
-        var jsonString = "{\"StringProp\":{\"Property\":\"maxValue\"},\"IntPro\":{\"Property\":234},\"Number\":4242}";
+        var jsonString = "{\"StringProp\":{\"Property\":\"maxValue\"},\"IntProp\":{\"Property\":234},\"Number\":4242}";
 
         //Act
         var obj = JsonTransformer.Deserialize<NestedMultipleObj>(jsonString);
