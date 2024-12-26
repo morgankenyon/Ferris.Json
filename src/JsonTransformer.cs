@@ -2,8 +2,16 @@
 
 namespace Ferris.Json
 {
+    /// <summary>
+    /// A json serialization/deserialization library.
+    /// </summary>
     public static class JsonTransformer
     {
+        /// <summary>
+        /// Serialize a C# object into a json string
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
         public static string Serialize(object obj)
         {
             var properties = obj.GetType().GetProperties();
@@ -76,6 +84,12 @@ namespace Ferris.Json
             return combinedProperties;
         }
 
+        /// <summary>
+        /// Deserialize the json string into a C# object
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="json"></param>
+        /// <returns></returns>
         public static T Deserialize<T>(string json)
         {
             Type type = typeof(T);
