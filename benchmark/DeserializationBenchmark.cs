@@ -1,9 +1,14 @@
 ﻿using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Configs;
 using Ferris.Json.Test.TestObjects;
 using Newtonsoft.Json;
 
 namespace Ferris.Json.Benchmark;
-public class ToObjectBenchmark
+[MemoryDiagnoser]
+[DisassemblyDiagnoser]
+[CategoriesColumn]
+[GroupBenchmarksBy(BenchmarkLogicalGroupRule.ByCategory)]
+public class DeserializationBenchmark
 {
     private static string jsonString = "{\"Property\":\"testValue\"}";
     private int count = 0;

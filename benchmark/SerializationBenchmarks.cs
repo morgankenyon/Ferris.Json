@@ -9,7 +9,7 @@ namespace Ferris.Json.Benchmark;
 [DisassemblyDiagnoser]
 [CategoriesColumn]
 [GroupBenchmarksBy(BenchmarkLogicalGroupRule.ByCategory)]
-public class ValueMapperBenchmarks
+public class SerializationBenchmarks
 {
     private static ValueTestObject testObj = TestObjs.GetValueTestObject();
     private int count = 0;

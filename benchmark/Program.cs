@@ -6,6 +6,6 @@ class Program
 {
     static void Main(string[] args)
     {
-        var summary = BenchmarkRunner.Run<ToObjectBenchmark>();
+        var summary = BenchmarkRunner.Run<DeserializationBenchmark>();
     }
 }
