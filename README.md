@@ -28,3 +28,19 @@ var obj = JsonTransformer.Deserialize<TestObject>(jsonString);
 * `/src` - contains all source code for Ferris.Json
 * `/test` - contains all tests for Ferris.Json
 * `/benchmark` - contains benchmarks between Ferris.Json, Newtonsoft and System.Text.Json
+
+## Features
+
+- [x] - serializing basic types
+- [x] - serializing nested objects
+- [x] - deserializing basic types
+- [x] - deserializing nested object
+- [ ] - handle nulls
+- [ ] - serializing arrays
+- [ ] - deserializing arrays
+- [ ] - handling whitespace
+- [ ] - gracefully handling invalid json
+- [ ] - add serialization options (pretty print, DateTime format, etc)
+- [ ] - handle numbers with exponents
+- [ ] - handle nested quotes in strings
+- [ ] - support hex
