@@ -447,4 +447,30 @@ public class SerializationTests
         //Assert
         jsonString.Should().Be("""{"Strings":[{"Property":"FirstString"},{"Property":"SecondString"}],"Property":"prop"}""");
     }
+
+    [Fact(DisplayName = "Map array property to json array")]
+    public void JsonTransformer_MapArrayProperty()
+    {
+        //Arrange
+        var obj = new ArrayTestObj
+        {
+            Strings = new StringPropertyObj[2]
+        };
+
+        var strings = new LinkedList<StringPropertyObj>();
+        obj.Strings[0] = new StringPropertyObj
+        {
+            Property = "FirstString"
+        };
+        obj.Strings[1] = new StringPropertyObj
+        {
+            Property = "SecondString"
+        };
+
+        //Act
+        var jsonString = JsonTransformer.Serialize(obj);
+
+        //Assert
+        jsonString.Should().Be("""{"Strings":[{"Property":"FirstString"},{"Property":"SecondString"}]}""");
+    }
 }

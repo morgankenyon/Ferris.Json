@@ -35,11 +35,14 @@ var obj = JsonTransformer.Deserialize<TestObject>(jsonString);
 - [x] - serializing nested objects
 - [x] - deserializing basic types
 - [x] - deserializing nested object
-- [x] - serializing arrays
-- [ ] - deserializing arrays
+- [x] - serializing IEnumerable types
+- [x] - serializng arrays ([])
+- [ ] - deserializing IEnumerable types
+- [ ] - deserializing arrays ([])
 - [ ] - handle nulls
 - [ ] - handling whitespace
 - [ ] - gracefully handling invalid json
+- [ ] - handling null values in C# while serializing
 - [ ] - add serialization options (pretty print, DateTime format, etc)
 - [ ] - handle numbers with exponents
 - [ ] - handle nested quotes in strings
