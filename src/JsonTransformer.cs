@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Linq.Expressions;
+using System.Reflection;
 
 namespace Ferris.Json
 {
@@ -125,6 +126,12 @@ namespace Ferris.Json
         private static bool IsLineEndingToken(Token token) =>
             token.IsComma() || token.IsCloseBrace();
 
+        private static bool IsGenericCollection(Type type)
+        {
+            return type.GetInterfaces()
+                .Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(ICollection<>));
+        }
+
         private static SpanData Deserialize(Type type, ReadOnlySpan<char> jsonSpan)
         {
             var propertyStack = new Stack<(Token token, object? data)>();
@@ -166,6 +173,7 @@ namespace Ferris.Json
 
                 if (token.IsOpenBrace() && previousToken.IsColon())
                 {
+                    //since stack is IEnumerable, maybe iterate versus popping and readding?
                     var (colonToken, colonData) = propertyStack.Pop();
                     var (propertyNameToken, propertyName) = propertyStack.Pop();
 
@@ -191,6 +199,53 @@ namespace Ferris.Json
                     else
                     {
                         //need some type of error message
+                    }
+                }
+                else if (token.IsOpenBracket() && previousToken.IsColon())
+                {
+                    var (colonToken, colonData) = propertyStack.Pop();
+                    var (propertyNameToken, propertyName) = propertyStack.Pop();
+
+                    if (colonToken.IsColon()
+                        && propertyNameToken.IsPropertyName()
+                        && propertyName != null
+                        && propertiesDict.TryGetValue((string)propertyName, out var arrayInfo))
+                    {
+                        //this is a mess
+                        //get type of ienumerable
+                        var arrayType = arrayInfo.PropertyType;
+
+                        //if it's a list
+                        if (arrayType.IsGenericType && arrayType.GetGenericTypeDefinition() == typeof(List<>))
+                        {
+                            var elementType = arrayType.GetGenericArguments()[0];
+                            var nextListToken = Token.None;
+                            //make new list
+                            var listInstance = (System.Collections.IList)Activator.CreateInstance(arrayType);
+                            do
+                            {
+                                //convert all elements to C# objects
+                                jsonSpan = jsonSpan.Slice(1);
+                                var spanData = Deserialize(elementType, jsonSpan);
+                                jsonSpan = spanData.JsonSpan;
+                                (nextListToken, _) = GetNextToken(Token.None, jsonSpan);
+                                listInstance.Add(spanData.Value);
+                            } while (nextListToken.IsComma());
+
+                            if (nextListToken.IsCloseBracket())
+                            {
+                                jsonSpan = jsonSpan.Slice(1);
+                            }
+                            propertyStack.Push((propertyNameToken, propertyName));
+                            propertyStack.Push((colonToken, colonData));
+                            propertyStack.Push((Token.PropertyValue, listInstance));
+                            previousToken = Token.PropertyValue;
+                            continue;
+                        }
+                        else
+                        {
+                            var elementType = arrayType.GetElementType();
+                        }
                     }
                 }
                 else if (token.IsCloseBrace())

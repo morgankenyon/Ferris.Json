@@ -632,4 +632,42 @@ public class DeserializationTests
         prop.IntProp.Property.Should().Be(234);
         prop.Number.Should().Be(4242);
     }
+
+    [Fact(DisplayName = "Can parse a json array to C# List")]
+    public void JsonTransform_Deserialize_ParseToList()
+    {
+        //Arrange
+        var jsonString = """{"Strings":[{"Property":"FirstString"},{"Property":"SecondString"}]}""";
+
+        //Act
+        var obj = JsonTransformer.Deserialize<ListTestObj>(jsonString);
+
+        //Assert
+        obj.Should().BeOfType<ListTestObj>();
+
+        var prop = obj as ListTestObj;
+        prop.Strings.Should().NotBeNull();
+        prop.Strings.Should().HaveCount(2);
+        prop.Strings.First().Property.Should().Be("FirstString");
+        prop.Strings.Last().Property.Should().Be("SecondString");
+    }
+
+    [Fact(DisplayName = "Can parse a json array to C# LinkedList")]
+    public void JsonTransform_Deserialize_ParseToLinkedList()
+    {
+        //Arrange
+        var jsonString = """{"Strings":[{"Property":"FirstString"},{"Property":"SecondString"}]}""";
+
+        //Act
+        var obj = JsonTransformer.Deserialize<LinkedListObj>(jsonString);
+
+        //Assert
+        obj.Should().BeOfType<LinkedListObj>();
+
+        var prop = obj as LinkedListObj;
+        prop.Strings.Should().NotBeNull();
+        prop.Strings.Should().HaveCount(2);
+        prop.Strings.First().Property.Should().Be("FirstString");
+        prop.Strings.Last().Property.Should().Be("SecondString");
+    }
 }

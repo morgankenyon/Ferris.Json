@@ -3,6 +3,10 @@ internal class ListTestObj
 {
     public List<StringPropertyObj>? Strings { get; set; }
 }
+internal class ValueListTestObj
+{
+    public List<string>? Strings { get; set; }
+}
 internal class LinkedListObj
 {
     public LinkedList<StringPropertyObj>? Strings { get; set; }

@@ -21,4 +21,8 @@ internal static class TokenExtensions
         token == Token.Comma;
     internal static bool IsColon(this Token token) =>
         token == Token.Colon;
+    internal static bool IsOpenBracket(this Token token) =>
+        token == Token.OpenBracket;
+    internal static bool IsCloseBracket(this Token token) =>
+        token == Token.CloseBracket;
 }
