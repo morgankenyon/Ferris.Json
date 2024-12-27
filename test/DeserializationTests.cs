@@ -670,4 +670,23 @@ public class DeserializationTests
         prop.Strings.First().Property.Should().Be("FirstString");
         prop.Strings.Last().Property.Should().Be("SecondString");
     }
+
+    [Fact(DisplayName = "Can parse a json array to C# array")]
+    public void JsonTransform_Deserialize_ParseToArray()
+    {
+        //Arrange
+        var jsonString = """{"Strings":[{"Property":"FirstString"},{"Property":"SecondString"}]}""";
+
+        //Act
+        var obj = JsonTransformer.Deserialize<ArrayTestObj>(jsonString);
+
+        //Assert
+        obj.Should().BeOfType<ArrayTestObj>();
+
+        var prop = obj as ArrayTestObj;
+        prop.Strings.Should().NotBeNull();
+        prop.Strings.Should().HaveCount(2);
+        prop.Strings.First().Property.Should().Be("FirstString");
+        prop.Strings.Last().Property.Should().Be("SecondString");
+    }
 }
