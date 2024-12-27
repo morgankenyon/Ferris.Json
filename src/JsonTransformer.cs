@@ -132,6 +132,12 @@ namespace Ferris.Json
                 .Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(ICollection<>));
         }
 
+        private static bool IsGenericIEnumerable(Type type)
+        {
+            return type.GetInterfaces()
+                .Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEnumerable<>));
+        }
+
         private static SpanData Deserialize(Type type, ReadOnlySpan<char> jsonSpan)
         {
             var propertyStack = new Stack<(Token token, object? data)>();
@@ -211,12 +217,42 @@ namespace Ferris.Json
                         && propertyName != null
                         && propertiesDict.TryGetValue((string)propertyName, out var arrayInfo))
                     {
-                        //this is a mess
-                        //get type of ienumerable
                         var arrayType = arrayInfo.PropertyType;
 
+                        if (arrayType.IsGenericType && arrayType.GetGenericTypeDefinition() == typeof(LinkedList<>))
+                        {
+                            var elementType = arrayType.GetGenericArguments()[0];
+                            var nextListToken = Token.None;
+                            //make new list
+                            dynamic linkedListInstance = Activator.CreateInstance(arrayType);
+                            var llType = linkedListInstance.GetType();
+                            var areEqual = arrayType == llType;
+                            var addLastMethod = linkedListInstance.GetType().GetMethod("AddLast", new[] { elementType });
+                            do
+                            {
+                                //convert all elements to C# objects
+                                jsonSpan = jsonSpan.Slice(1);
+                                var spanData = Deserialize(elementType, jsonSpan);
+                                jsonSpan = spanData.JsonSpan;
+                                (nextListToken, _) = GetNextToken(Token.None, jsonSpan);
+                                object? value = spanData.Value;
+                                //linkedListInstance.AddLast(value);
+                                addLastMethod.Invoke(linkedListInstance, new[] { value });
+                            } while (nextListToken.IsComma());
+
+                            if (nextListToken.IsCloseBracket())
+                            {
+                                jsonSpan = jsonSpan.Slice(1);
+                            }
+
+                            propertyStack.Push((propertyNameToken, propertyName));
+                            propertyStack.Push((colonToken, colonData));
+                            propertyStack.Push((Token.PropertyValue, linkedListInstance));
+                            previousToken = Token.PropertyValue;
+                            continue;
+                        }
                         //if it's a list
-                        if (arrayType.IsGenericType && arrayType.GetGenericTypeDefinition() == typeof(List<>))
+                        else if (arrayType.IsGenericType && arrayType.GetGenericTypeDefinition() == typeof(List<>))
                         {
                             var elementType = arrayType.GetGenericArguments()[0];
                             var nextListToken = Token.None;
