@@ -457,7 +457,6 @@ public class SerializationTests
             Strings = new StringPropertyObj[2]
         };
 
-        var strings = new LinkedList<StringPropertyObj>();
         obj.Strings[0] = new StringPropertyObj
         {
             Property = "FirstString"

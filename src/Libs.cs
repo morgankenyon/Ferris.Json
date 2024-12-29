@@ -12,7 +12,8 @@ internal static class Libs
 
         var propertyType = propertyInfo.PropertyType;
         if (propertyType == typeof(string)
-            || propertyType.BaseType == typeof(object))
+            || propertyType.BaseType == typeof(object)
+            || propertyType.IsArray)
         {
             propertyInfo.SetValue(instance, data);
         }

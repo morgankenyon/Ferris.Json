@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Reflection;
 
 namespace Ferris.Json
@@ -218,15 +219,13 @@ namespace Ferris.Json
                         && propertiesDict.TryGetValue((string)propertyName, out var arrayInfo))
                     {
                         var arrayType = arrayInfo.PropertyType;
-
+                        //if linkedlist
                         if (arrayType.IsGenericType && arrayType.GetGenericTypeDefinition() == typeof(LinkedList<>))
                         {
                             var elementType = arrayType.GetGenericArguments()[0];
                             var nextListToken = Token.None;
                             //make new list
                             dynamic linkedListInstance = Activator.CreateInstance(arrayType);
-                            var llType = linkedListInstance.GetType();
-                            var areEqual = arrayType == llType;
                             var addLastMethod = linkedListInstance.GetType().GetMethod("AddLast", new[] { elementType });
                             do
                             {
@@ -277,6 +276,36 @@ namespace Ferris.Json
                             propertyStack.Push((Token.PropertyValue, listInstance));
                             previousToken = Token.PropertyValue;
                             continue;
+                        }
+                        else if (arrayType.IsArray)
+                        {
+                            var elementType = arrayType.GetElementType();
+                            Type listType = typeof(List<>).MakeGenericType(elementType);
+                            var elementList = (System.Collections.IList)Activator.CreateInstance(listType);
+
+                            var nextListToken = Token.None;
+                            do
+                            {
+                                jsonSpan = jsonSpan.Slice(1);
+                                var spanData = Deserialize(elementType, jsonSpan);
+                                jsonSpan = spanData.JsonSpan;
+                                (nextListToken, _) = GetNextToken(Token.None, jsonSpan);
+                                elementList.Add(spanData.Value);
+                            } while (nextListToken.IsComma());
+
+                            if (nextListToken.IsCloseBracket())
+                            {
+                                jsonSpan = jsonSpan.Slice(1);
+                            }
+                            Array array = Array.CreateInstance(elementType, elementList.Count);
+                            elementList.CopyTo(array, 0);
+                            propertyStack.Push((propertyNameToken, propertyName));
+                            propertyStack.Push((colonToken, colonData));
+                            propertyStack.Push((Token.PropertyValue, array));
+                            previousToken = Token.PropertyValue;
+                            continue;
+
+
                         }
                         else
                         {
