@@ -36,7 +36,7 @@ var obj = JsonTransformer.Deserialize<TestObject>(jsonString);
 - [x] - deserializing basic types
 - [x] - deserializing nested object
 - [x] - serializing IEnumerable types
-- [x] - serializng arrays ([])
+- [x] - serializing arrays ([])
 - [ ] - deserializing IEnumerable types
 - [ ] - deserializing arrays ([])
 - [ ] - handle nulls while deserializing
