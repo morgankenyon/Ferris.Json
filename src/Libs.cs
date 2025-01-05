@@ -3,19 +3,28 @@
 namespace Ferris.Json;
 internal static class Libs
 {
-    internal static void MapValue(PropertyInfo propertyInfo, object instance, object? data)
+    internal static void MapValue(PropertyInfo propertyInfo, object instance, TokenInfo dataInfo)
     {
-        if (data == null)
+        if (!dataInfo.HasValue)
         {
             return;
         }
+        object data = dataInfo.Data!;
 
         var propertyType = propertyInfo.PropertyType;
         if (propertyType == typeof(string)
             || propertyType.BaseType == typeof(object)
             || propertyType.IsArray)
         {
-            propertyInfo.SetValue(instance, data);
+            var stringValue = data.ToString();
+            if (stringValue != null && stringValue.StartsWith("null"))
+            {
+                propertyInfo.SetValue(instance, null);
+            }
+            else
+            {
+                propertyInfo.SetValue(instance, data);
+            }
         }
         else
         {

@@ -56,51 +56,52 @@ public class DeserializationTests
     //}
 
     [Theory(DisplayName = "Can find values to appropriate tokens")]
-    [InlineData("", Token.None, 1, null, Token.EndOfInput)]
-    [InlineData("&", Token.None, 1, null, Token.Unknown)]
-    [InlineData("{", Token.None, 1, null, Token.OpenBrace)]
-    [InlineData("}", Token.PropertyValue, 1, null, Token.CloseBrace)]
-    [InlineData("\"Property\"", Token.OpenBrace, 10, "Property", Token.PropertyName)]
-    [InlineData("283,", Token.Colon, 3, "283", Token.PropertyValue)]
-    [InlineData("\"data\",", Token.Colon, 6, "data", Token.PropertyValue)]
-    [InlineData("     ", Token.None, 5, null, Token.Whitespace)]
+    [InlineData("", Token.None, 1, false, null, Token.EndOfInput)]
+    [InlineData("&", Token.None, 1, false, null, Token.Unknown)]
+    [InlineData("{", Token.None, 1, false, null, Token.OpenBrace)]
+    [InlineData("}", Token.PropertyValue, 1, false, null, Token.CloseBrace)]
+    [InlineData("\"Property\"", Token.OpenBrace, 10, true, "Property", Token.PropertyName)]
+    [InlineData("283,", Token.Colon, 3, true, "283", Token.PropertyValue)]
+    [InlineData("\"data\",", Token.Colon, 6, true, "data", Token.PropertyValue)]
+    [InlineData("     ", Token.None, 5, false, null, Token.Whitespace)]
     internal void JsonTransform_GetNextTokenAndData(string json,
         Token previousToken,
         int expectedPlaceholder,
+        bool expectedHasValue,
         string expectedData,
         Token expectedToken)
     {
         //Act
-        var (token, placeholder, data) = JsonTransformer.GetNextTokenAndData(previousToken, json);
+        var tokenInfo = JsonTransformer.GetNextTokenAndData(previousToken, json);
 
         //Assert
-        token.Should().Be(expectedToken);
-        placeholder.Should().Be(expectedPlaceholder);
-        data.Should().Be(expectedData);
+        tokenInfo.Token.Should().Be(expectedToken);
+        tokenInfo.Length.Should().Be(expectedPlaceholder);
+        tokenInfo.HasValue.Should().Be(expectedHasValue);
+        tokenInfo.Data.Should().Be(expectedData);
     }
 
     //This was leftover from when I was using strings versus
     //ReadOnlySpan<char>, see if this is still needed
     [Theory(DisplayName = "Can find offset values")]
-    [InlineData("{\"name\"", Token.Colon, Token.OpenBrace, 1, null)]
-    [InlineData("\"name\"", Token.OpenBrace, Token.PropertyName, 6, "name")]
+    [InlineData("{\"name\"", Token.Colon, Token.OpenBrace, 1, false, null)]
+    [InlineData("\"name\"", Token.OpenBrace, Token.PropertyName, 6, true, "name")]
     internal void JsonTransform_GetNextTokenAndToken_IncorpratesOffset(
         string json,
         Token previousToken,
         Token expectedToken,
         int expectedPlaceholder,
+        bool expectedHasValue,
         string expectedData)
     {
         //Act
-        var (token, placeholder, data) = JsonTransformer.GetNextTokenAndData(previousToken, json);
+        var tokenInfo = JsonTransformer.GetNextTokenAndData(previousToken, json);
 
         //Assert
-        Assert.Multiple(() =>
-        {
-            Assert.Equal(expectedToken, token);
-            Assert.Equal(expectedPlaceholder, placeholder);
-            Assert.Equal(expectedData, data);
-        });
+        tokenInfo.Token.Should().Be(expectedToken);
+        tokenInfo.Length.Should().Be(expectedPlaceholder);
+        tokenInfo.HasValue.Should().Be(expectedHasValue);
+        tokenInfo.Data.Should().Be(expectedData);
     }
 
     [Theory(DisplayName = "Can extract token data")]
@@ -113,6 +114,8 @@ public class DeserializationTests
     [InlineData("\"data point\",", "data point", 12, Token.PropertyValue)]
     [InlineData("\"name\"", "name", 6, Token.PropertyName)]
     [InlineData("\"maxValue\"},", "maxValue", 10, Token.PropertyValue)]
+    [InlineData("\"null\"},", "null", 6, Token.PropertyValue)]
+    [InlineData("\"null\",", "null", 6, Token.PropertyValue)]
     internal void JsonTransform_ExtractTokenData(
         string json,
         string expectedData,
@@ -120,14 +123,11 @@ public class DeserializationTests
         Token token)
     {
         //Act
-        var (data, length) = JsonTransformer.ExtractTokenData(token, json);
+        var tokenInfo = JsonTransformer.ExtractTokenData(token, json);
 
         //Assert
-        Assert.Multiple(() =>
-        {
-            Assert.Equal(expectedData, data);
-            Assert.Equal(expectedLength, length);
-        });
+        tokenInfo.Length.Should().Be(expectedLength);
+        tokenInfo.Data.Should().Be(expectedData);
     }
 
     //Leftover from using strings instead of ReadOnlySpan<char>
@@ -179,7 +179,7 @@ public class DeserializationTests
         };
         Assert.Equal(expectedTokens.Count, tokenInfo.Count);
 
-        var tokens = tokenInfo.Select(ti => ti.token).ToList();
+        var tokens = tokenInfo.Select(ti => ti.Token).ToList();
 
         Assert.Equal(expectedTokens, tokens);
     }
@@ -210,7 +210,7 @@ public class DeserializationTests
         };
         Assert.Equal(expectedTokens.Count, tokenInfo.Count);
 
-        var tokens = tokenInfo.Select(ti => ti.token).ToList();
+        var tokens = tokenInfo.Select(ti => ti.Token).ToList();
 
         Assert.Equal(expectedTokens, tokens);
     }
@@ -243,7 +243,7 @@ public class DeserializationTests
         };
         Assert.Equal(expectedTokens.Count, tokenInfo.Count);
 
-        var tokens = tokenInfo.Select(ti => ti.token).ToList();
+        var tokens = tokenInfo.Select(ti => ti.Token).ToList();
 
         Assert.Equal(expectedTokens, tokens);
     }
@@ -280,25 +280,32 @@ public class DeserializationTests
         };
         Assert.Equal(expectedTokens.Count, tokenInfo.Count);
 
-        var tokens = tokenInfo.Select(ti => ti.token).ToList();
+        var tokens = tokenInfo.Select(ti => ti.Token).ToList();
 
         Assert.Equal(expectedTokens, tokens);
     }
 
     [Theory(DisplayName = "Can parse json string to object")]
-    [InlineData("{\"Property\":\"testValue\"}")]
-    [InlineData(" { \"Property\" : \"testValue\" } ")]
-    [InlineData("       {        \"Property\"             :          \"testValue\"     }   ")]
-    public void JsonTransform_Deserialize_SingleStringProperty(string jsonString)
+    [InlineData("{\"Property\":\"testValue\"}", false)]
+    [InlineData(" { \"Property\" : \"testValue\" } ", false)]
+    [InlineData("       {        \"Property\"             :          \"testValue\"     }   ", false)]
+    [InlineData("{\"Property\":null}", true)]
+    [InlineData(" { \"Property\" : null } ", true)]
+    public void JsonTransform_Deserialize_SingleStringProperty(
+        string jsonString,
+        bool isNull)
     {
         //Act
         var obj = JsonTransformer.Deserialize<StringPropertyObj>(jsonString);
 
         //Assert
-        Assert.True(obj is StringPropertyObj);
+        obj.Should().BeOfType<StringPropertyObj>();
 
         var stringProp = obj as StringPropertyObj;
-        Assert.Equal("testValue", stringProp.Property);
+        if (isNull)
+            obj.Property.Should().BeNull();
+        else
+            obj.Property.Should().Be("testValue");
     }
 
     [Fact(DisplayName = "Can parse json number to integer")]
@@ -615,6 +622,23 @@ public class DeserializationTests
         var prop = obj as NestedStringObj;
         prop.Property.Should().NotBeNull();
         prop.Property!.Property.Should().Be("maxValue");
+    }
+
+    [Fact(DisplayName = "Can parse nested json")]
+    public void JsonTransform_Deserialize_ParseNestedNullValue()
+    {
+        //Arrange
+        var maxValue = DateTime.MaxValue;
+        var jsonString = "{\"Property\":null}";
+
+        //Act
+        var obj = JsonTransformer.Deserialize<NestedStringObj>(jsonString);
+
+        //Assert
+        Assert.True(obj is NestedStringObj);
+
+        var prop = obj as NestedStringObj;
+        prop.Property.Should().BeNull();
     }
 
     [Fact(DisplayName = "Can parse triple property json")]
