@@ -40,7 +40,8 @@ var obj = JsonTransformer.Deserialize<TestObject>(jsonString);
 - [ ] - deserializing IEnumerable types
 - [ ] - deserializing arrays ([])
 - [ ] - handle nulls while deserializing
-- [ ] - handling whitespace
+- [x] - handling empty whitespace
+- [ ] - handle other types of whitespace (needed???)
 - [ ] - gracefully handling invalid json
 - [ ] - handling null values in C# while serializing
 - [ ] - add serialization options (pretty print, DateTime format, etc)

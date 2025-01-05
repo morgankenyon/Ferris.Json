@@ -5,31 +5,27 @@ namespace Ferris.Json.Test;
 public class DeserializationTests
 {
     [Theory(DisplayName = "Can find simple tokens")]
-    [InlineData("", Token.None, Token.EndOfInput, 0)]
-    [InlineData("&", Token.None, Token.Unknown, 0)]
-    [InlineData("{", Token.None, Token.OpenBrace, 0)]
-    [InlineData("}", Token.PropertyValue, Token.CloseBrace, 0)]
-    [InlineData("[", Token.None, Token.OpenBracket, 0)]
-    [InlineData("]", Token.PropertyValue, Token.CloseBracket, 0)]
-    [InlineData(",", Token.PropertyValue, Token.Comma, 0)]
-    [InlineData("\"Property\"", Token.Comma, Token.PropertyName, 0)]
-    [InlineData("283,", Token.Colon, Token.PropertyValue, 0)]
-    [InlineData(":{", Token.PropertyName, Token.Colon, 0)]
+    [InlineData("", Token.None, Token.EndOfInput)]
+    [InlineData("&", Token.None, Token.Unknown)]
+    [InlineData("{", Token.None, Token.OpenBrace)]
+    [InlineData("}", Token.PropertyValue, Token.CloseBrace)]
+    [InlineData("[", Token.None, Token.OpenBracket)]
+    [InlineData("]", Token.PropertyValue, Token.CloseBracket)]
+    [InlineData(",", Token.PropertyValue, Token.Comma)]
+    [InlineData("\"Property\"", Token.Comma, Token.PropertyName)]
+    [InlineData("283,", Token.Colon, Token.PropertyValue)]
+    [InlineData(":{", Token.PropertyName, Token.Colon)]
+    [InlineData(" ", Token.None, Token.Whitespace)]
     internal void JsonTransform_GetNextToken(
         string json,
         Token previousToken,
-        Token expectedToken,
-        int expectedTokenOffset)
+        Token expectedToken)
     {
         //Act
-        var (token, tokenOffset) = JsonTransformer.GetNextToken(previousToken, json);
+        var token = JsonTransformer.GetNextToken(previousToken, json);
 
         //Assert
-        Assert.Multiple(() =>
-        {
-            Assert.Equal(expectedToken, token);
-            Assert.Equal(expectedTokenOffset, tokenOffset);
-        });
+        token.Should().Be(expectedToken);
     }
 
     //This was leftover from when I was using strings versus
@@ -67,6 +63,7 @@ public class DeserializationTests
     [InlineData("\"Property\"", Token.OpenBrace, 10, "Property", Token.PropertyName)]
     [InlineData("283,", Token.Colon, 3, "283", Token.PropertyValue)]
     [InlineData("\"data\",", Token.Colon, 6, "data", Token.PropertyValue)]
+    [InlineData("     ", Token.None, 5, null, Token.Whitespace)]
     internal void JsonTransform_GetNextTokenAndData(string json,
         Token previousToken,
         int expectedPlaceholder,
@@ -77,12 +74,9 @@ public class DeserializationTests
         var (token, placeholder, data) = JsonTransformer.GetNextTokenAndData(previousToken, json);
 
         //Assert
-        Assert.Multiple(() =>
-        {
-            Assert.Equal(expectedToken, token);
-            Assert.Equal(expectedPlaceholder, placeholder);
-            Assert.Equal(expectedData, data);
-        });
+        token.Should().Be(expectedToken);
+        placeholder.Should().Be(expectedPlaceholder);
+        data.Should().Be(expectedData);
     }
 
     //This was leftover from when I was using strings versus
@@ -190,6 +184,37 @@ public class DeserializationTests
         Assert.Equal(expectedTokens, tokens);
     }
 
+    [Fact(DisplayName = "Can extract simple tokens from string with whitespace")]
+    public void JsonTransform_ExtractWhitespaceTokens()
+    {
+        //Arrange
+        var jsonString = " { \"name\" : 234 } ";
+
+        //Act
+        var tokenInfo = JsonTransformer.TokenizeString(jsonString);
+
+        //Assert
+        var expectedTokens = new List<Token> {
+            Token.Whitespace,
+            Token.OpenBrace,
+            Token.Whitespace,
+            Token.PropertyName,
+            Token.Whitespace,
+            Token.Colon,
+            Token.Whitespace,
+            Token.PropertyValue,
+            //Token.Whitespace, //not sure if this token is needed
+            Token.CloseBrace,
+            Token.Whitespace,
+            Token.EndOfInput
+        };
+        Assert.Equal(expectedTokens.Count, tokenInfo.Count);
+
+        var tokens = tokenInfo.Select(ti => ti.token).ToList();
+
+        Assert.Equal(expectedTokens, tokens);
+    }
+
     [Fact(DisplayName = "Can extract tokens from nested string")]
     public void JsonTransform_CanExtractNestedTokens()
     {
@@ -260,12 +285,12 @@ public class DeserializationTests
         Assert.Equal(expectedTokens, tokens);
     }
 
-    [Fact(DisplayName = "Can parse json string to object")]
-    public void JsonTransform_Deserialize_SingleStringProperty()
+    [Theory(DisplayName = "Can parse json string to object")]
+    [InlineData("{\"Property\":\"testValue\"}")]
+    [InlineData(" { \"Property\" : \"testValue\" } ")]
+    [InlineData("       {        \"Property\"             :          \"testValue\"     }   ")]
+    public void JsonTransform_Deserialize_SingleStringProperty(string jsonString)
     {
-        //Arrange
-        var jsonString = "{\"Property\":\"testValue\"}";
-
         //Act
         var obj = JsonTransformer.Deserialize<StringPropertyObj>(jsonString);
 

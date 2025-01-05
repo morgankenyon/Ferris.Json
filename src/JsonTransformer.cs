@@ -233,7 +233,7 @@ namespace Ferris.Json
                                 jsonSpan = jsonSpan.Slice(1);
                                 var spanData = Deserialize(elementType, jsonSpan);
                                 jsonSpan = spanData.JsonSpan;
-                                (nextListToken, _) = GetNextToken(Token.None, jsonSpan);
+                                nextListToken = GetNextToken(Token.None, jsonSpan);
                                 object? value = spanData.Value;
                                 //linkedListInstance.AddLast(value);
                                 addLastMethod.Invoke(linkedListInstance, new[] { value });
@@ -263,7 +263,7 @@ namespace Ferris.Json
                                 jsonSpan = jsonSpan.Slice(1);
                                 var spanData = Deserialize(elementType, jsonSpan);
                                 jsonSpan = spanData.JsonSpan;
-                                (nextListToken, _) = GetNextToken(Token.None, jsonSpan);
+                                nextListToken = GetNextToken(Token.None, jsonSpan);
                                 listInstance.Add(spanData.Value);
                             } while (nextListToken.IsComma());
 
@@ -289,7 +289,7 @@ namespace Ferris.Json
                                 jsonSpan = jsonSpan.Slice(1);
                                 var spanData = Deserialize(elementType, jsonSpan);
                                 jsonSpan = spanData.JsonSpan;
-                                (nextListToken, _) = GetNextToken(Token.None, jsonSpan);
+                                nextListToken = GetNextToken(Token.None, jsonSpan);
                                 elementList.Add(spanData.Value);
                             } while (nextListToken.IsComma());
 
@@ -327,12 +327,15 @@ namespace Ferris.Json
                     jsonSpan = jsonSpan.Slice(tokenLength);
                     break;
                 }
-                else if (!token.IsComma())
+                else if (!token.IsComma() && !token.IsWhitespace())
                 {
                     propertyStack.Push((token, data));
                 }
 
-                previousToken = token;
+                if (!token.IsWhitespace())
+                {
+                    previousToken = token;
+                }
                 jsonSpan = jsonSpan.Slice(tokenLength);
             }
 
@@ -345,10 +348,10 @@ namespace Ferris.Json
             List<(Token, int, string?)> tokens = new List<(Token, int, string?)>();
             ReadOnlySpan<char> jsonSpan = json;
 
-            var previousToken = Token.Unknown;
+            var previousValidToken = Token.Unknown;
             while (true)
             {
-                var (token, placeholder, data) = GetNextTokenAndData(previousToken, jsonSpan);
+                var (token, placeholder, data) = GetNextTokenAndData(previousValidToken, jsonSpan);
                 tokens.Add((token, placeholder, data));
                 if (token == Token.None
                     || token == Token.Unknown
@@ -358,7 +361,10 @@ namespace Ferris.Json
                     return tokens;
                 }
                 jsonSpan = jsonSpan.Slice(placeholder);
-                previousToken = token;
+                if (token != Token.Whitespace)
+                {
+                    previousValidToken = token;
+                }
             }
 
             return tokens;
@@ -368,7 +374,7 @@ namespace Ferris.Json
             Token previousToken,
             ReadOnlySpan<char> jsonSpan)
         {
-            var (token, tokenOffset) = GetNextToken(previousToken, jsonSpan);
+            var token = GetNextToken(previousToken, jsonSpan);
 
             if (token == Token.PropertyName
                 || token == Token.PropertyValue)
@@ -376,13 +382,31 @@ namespace Ferris.Json
                 var (data, length) = ExtractTokenData(token, jsonSpan);
                 return (token, length, data);
             }
+            else if (token == Token.Whitespace)
+            {
+                var length = FindWhitespaceLength(jsonSpan);
+                return (token, length, null);
+            }
             else if (token == Token.Unknown
                 || token == Token.None)
             {
                 return (token, 1, null);
             }
 
-            return (token, 1 + tokenOffset, null);
+            return (token, 1, null);
+        }
+
+        private static int FindWhitespaceLength(ReadOnlySpan<char> jsonSpan)
+        {
+            var originalLength = jsonSpan.Length;
+            var nextToken = Token.Whitespace;
+            while (nextToken == Token.Whitespace)
+            {
+                jsonSpan = jsonSpan.Slice(1);
+                nextToken = GetNextToken(nextToken, jsonSpan);
+            }
+
+            return originalLength - jsonSpan.Length;
         }
 
         private static (string name, int length) ExtractPropertyName(ReadOnlySpan<char> jsonSpan)
@@ -449,11 +473,11 @@ namespace Ferris.Json
             return ("", 0);
         }
 
-        internal static (Token token, int tokenOffset) GetNextToken(Token previousToken, ReadOnlySpan<char> jsonSpan)
+        internal static Token GetNextToken(Token previousToken, ReadOnlySpan<char> jsonSpan)
         {
             if (jsonSpan.Length == 0)
             {
-                return (Token.EndOfInput, 0);
+                return Token.EndOfInput;
             }
 
             //check if remaining string is whitespace or not
@@ -464,44 +488,48 @@ namespace Ferris.Json
             //}
             if (jsonSpan[0] == '{')
             {
-                return (Token.OpenBrace, 0);
+                return Token.OpenBrace;
             }
             else if (jsonSpan[0] == '}')
             {
-                return (Token.CloseBrace, 0);
+                return Token.CloseBrace;
             }
             else if (jsonSpan[0] == '"')
             {
                 if (previousToken == Token.Colon)
                 {
-                    return (Token.PropertyValue, 0);
+                    return Token.PropertyValue;
                 }
                 else
                 {
-                    return (Token.PropertyName, 0);
+                    return Token.PropertyName;
                 }
             }
             else if (jsonSpan[0] == ':')
             {
-                return (Token.Colon, 0);
+                return Token.Colon;
             }
             else if (jsonSpan[0] == ',')
             {
-                return (Token.Comma, 0);
+                return Token.Comma;
             }
             else if (jsonSpan[0] == '[')
             {
-                return (Token.OpenBracket, 0);
+                return Token.OpenBracket;
             }
             else if (jsonSpan[0] == ']')
             {
-                return (Token.CloseBracket, 0);
+                return Token.CloseBracket;
+            }
+            else if (jsonSpan[0] == ' ')
+            {
+                return Token.Whitespace;
             }
             else if (previousToken == Token.Colon)
             {
-                return (Token.PropertyValue, 0);
+                return Token.PropertyValue;
             }
-            return (Token.Unknown, 0);
+            return Token.Unknown;
         }
     }
 }
