@@ -50,10 +50,27 @@ namespace Ferris.Json
                     {
                         foreach (var item in enumerable)
                         {
-                            var listItemProperties = item.GetType().GetProperties();
-                            var listItemJson = MapProperties(listItemProperties, item);
-                            generatedListJson.Add(listItemJson);
+                            var listItemType = item.GetType();
+                            if (listItemType == typeof(System.String)
+                                || listItemType == typeof(System.Char))
+                            {
+                                generatedListJson.Add($"\"{item.ToString()}\"");
+                            }
+                            else if (listItemType.BaseType == typeof(object))
+                            {
+                                var listItemProperties = item.GetType().GetProperties();
+                                var listItemJson = MapProperties(listItemProperties, item);
+                                generatedListJson.Add(listItemJson);
+                            }
+                            else
+                            {
+                                generatedListJson.Add(item.ToString());
+                            }
                         }
+                    }
+                    else
+                    {
+                        //need something here
                     }
                     var joinedChildren = string.Join(",", generatedListJson);
                     jsonProperties.Add($"\"{propertyInfo.Name}\":[{joinedChildren}]");

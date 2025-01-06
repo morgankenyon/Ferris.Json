@@ -295,6 +295,19 @@ public class SerializationTests
         Assert.Equal("{\"Property\":\"FirstTest\"}", jsonString);
     }
 
+    [Fact(DisplayName = "Map null string property to Json")]
+    public void JsonTransformer_MapNullStringProperty()
+    {
+        //Arrange
+        var obj = new StringPropertyObj();
+
+        //Act
+        var jsonString = JsonTransformer.Serialize(obj);
+
+        //Assert
+        Assert.Equal("{\"Property\":null}", jsonString);
+    }
+
     [Fact(DisplayName = "Map null property to Json")]
     public void JsonTransformer_MapNullProperty()
     {
@@ -471,5 +484,48 @@ public class SerializationTests
 
         //Assert
         jsonString.Should().Be("""{"Strings":[{"Property":"FirstString"},{"Property":"SecondString"}]}""");
+    }
+
+    [Fact(DisplayName = "Map string list to json array")]
+    public void JsonTransformer_MapStringListProperty()
+    {
+        //Arrange
+        var obj = new StringListTestObj
+        {
+            Strings = new List<string>
+            {
+                "one",
+                "two",
+                "three"
+            }
+        };
+
+        //Act
+        var jsonString = JsonTransformer.Serialize(obj);
+
+        //Assert
+        jsonString.Should().Be("""{"Strings":["one","two","three"]}""");
+    }
+
+    [Fact(DisplayName = "Map object list to json array")]
+    public void JsonTransformer_MapObjectListProperty()
+    {
+        //Arrange
+        var obj = new ObjectListTestObj
+        {
+            Objects = new List<object>
+            {
+                "one",
+                23,
+                '2',
+                23.42m
+            }
+        };
+
+        //Act
+        var jsonString = JsonTransformer.Serialize(obj);
+
+        //Assert
+        jsonString.Should().Be("""{"Objects":["one",23,"2",23.42]}""");
     }
 }
