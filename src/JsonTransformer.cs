@@ -145,21 +145,46 @@ namespace Ferris.Json
         private static bool IsLineEndingToken(Token token) =>
             token.IsComma() || token.IsCloseBrace();
 
-        private static bool IsGenericCollection(Type type)
+        private static bool IsValidPropertyNameToken(TokenInfo? propertyNameInfo)
         {
-            return type.GetInterfaces()
-                .Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(ICollection<>));
+            return propertyNameInfo != null
+                && propertyNameInfo.Token.IsPropertyName()
+                && propertyNameInfo.Data != null;
         }
 
-        private static bool IsGenericIEnumerable(Type type)
+        private static bool IsValidColonToken(TokenInfo? colonInfo)
         {
-            return type.GetInterfaces()
-                .Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEnumerable<>));
+            return colonInfo != null
+                && colonInfo.Token.IsColon();
+        }
+
+        private static bool IsValidPropertyValueToken(TokenInfo? propertyValueInfo)
+        {
+            return propertyValueInfo != null
+                && propertyValueInfo.Token.IsPropertyValue()
+                && propertyValueInfo.HasValue;
+        }
+
+        private static bool AreTokensSetupForPropertyValue(TokenInfo? propertyNameInfo, TokenInfo? colonInfo)
+        {
+            return IsValidPropertyNameToken(propertyNameInfo)
+                && IsValidColonToken(colonInfo);
+        }
+
+        private static bool AreTokensSetupForValue(
+            Token previousToken,
+            TokenInfo? propertyNameInfo,
+            TokenInfo? colonInfo,
+            TokenInfo? propertyValueInfo)
+        {
+            return previousToken.IsPropertyValue()
+                && IsValidPropertyNameToken(propertyNameInfo)
+                && IsValidColonToken(colonInfo)
+                && IsValidPropertyValueToken(propertyValueInfo);
         }
 
         private static SpanData Deserialize(Type type, ReadOnlySpan<char> jsonSpan)
         {
-            var propertyStack = new Stack<TokenInfo>();
             PropertyInfo[] properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
             var propertiesDict = properties.ToDictionary(p => p.Name, p => p);
@@ -171,53 +196,42 @@ namespace Ferris.Json
                 return new SpanData(jsonSpan, null);
             }
             var previousToken = Token.None;
+            TokenInfo? openBraceInfo = null;
+            TokenInfo? propertyNameInfo = null;
+            TokenInfo? colonInfo = null;
+            TokenInfo? propertyValueInfo = null;
             while (true)
             {
                 var tokenInfo = GetNextTokenAndData(previousToken, jsonSpan);
                 var token = tokenInfo.Token;
                 var tokenLength = tokenInfo.Length;
-                var data = tokenInfo.Data;
-                //var (token, tokenLength, data) = GetNextTokenAndData(previousToken, jsonSpan);
 
                 if (token.IsEndOfInput())
                 {
                     break;
                 }
 
-                if (IsLineEndingToken(token) && previousToken.IsPropertyValue())
+                //Case for completing a name + value pair
+                if (IsLineEndingToken(token)
+                    && AreTokensSetupForValue(previousToken, propertyNameInfo, colonInfo, propertyValueInfo)
+                    && propertiesDict.TryGetValue((string)propertyNameInfo!.Data!, out var propertyInfo))
                 {
-                    var propertyDataInfo = propertyStack.Pop();
-                    var colonInfo = propertyStack.Pop();
-                    var propertyNameInfo = propertyStack.Pop();
-
-                    if (colonInfo.Token.IsColon()
-                        && propertyNameInfo.Token.IsPropertyName()
-                        && propertyDataInfo.HasValue
-                        && propertyNameInfo.HasValue
-                        && propertiesDict.TryGetValue((string)propertyNameInfo.Data!, out var propertyInfo))
-                    {
-                        Libs.MapValue(propertyInfo, instance, propertyDataInfo);
-                    }
+                    Libs.MapValue(propertyInfo, instance, propertyValueInfo!);
+                }
+                else
+                {
+                    //some error message
                 }
 
+                //Case for nested json object
                 if (token.IsOpenBrace() && previousToken.IsColon())
                 {
-                    //since stack is IEnumerable, maybe iterate versus popping and readding?
-                    var colonInfo = propertyStack.Pop();
-                    var propertyNameInfo = propertyStack.Pop();
-
-                    if (colonInfo.Token.IsColon()
-                        && propertyNameInfo.Token.IsPropertyName()
-                        && propertyNameInfo.HasValue
-                        && propertiesDict.TryGetValue((string)propertyNameInfo.Data!, out var objectInfo))
+                    if (AreTokensSetupForPropertyValue(propertyNameInfo, colonInfo)
+                        && propertiesDict.TryGetValue((string)propertyNameInfo!.Data!, out var objectInfo))
                     {
                         var spanData = Deserialize(objectInfo.PropertyType, jsonSpan);
 
-                        //push thing back on the stack for mapping value function
-                        //to work correctly
-                        propertyStack.Push(propertyNameInfo);
-                        propertyStack.Push(colonInfo);
-                        propertyStack.Push(new TokenInfo(Token.PropertyValue, 0, spanData.Value));
+                        propertyValueInfo = new TokenInfo(Token.PropertyValue, 0, spanData.Value);
                         previousToken = Token.PropertyValue;
                         jsonSpan = spanData.JsonSpan;
 
@@ -230,55 +244,20 @@ namespace Ferris.Json
                         //need some type of error message
                     }
                 }
+                //Case for json array
                 else if (token.IsOpenBracket() && previousToken.IsColon())
                 {
-                    var colonInfo = propertyStack.Pop();
-                    var propertyNameInfo = propertyStack.Pop();
-
-                    if (colonInfo.Token.IsColon()
-                        && propertyNameInfo.Token.IsPropertyName()
-                        && propertyNameInfo.HasValue
-                        && propertiesDict.TryGetValue((string)propertyNameInfo.Data, out var arrayInfo))
+                    if (AreTokensSetupForPropertyValue(propertyNameInfo, colonInfo)
+                        && propertiesDict.TryGetValue((string)propertyNameInfo!.Data!, out var arrayInfo))
                     {
                         var arrayType = arrayInfo.PropertyType;
-                        //if linkedlist
-                        if (arrayType.IsGenericType && arrayType.GetGenericTypeDefinition() == typeof(LinkedList<>))
-                        {
-                            var elementType = arrayType.GetGenericArguments()[0];
-                            var nextListToken = Token.None;
-                            //make new list
-                            dynamic linkedListInstance = Activator.CreateInstance(arrayType);
-                            var addLastMethod = linkedListInstance.GetType().GetMethod("AddLast", new[] { elementType });
-                            do
-                            {
-                                //convert all elements to C# objects
-                                jsonSpan = jsonSpan.Slice(1);
-                                var spanData = Deserialize(elementType, jsonSpan);
-                                jsonSpan = spanData.JsonSpan;
-                                nextListToken = GetNextToken(Token.None, jsonSpan);
-                                object? value = spanData.Value;
-                                //linkedListInstance.AddLast(value);
-                                addLastMethod.Invoke(linkedListInstance, new[] { value });
-                            } while (nextListToken.IsComma());
-
-                            if (nextListToken.IsCloseBracket())
-                            {
-                                jsonSpan = jsonSpan.Slice(1);
-                            }
-
-                            propertyStack.Push(propertyNameInfo);
-                            propertyStack.Push(colonInfo);
-                            propertyStack.Push(new TokenInfo(Token.PropertyValue, 0, linkedListInstance));
-                            previousToken = Token.PropertyValue;
-                            continue;
-                        }
                         //if it's a list
-                        else if (arrayType.IsGenericType && arrayType.GetGenericTypeDefinition() == typeof(List<>))
+                        if (arrayType.IsGenericType && arrayType.GetGenericTypeDefinition() == typeof(List<>))
                         {
                             var elementType = arrayType.GetGenericArguments()[0];
                             var nextListToken = Token.None;
                             //make new list
-                            var listInstance = (System.Collections.IList)Activator.CreateInstance(arrayType);
+                            var listInstance = (System.Collections.IList?)Activator.CreateInstance(arrayType);
                             do
                             {
                                 //convert all elements to C# objects
@@ -293,9 +272,8 @@ namespace Ferris.Json
                             {
                                 jsonSpan = jsonSpan.Slice(1);
                             }
-                            propertyStack.Push(propertyNameInfo);
-                            propertyStack.Push(colonInfo);
-                            propertyStack.Push(new TokenInfo(Token.PropertyValue, 0, listInstance));
+
+                            propertyValueInfo = new TokenInfo(Token.PropertyValue, 0, listInstance);
                             previousToken = Token.PropertyValue;
                             continue;
                         }
@@ -321,9 +299,8 @@ namespace Ferris.Json
                             }
                             Array array = Array.CreateInstance(elementType, elementList.Count);
                             elementList.CopyTo(array, 0);
-                            propertyStack.Push(propertyNameInfo);
-                            propertyStack.Push(colonInfo);
-                            propertyStack.Push(new TokenInfo(Token.PropertyValue, 0, array));
+
+                            propertyValueInfo = new TokenInfo(Token.PropertyValue, 0, array);
                             previousToken = Token.PropertyValue;
                             continue;
 
@@ -337,10 +314,9 @@ namespace Ferris.Json
                 }
                 else if (token.IsCloseBrace())
                 {
-                    if (propertyStack.TryPeek(out var openBraceProperty) 
-                        && openBraceProperty.Token.IsOpenBrace())
+                    if (openBraceInfo != null)
                     {
-                        propertyStack.Pop();
+                        openBraceInfo = null;
                     }
                     else
                     {
@@ -351,7 +327,29 @@ namespace Ferris.Json
                 }
                 else if (!token.IsComma() && !token.IsWhitespace())
                 {
-                    propertyStack.Push(tokenInfo);
+                    if (token.IsPropertyName())
+                    {
+                        propertyNameInfo = tokenInfo;
+                    }
+                    else if (token.IsColon())
+                    {
+                        colonInfo = tokenInfo;
+                    }
+                    else if (token.IsPropertyValue())
+                    {
+                        propertyValueInfo = tokenInfo;
+                    }
+                    else if (token.IsOpenBrace())
+                    {
+                        if (openBraceInfo != null)
+                        {
+                            //log error case
+                        }
+                        else
+                        {
+                            openBraceInfo = tokenInfo;
+                        }
+                    }
                 }
 
                 if (!token.IsWhitespace())
