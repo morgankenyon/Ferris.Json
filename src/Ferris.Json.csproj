@@ -7,7 +7,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageId>Ferris.Json</PackageId>
     <Title>Ferris.Json</Title>
-    <Version>0.2.0</Version>
+    <Version>0.3.0-beta</Version>
     <Authors>Morgan Kenyon</Authors>
     <Description>A library for serializing and deserializing json.</Description>
     <Summary>A library for serializing and deserializing json.</Summary>
@@ -27,9 +27,5 @@
 
     <ItemGroup>
       <None Include="../README.md" Pack="true" PackagePath="" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <PackageReference Include="System.Memory" Version="4.6.0" />
     </ItemGroup>
 </Project>
