@@ -1,0 +1,1705 @@
+// Validating benchmarks:
+// ***** BenchmarkRunner: Start   *****
+// ***** Found 6 benchmark(s) in total *****
+// ***** Building 1 exe(s) in Parallel: Start   *****
+// start dotnet  restore /p:UseSharedCompilation=false /p:BuildInParallel=false /m:1 /p:Deterministic=true /p:Optimize=true /p:IntermediateOutputPath="C:\dev\Ferris.Json\benchmark\bin\Release\net8.0\9808b21c-fa84-4582-92c9-e5fe6b77b208\obj\Release\net8.0/" /p:OutDir="C:\dev\Ferris.Json\benchmark\bin\Release\net8.0\9808b21c-fa84-4582-92c9-e5fe6b77b208\bin\Release\net8.0/" /p:OutputPath="C:\dev\Ferris.Json\benchmark\bin\Release\net8.0\9808b21c-fa84-4582-92c9-e5fe6b77b208\bin\Release\net8.0/" in C:\dev\Ferris.Json\benchmark\bin\Release\net8.0\9808b21c-fa84-4582-92c9-e5fe6b77b208
+// command took 2.64 sec and exited with 0
+// start dotnet  build -c Release --no-restore /p:UseSharedCompilation=false /p:BuildInParallel=false /m:1 /p:Deterministic=true /p:Optimize=true /p:IntermediateOutputPath="C:\dev\Ferris.Json\benchmark\bin\Release\net8.0\9808b21c-fa84-4582-92c9-e5fe6b77b208\obj\Release\net8.0/" /p:OutDir="C:\dev\Ferris.Json\benchmark\bin\Release\net8.0\9808b21c-fa84-4582-92c9-e5fe6b77b208\bin\Release\net8.0/" /p:OutputPath="C:\dev\Ferris.Json\benchmark\bin\Release\net8.0\9808b21c-fa84-4582-92c9-e5fe6b77b208\bin\Release\net8.0/" --output "C:\dev\Ferris.Json\benchmark\bin\Release\net8.0\9808b21c-fa84-4582-92c9-e5fe6b77b208\bin\Release\net8.0/" in C:\dev\Ferris.Json\benchmark\bin\Release\net8.0\9808b21c-fa84-4582-92c9-e5fe6b77b208
+// command took 11.64 sec and exited with 0
+// ***** Done, took 00:00:14 (14.49 sec)   *****
+// Found 6 benchmarks:
+//   SimpleJsonBenchmark.FerrisSingleMapping: DefaultJob
+//   SimpleJsonBenchmark.NewtonsoftSingleMapping: DefaultJob
+//   SimpleJsonBenchmark.STJSingleMapping: DefaultJob
+//   SimpleJsonBenchmark.FerrisValueMapping: DefaultJob
+//   SimpleJsonBenchmark.NewtonsoftValueMapping: DefaultJob
+//   SimpleJsonBenchmark.TextJsonValueMapping: DefaultJob
+
+Setup power plan (GUID: 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c FriendlyName: High performance)
+// **************************
+// Benchmark: SimpleJsonBenchmark.FerrisSingleMapping: DefaultJob
+// *** Execute ***
+// Launch: 1 / 1
+// Execute: dotnet 9808b21c-fa84-4582-92c9-e5fe6b77b208.dll --anonymousPipes 1880 1900 --benchmarkName Ferris.Json.Benchmark.SimpleJsonBenchmark.FerrisSingleMapping --job Default --benchmarkId 0 in C:\dev\Ferris.Json\benchmark\bin\Release\net8.0\9808b21c-fa84-4582-92c9-e5fe6b77b208\bin\Release\net8.0
+// BeforeAnythingElse
+
+// Benchmark Process Environment Information:
+// BenchmarkDotNet v0.14.0
+// Runtime=.NET 8.0.11 (8.0.1124.51707), X64 RyuJIT AVX2
+// GC=Concurrent Workstation
+// HardwareIntrinsics=AVX2,AES,BMI1,BMI2,FMA,LZCNT,PCLMUL,POPCNT VectorSize=256
+// Job: DefaultJob
+
+OverheadJitting  1: 1 op, 174700.00 ns, 174.7000 us/op
+WorkloadJitting  1: 1 op, 6465500.00 ns, 6.4655 ms/op
+
+OverheadJitting  2: 16 op, 350200.00 ns, 21.8875 us/op
+WorkloadJitting  2: 16 op, 608000.00 ns, 38.0000 us/op
+
+WorkloadPilot    1: 16 op, 582800.00 ns, 36.4250 us/op
+WorkloadPilot    2: 32 op, 526500.00 ns, 16.4531 us/op
+WorkloadPilot    3: 64 op, 648100.00 ns, 10.1266 us/op
+WorkloadPilot    4: 128 op, 659300.00 ns, 5.1508 us/op
+WorkloadPilot    5: 256 op, 1105100.00 ns, 4.3168 us/op
+WorkloadPilot    6: 512 op, 1156900.00 ns, 2.2596 us/op
+WorkloadPilot    7: 1024 op, 1794600.00 ns, 1.7525 us/op
+WorkloadPilot    8: 2048 op, 4941300.00 ns, 2.4127 us/op
+WorkloadPilot    9: 4096 op, 11805100.00 ns, 2.8821 us/op
+WorkloadPilot   10: 8192 op, 19303200.00 ns, 2.3563 us/op
+WorkloadPilot   11: 16384 op, 30470000.00 ns, 1.8597 us/op
+WorkloadPilot   12: 32768 op, 55157600.00 ns, 1.6833 us/op
+WorkloadPilot   13: 65536 op, 156503700.00 ns, 2.3881 us/op
+WorkloadPilot   14: 131072 op, 294776600.00 ns, 2.2490 us/op
+WorkloadPilot   15: 262144 op, 220827500.00 ns, 842.3901 ns/op
+WorkloadPilot   16: 524288 op, 289421400.00 ns, 552.0275 ns/op
+WorkloadPilot   17: 1048576 op, 577732400.00 ns, 550.9686 ns/op
+
+OverheadWarmup   1: 1048576 op, 3584900.00 ns, 3.4188 ns/op
+OverheadWarmup   2: 1048576 op, 3639000.00 ns, 3.4704 ns/op
+OverheadWarmup   3: 1048576 op, 3569700.00 ns, 3.4043 ns/op
+OverheadWarmup   4: 1048576 op, 3775200.00 ns, 3.6003 ns/op
+OverheadWarmup   5: 1048576 op, 3712600.00 ns, 3.5406 ns/op
+
+OverheadActual   1: 1048576 op, 5188200.00 ns, 4.9479 ns/op
+OverheadActual   2: 1048576 op, 4235300.00 ns, 4.0391 ns/op
+OverheadActual   3: 1048576 op, 4379800.00 ns, 4.1769 ns/op
+OverheadActual   4: 1048576 op, 2767900.00 ns, 2.6397 ns/op
+OverheadActual   5: 1048576 op, 3496100.00 ns, 3.3341 ns/op
+OverheadActual   6: 1048576 op, 3352700.00 ns, 3.1974 ns/op
+OverheadActual   7: 1048576 op, 3569000.00 ns, 3.4037 ns/op
+OverheadActual   8: 1048576 op, 2592500.00 ns, 2.4724 ns/op
+OverheadActual   9: 1048576 op, 3140000.00 ns, 2.9945 ns/op
+OverheadActual  10: 1048576 op, 3799900.00 ns, 3.6239 ns/op
+OverheadActual  11: 1048576 op, 3556400.00 ns, 3.3916 ns/op
+OverheadActual  12: 1048576 op, 3505200.00 ns, 3.3428 ns/op
+OverheadActual  13: 1048576 op, 4617900.00 ns, 4.4040 ns/op
+OverheadActual  14: 1048576 op, 4346100.00 ns, 4.1448 ns/op
+OverheadActual  15: 1048576 op, 3609500.00 ns, 3.4423 ns/op
+OverheadActual  16: 1048576 op, 3566100.00 ns, 3.4009 ns/op
+OverheadActual  17: 1048576 op, 3050900.00 ns, 2.9096 ns/op
+OverheadActual  18: 1048576 op, 3569900.00 ns, 3.4045 ns/op
+OverheadActual  19: 1048576 op, 3808700.00 ns, 3.6323 ns/op
+OverheadActual  20: 1048576 op, 3898000.00 ns, 3.7174 ns/op
+
+WorkloadWarmup   1: 1048576 op, 544520600.00 ns, 519.2953 ns/op
+WorkloadWarmup   2: 1048576 op, 548899400.00 ns, 523.4713 ns/op
+WorkloadWarmup   3: 1048576 op, 562582900.00 ns, 536.5209 ns/op
+WorkloadWarmup   4: 1048576 op, 549527800.00 ns, 524.0705 ns/op
+WorkloadWarmup   5: 1048576 op, 529487000.00 ns, 504.9582 ns/op
+WorkloadWarmup   6: 1048576 op, 513705800.00 ns, 489.9080 ns/op
+WorkloadWarmup   7: 1048576 op, 558445700.00 ns, 532.5753 ns/op
+WorkloadWarmup   8: 1048576 op, 554567800.00 ns, 528.8771 ns/op
+
+// BeforeActualRun
+WorkloadActual   1: 1048576 op, 568245100.00 ns, 541.9208 ns/op
+WorkloadActual   2: 1048576 op, 616302200.00 ns, 587.7516 ns/op
+WorkloadActual   3: 1048576 op, 496979600.00 ns, 473.9567 ns/op
+WorkloadActual   4: 1048576 op, 518812100.00 ns, 494.7778 ns/op
+WorkloadActual   5: 1048576 op, 532418200.00 ns, 507.7536 ns/op
+WorkloadActual   6: 1048576 op, 564780400.00 ns, 538.6166 ns/op
+WorkloadActual   7: 1048576 op, 621742300.00 ns, 592.9397 ns/op
+WorkloadActual   8: 1048576 op, 716047400.00 ns, 682.8760 ns/op
+WorkloadActual   9: 1048576 op, 643820000.00 ns, 613.9946 ns/op
+WorkloadActual  10: 1048576 op, 585885000.00 ns, 558.7435 ns/op
+WorkloadActual  11: 1048576 op, 752642500.00 ns, 717.7758 ns/op
+WorkloadActual  12: 1048576 op, 880632400.00 ns, 839.8365 ns/op
+WorkloadActual  13: 1048576 op, 776516000.00 ns, 740.5434 ns/op
+WorkloadActual  14: 1048576 op, 764038400.00 ns, 728.6438 ns/op
+WorkloadActual  15: 1048576 op, 624887900.00 ns, 595.9395 ns/op
+WorkloadActual  16: 1048576 op, 594998800.00 ns, 567.4351 ns/op
+WorkloadActual  17: 1048576 op, 594240600.00 ns, 566.7120 ns/op
+WorkloadActual  18: 1048576 op, 526920100.00 ns, 502.5102 ns/op
+WorkloadActual  19: 1048576 op, 517171300.00 ns, 493.2130 ns/op
+WorkloadActual  20: 1048576 op, 510726400.00 ns, 487.0667 ns/op
+WorkloadActual  21: 1048576 op, 521517200.00 ns, 497.3576 ns/op
+WorkloadActual  22: 1048576 op, 530521700.00 ns, 505.9449 ns/op
+WorkloadActual  23: 1048576 op, 514403400.00 ns, 490.5733 ns/op
+WorkloadActual  24: 1048576 op, 505186800.00 ns, 481.7837 ns/op
+WorkloadActual  25: 1048576 op, 551254600.00 ns, 525.7174 ns/op
+WorkloadActual  26: 1048576 op, 703518500.00 ns, 670.9275 ns/op
+WorkloadActual  27: 1048576 op, 630290600.00 ns, 601.0920 ns/op
+WorkloadActual  28: 1048576 op, 616683600.00 ns, 588.1153 ns/op
+WorkloadActual  29: 1048576 op, 551735200.00 ns, 526.1757 ns/op
+WorkloadActual  30: 1048576 op, 530715100.00 ns, 506.1294 ns/op
+WorkloadActual  31: 1048576 op, 499163700.00 ns, 476.0396 ns/op
+WorkloadActual  32: 1048576 op, 565573700.00 ns, 539.3731 ns/op
+WorkloadActual  33: 1048576 op, 606189000.00 ns, 578.1069 ns/op
+WorkloadActual  34: 1048576 op, 567726900.00 ns, 541.4266 ns/op
+WorkloadActual  35: 1048576 op, 520330400.00 ns, 496.2257 ns/op
+WorkloadActual  36: 1048576 op, 502185300.00 ns, 478.9212 ns/op
+WorkloadActual  37: 1048576 op, 462544100.00 ns, 441.1164 ns/op
+WorkloadActual  38: 1048576 op, 461751800.00 ns, 440.3608 ns/op
+WorkloadActual  39: 1048576 op, 489543200.00 ns, 466.8648 ns/op
+WorkloadActual  40: 1048576 op, 532166800.00 ns, 507.5138 ns/op
+WorkloadActual  41: 1048576 op, 613804900.00 ns, 585.3700 ns/op
+WorkloadActual  42: 1048576 op, 529478700.00 ns, 504.9502 ns/op
+WorkloadActual  43: 1048576 op, 505482200.00 ns, 482.0654 ns/op
+WorkloadActual  44: 1048576 op, 510716800.00 ns, 487.0575 ns/op
+WorkloadActual  45: 1048576 op, 466641700.00 ns, 445.0242 ns/op
+WorkloadActual  46: 1048576 op, 465728600.00 ns, 444.1534 ns/op
+WorkloadActual  47: 1048576 op, 489555900.00 ns, 466.8769 ns/op
+WorkloadActual  48: 1048576 op, 548871700.00 ns, 523.4448 ns/op
+WorkloadActual  49: 1048576 op, 558209400.00 ns, 532.3500 ns/op
+WorkloadActual  50: 1048576 op, 521313400.00 ns, 497.1632 ns/op
+WorkloadActual  51: 1048576 op, 513770600.00 ns, 489.9698 ns/op
+WorkloadActual  52: 1048576 op, 501870400.00 ns, 478.6209 ns/op
+WorkloadActual  53: 1048576 op, 464312900.00 ns, 442.8033 ns/op
+WorkloadActual  54: 1048576 op, 486309300.00 ns, 463.7807 ns/op
+WorkloadActual  55: 1048576 op, 506422900.00 ns, 482.9625 ns/op
+WorkloadActual  56: 1048576 op, 572699500.00 ns, 546.1688 ns/op
+WorkloadActual  57: 1048576 op, 550086900.00 ns, 524.6037 ns/op
+WorkloadActual  58: 1048576 op, 528203400.00 ns, 503.7340 ns/op
+WorkloadActual  59: 1048576 op, 510229900.00 ns, 486.5932 ns/op
+WorkloadActual  60: 1048576 op, 482578300.00 ns, 460.2225 ns/op
+WorkloadActual  61: 1048576 op, 468864900.00 ns, 447.1444 ns/op
+WorkloadActual  62: 1048576 op, 499675900.00 ns, 476.5281 ns/op
+WorkloadActual  63: 1048576 op, 513836500.00 ns, 490.0327 ns/op
+WorkloadActual  64: 1048576 op, 656915000.00 ns, 626.4830 ns/op
+WorkloadActual  65: 1048576 op, 663307300.00 ns, 632.5791 ns/op
+WorkloadActual  66: 1048576 op, 689931200.00 ns, 657.9697 ns/op
+WorkloadActual  67: 1048576 op, 806283600.00 ns, 768.9320 ns/op
+WorkloadActual  68: 1048576 op, 917837100.00 ns, 875.3177 ns/op
+WorkloadActual  69: 1048576 op, 739898400.00 ns, 705.6221 ns/op
+WorkloadActual  70: 1048576 op, 590622900.00 ns, 563.2619 ns/op
+WorkloadActual  71: 1048576 op, 566904100.00 ns, 540.6419 ns/op
+WorkloadActual  72: 1048576 op, 787103700.00 ns, 750.6406 ns/op
+WorkloadActual  73: 1048576 op, 1168936800.00 ns, 1.1148 us/op
+WorkloadActual  74: 1048576 op, 832924500.00 ns, 794.3387 ns/op
+WorkloadActual  75: 1048576 op, 679896200.00 ns, 648.3995 ns/op
+WorkloadActual  76: 1048576 op, 594818100.00 ns, 567.2627 ns/op
+WorkloadActual  77: 1048576 op, 556572300.00 ns, 530.7887 ns/op
+WorkloadActual  78: 1048576 op, 528228100.00 ns, 503.7576 ns/op
+WorkloadActual  79: 1048576 op, 489573100.00 ns, 466.8933 ns/op
+WorkloadActual  80: 1048576 op, 524278800.00 ns, 499.9912 ns/op
+WorkloadActual  81: 1048576 op, 540061800.00 ns, 515.0431 ns/op
+WorkloadActual  82: 1048576 op, 612336000.00 ns, 583.9691 ns/op
+WorkloadActual  83: 1048576 op, 593498000.00 ns, 566.0038 ns/op
+WorkloadActual  84: 1048576 op, 557143800.00 ns, 531.3337 ns/op
+WorkloadActual  85: 1048576 op, 542913400.00 ns, 517.7626 ns/op
+WorkloadActual  86: 1048576 op, 513523500.00 ns, 489.7342 ns/op
+WorkloadActual  87: 1048576 op, 537264400.00 ns, 512.3753 ns/op
+WorkloadActual  88: 1048576 op, 542253900.00 ns, 517.1336 ns/op
+WorkloadActual  89: 1048576 op, 599736300.00 ns, 571.9531 ns/op
+WorkloadActual  90: 1048576 op, 667583200.00 ns, 636.6570 ns/op
+WorkloadActual  91: 1048576 op, 609089500.00 ns, 580.8730 ns/op
+WorkloadActual  92: 1048576 op, 659998300.00 ns, 629.4234 ns/op
+WorkloadActual  93: 1048576 op, 534889900.00 ns, 510.1108 ns/op
+WorkloadActual  94: 1048576 op, 577408900.00 ns, 550.6600 ns/op
+WorkloadActual  95: 1048576 op, 559020300.00 ns, 533.1233 ns/op
+WorkloadActual  96: 1048576 op, 571524500.00 ns, 545.0482 ns/op
+WorkloadActual  97: 1048576 op, 598362100.00 ns, 570.6426 ns/op
+WorkloadActual  98: 1048576 op, 574537600.00 ns, 547.9218 ns/op
+WorkloadActual  99: 1048576 op, 613373500.00 ns, 584.9586 ns/op
+WorkloadActual  100: 1048576 op, 574693700.00 ns, 548.0706 ns/op
+
+// AfterActualRun
+WorkloadResult   1: 1048576 op, 564675650.00 ns, 538.5167 ns/op
+WorkloadResult   2: 1048576 op, 612732750.00 ns, 584.3475 ns/op
+WorkloadResult   3: 1048576 op, 493410150.00 ns, 470.5526 ns/op
+WorkloadResult   4: 1048576 op, 515242650.00 ns, 491.3737 ns/op
+WorkloadResult   5: 1048576 op, 528848750.00 ns, 504.3495 ns/op
+WorkloadResult   6: 1048576 op, 561210950.00 ns, 535.2125 ns/op
+WorkloadResult   7: 1048576 op, 618172850.00 ns, 589.5356 ns/op
+WorkloadResult   8: 1048576 op, 712477950.00 ns, 679.4719 ns/op
+WorkloadResult   9: 1048576 op, 640250550.00 ns, 610.5905 ns/op
+WorkloadResult  10: 1048576 op, 582315550.00 ns, 555.3394 ns/op
+WorkloadResult  11: 1048576 op, 749073050.00 ns, 714.3717 ns/op
+WorkloadResult  12: 1048576 op, 621318450.00 ns, 592.5354 ns/op
+WorkloadResult  13: 1048576 op, 591429350.00 ns, 564.0310 ns/op
+WorkloadResult  14: 1048576 op, 590671150.00 ns, 563.3079 ns/op
+WorkloadResult  15: 1048576 op, 523350650.00 ns, 499.1061 ns/op
+WorkloadResult  16: 1048576 op, 513601850.00 ns, 489.8089 ns/op
+WorkloadResult  17: 1048576 op, 507156950.00 ns, 483.6626 ns/op
+WorkloadResult  18: 1048576 op, 517947750.00 ns, 493.9535 ns/op
+WorkloadResult  19: 1048576 op, 526952250.00 ns, 502.5408 ns/op
+WorkloadResult  20: 1048576 op, 510833950.00 ns, 487.1692 ns/op
+WorkloadResult  21: 1048576 op, 501617350.00 ns, 478.3796 ns/op
+WorkloadResult  22: 1048576 op, 547685150.00 ns, 522.3133 ns/op
+WorkloadResult  23: 1048576 op, 699949050.00 ns, 667.5234 ns/op
+WorkloadResult  24: 1048576 op, 626721150.00 ns, 597.6879 ns/op
+WorkloadResult  25: 1048576 op, 613114150.00 ns, 584.7112 ns/op
+WorkloadResult  26: 1048576 op, 548165750.00 ns, 522.7716 ns/op
+WorkloadResult  27: 1048576 op, 527145650.00 ns, 502.7253 ns/op
+WorkloadResult  28: 1048576 op, 495594250.00 ns, 472.6355 ns/op
+WorkloadResult  29: 1048576 op, 562004250.00 ns, 535.9690 ns/op
+WorkloadResult  30: 1048576 op, 602619550.00 ns, 574.7028 ns/op
+WorkloadResult  31: 1048576 op, 564157450.00 ns, 538.0225 ns/op
+WorkloadResult  32: 1048576 op, 516760950.00 ns, 492.8216 ns/op
+WorkloadResult  33: 1048576 op, 498615850.00 ns, 475.5171 ns/op
+WorkloadResult  34: 1048576 op, 458974650.00 ns, 437.7123 ns/op
+WorkloadResult  35: 1048576 op, 458182350.00 ns, 436.9567 ns/op
+WorkloadResult  36: 1048576 op, 485973750.00 ns, 463.4607 ns/op
+WorkloadResult  37: 1048576 op, 528597350.00 ns, 504.1097 ns/op
+WorkloadResult  38: 1048576 op, 610235450.00 ns, 581.9659 ns/op
+WorkloadResult  39: 1048576 op, 525909250.00 ns, 501.5461 ns/op
+WorkloadResult  40: 1048576 op, 501912750.00 ns, 478.6613 ns/op
+WorkloadResult  41: 1048576 op, 507147350.00 ns, 483.6534 ns/op
+WorkloadResult  42: 1048576 op, 463072250.00 ns, 441.6201 ns/op
+WorkloadResult  43: 1048576 op, 462159150.00 ns, 440.7493 ns/op
+WorkloadResult  44: 1048576 op, 485986450.00 ns, 463.4728 ns/op
+WorkloadResult  45: 1048576 op, 545302250.00 ns, 520.0408 ns/op
+WorkloadResult  46: 1048576 op, 554639950.00 ns, 528.9459 ns/op
+WorkloadResult  47: 1048576 op, 517743950.00 ns, 493.7591 ns/op
+WorkloadResult  48: 1048576 op, 510201150.00 ns, 486.5657 ns/op
+WorkloadResult  49: 1048576 op, 498300950.00 ns, 475.2168 ns/op
+WorkloadResult  50: 1048576 op, 460743450.00 ns, 439.3992 ns/op
+WorkloadResult  51: 1048576 op, 482739850.00 ns, 460.3766 ns/op
+WorkloadResult  52: 1048576 op, 502853450.00 ns, 479.5584 ns/op
+WorkloadResult  53: 1048576 op, 569130050.00 ns, 542.7647 ns/op
+WorkloadResult  54: 1048576 op, 546517450.00 ns, 521.1997 ns/op
+WorkloadResult  55: 1048576 op, 524633950.00 ns, 500.3299 ns/op
+WorkloadResult  56: 1048576 op, 506660450.00 ns, 483.1891 ns/op
+WorkloadResult  57: 1048576 op, 479008850.00 ns, 456.8184 ns/op
+WorkloadResult  58: 1048576 op, 465295450.00 ns, 443.7403 ns/op
+WorkloadResult  59: 1048576 op, 496106450.00 ns, 473.1240 ns/op
+WorkloadResult  60: 1048576 op, 510267050.00 ns, 486.6286 ns/op
+WorkloadResult  61: 1048576 op, 653345550.00 ns, 623.0789 ns/op
+WorkloadResult  62: 1048576 op, 659737850.00 ns, 629.1750 ns/op
+WorkloadResult  63: 1048576 op, 686361750.00 ns, 654.5656 ns/op
+WorkloadResult  64: 1048576 op, 736328950.00 ns, 702.2180 ns/op
+WorkloadResult  65: 1048576 op, 587053450.00 ns, 559.8578 ns/op
+WorkloadResult  66: 1048576 op, 563334650.00 ns, 537.2378 ns/op
+WorkloadResult  67: 1048576 op, 676326750.00 ns, 644.9955 ns/op
+WorkloadResult  68: 1048576 op, 591248650.00 ns, 563.8587 ns/op
+WorkloadResult  69: 1048576 op, 553002850.00 ns, 527.3846 ns/op
+WorkloadResult  70: 1048576 op, 524658650.00 ns, 500.3535 ns/op
+WorkloadResult  71: 1048576 op, 486003650.00 ns, 463.4892 ns/op
+WorkloadResult  72: 1048576 op, 520709350.00 ns, 496.5871 ns/op
+WorkloadResult  73: 1048576 op, 536492350.00 ns, 511.6390 ns/op
+WorkloadResult  74: 1048576 op, 608766550.00 ns, 580.5650 ns/op
+WorkloadResult  75: 1048576 op, 589928550.00 ns, 562.5997 ns/op
+WorkloadResult  76: 1048576 op, 553574350.00 ns, 527.9296 ns/op
+WorkloadResult  77: 1048576 op, 539343950.00 ns, 514.3585 ns/op
+WorkloadResult  78: 1048576 op, 509954050.00 ns, 486.3301 ns/op
+WorkloadResult  79: 1048576 op, 533694950.00 ns, 508.9712 ns/op
+WorkloadResult  80: 1048576 op, 538684450.00 ns, 513.7295 ns/op
+WorkloadResult  81: 1048576 op, 596166850.00 ns, 568.5490 ns/op
+WorkloadResult  82: 1048576 op, 664013750.00 ns, 633.2529 ns/op
+WorkloadResult  83: 1048576 op, 605520050.00 ns, 577.4689 ns/op
+WorkloadResult  84: 1048576 op, 656428850.00 ns, 626.0193 ns/op
+WorkloadResult  85: 1048576 op, 531320450.00 ns, 506.7067 ns/op
+WorkloadResult  86: 1048576 op, 573839450.00 ns, 547.2559 ns/op
+WorkloadResult  87: 1048576 op, 555450850.00 ns, 529.7192 ns/op
+WorkloadResult  88: 1048576 op, 567955050.00 ns, 541.6441 ns/op
+WorkloadResult  89: 1048576 op, 594792650.00 ns, 567.2385 ns/op
+WorkloadResult  90: 1048576 op, 570968150.00 ns, 544.5177 ns/op
+WorkloadResult  91: 1048576 op, 609804050.00 ns, 581.5545 ns/op
+WorkloadResult  92: 1048576 op, 571124250.00 ns, 544.6665 ns/op
+// GC:  202 0 0 847256336 1048576
+// Threading:  0 0 1048576
+
+// AfterAll
+// Benchmark Process 33516 has exited with code 0.
+
+Mean = 530.637 ns, StdErr = 6.424 ns (1.21%), N = 92, StdDev = 61.612 ns
+Min = 436.957 ns, Q1 = 486.507 ns, Median = 520.620 ns, Q3 = 564.833 ns, Max = 714.372 ns
+IQR = 78.326 ns, LowerFence = 369.018 ns, UpperFence = 682.322 ns
+ConfidenceInterval = [508.793 ns; 552.482 ns] (CI 99.9%), Margin = 21.844 ns (4.12% of Mean)
+Skewness = 0.83, Kurtosis = 3.32, MValue = 3.16
+
+// ** Remained 5 (83.3%) benchmark(s) to run. Estimated finish 2025-01-07 20:57 (0h 5m from now) **
+Setup power plan (GUID: 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c FriendlyName: High performance)
+// **************************
+// Benchmark: SimpleJsonBenchmark.NewtonsoftSingleMapping: DefaultJob
+// *** Execute ***
+// Launch: 1 / 1
+// Execute: dotnet 9808b21c-fa84-4582-92c9-e5fe6b77b208.dll --anonymousPipes 812 892 --benchmarkName Ferris.Json.Benchmark.SimpleJsonBenchmark.NewtonsoftSingleMapping --job Default --benchmarkId 1 in C:\dev\Ferris.Json\benchmark\bin\Release\net8.0\9808b21c-fa84-4582-92c9-e5fe6b77b208\bin\Release\net8.0
+// BeforeAnythingElse
+
+// Benchmark Process Environment Information:
+// BenchmarkDotNet v0.14.0
+// Runtime=.NET 8.0.11 (8.0.1124.51707), X64 RyuJIT AVX2
+// GC=Concurrent Workstation
+// HardwareIntrinsics=AVX2,AES,BMI1,BMI2,FMA,LZCNT,PCLMUL,POPCNT VectorSize=256
+// Job: DefaultJob
+
+OverheadJitting  1: 1 op, 345100.00 ns, 345.1000 us/op
+WorkloadJitting  1: 1 op, 136251000.00 ns, 136.2510 ms/op
+
+WorkloadPilot    1: 2 op, 132800.00 ns, 66.4000 us/op
+WorkloadPilot    2: 3 op, 44000.00 ns, 14.6667 us/op
+WorkloadPilot    3: 4 op, 49600.00 ns, 12.4000 us/op
+WorkloadPilot    4: 5 op, 63000.00 ns, 12.6000 us/op
+WorkloadPilot    5: 6 op, 86700.00 ns, 14.4500 us/op
+WorkloadPilot    6: 7 op, 69100.00 ns, 9.8714 us/op
+WorkloadPilot    7: 8 op, 97300.00 ns, 12.1625 us/op
+WorkloadPilot    8: 9 op, 149200.00 ns, 16.5778 us/op
+WorkloadPilot    9: 10 op, 121000.00 ns, 12.1000 us/op
+WorkloadPilot   10: 11 op, 112000.00 ns, 10.1818 us/op
+WorkloadPilot   11: 12 op, 118800.00 ns, 9.9000 us/op
+WorkloadPilot   12: 13 op, 128000.00 ns, 9.8462 us/op
+WorkloadPilot   13: 14 op, 132500.00 ns, 9.4643 us/op
+WorkloadPilot   14: 15 op, 140100.00 ns, 9.3400 us/op
+WorkloadPilot   15: 16 op, 175000.00 ns, 10.9375 us/op
+WorkloadPilot   16: 32 op, 298300.00 ns, 9.3219 us/op
+WorkloadPilot   17: 64 op, 579200.00 ns, 9.0500 us/op
+WorkloadPilot   18: 128 op, 930700.00 ns, 7.2711 us/op
+WorkloadPilot   19: 256 op, 2515900.00 ns, 9.8277 us/op
+WorkloadPilot   20: 512 op, 3750100.00 ns, 7.3244 us/op
+WorkloadPilot   21: 1024 op, 8434300.00 ns, 8.2366 us/op
+WorkloadPilot   22: 2048 op, 13182800.00 ns, 6.4369 us/op
+WorkloadPilot   23: 4096 op, 24818000.00 ns, 6.0591 us/op
+WorkloadPilot   24: 8192 op, 50667600.00 ns, 6.1850 us/op
+WorkloadPilot   25: 16384 op, 140307500.00 ns, 8.5637 us/op
+WorkloadPilot   26: 32768 op, 143585200.00 ns, 4.3819 us/op
+WorkloadPilot   27: 65536 op, 79775400.00 ns, 1.2173 us/op
+WorkloadPilot   28: 131072 op, 143897200.00 ns, 1.0978 us/op
+WorkloadPilot   29: 262144 op, 273422600.00 ns, 1.0430 us/op
+WorkloadPilot   30: 524288 op, 503820800.00 ns, 960.9619 ns/op
+
+WorkloadWarmup   1: 524288 op, 487788600.00 ns, 930.3829 ns/op
+WorkloadWarmup   2: 524288 op, 452537900.00 ns, 863.1475 ns/op
+WorkloadWarmup   3: 524288 op, 517592900.00 ns, 987.2301 ns/op
+WorkloadWarmup   4: 524288 op, 505389200.00 ns, 963.9534 ns/op
+WorkloadWarmup   5: 524288 op, 487776200.00 ns, 930.3593 ns/op
+WorkloadWarmup   6: 524288 op, 479533400.00 ns, 914.6374 ns/op
+WorkloadWarmup   7: 524288 op, 469948600.00 ns, 896.3558 ns/op
+WorkloadWarmup   8: 524288 op, 444986000.00 ns, 848.7434 ns/op
+WorkloadWarmup   9: 524288 op, 446386000.00 ns, 851.4137 ns/op
+WorkloadWarmup  10: 524288 op, 451537900.00 ns, 861.2402 ns/op
+WorkloadWarmup  11: 524288 op, 467278600.00 ns, 891.2632 ns/op
+WorkloadWarmup  12: 524288 op, 492673800.00 ns, 939.7007 ns/op
+WorkloadWarmup  13: 524288 op, 507192400.00 ns, 967.3927 ns/op
+WorkloadWarmup  14: 524288 op, 501940400.00 ns, 957.3753 ns/op
+
+// BeforeActualRun
+WorkloadActual   1: 524288 op, 493077300.00 ns, 940.4703 ns/op
+WorkloadActual   2: 524288 op, 491599200.00 ns, 937.6511 ns/op
+WorkloadActual   3: 524288 op, 477209900.00 ns, 910.2057 ns/op
+WorkloadActual   4: 524288 op, 481939100.00 ns, 919.2259 ns/op
+WorkloadActual   5: 524288 op, 488882800.00 ns, 932.4699 ns/op
+WorkloadActual   6: 524288 op, 493956000.00 ns, 942.1463 ns/op
+WorkloadActual   7: 524288 op, 487694700.00 ns, 930.2038 ns/op
+WorkloadActual   8: 524288 op, 492297500.00 ns, 938.9830 ns/op
+WorkloadActual   9: 524288 op, 636523700.00 ns, 1.2141 us/op
+WorkloadActual  10: 524288 op, 717735700.00 ns, 1.3690 us/op
+WorkloadActual  11: 524288 op, 535989800.00 ns, 1.0223 us/op
+WorkloadActual  12: 524288 op, 558110800.00 ns, 1.0645 us/op
+WorkloadActual  13: 524288 op, 517050200.00 ns, 986.1950 ns/op
+WorkloadActual  14: 524288 op, 568010900.00 ns, 1.0834 us/op
+WorkloadActual  15: 524288 op, 608981700.00 ns, 1.1615 us/op
+WorkloadActual  16: 524288 op, 601340800.00 ns, 1.1470 us/op
+WorkloadActual  17: 524288 op, 870238200.00 ns, 1.6598 us/op
+WorkloadActual  18: 524288 op, 1276591600.00 ns, 2.4349 us/op
+WorkloadActual  19: 524288 op, 1103082900.00 ns, 2.1040 us/op
+WorkloadActual  20: 524288 op, 937440700.00 ns, 1.7880 us/op
+WorkloadActual  21: 524288 op, 1050174900.00 ns, 2.0030 us/op
+WorkloadActual  22: 524288 op, 972991700.00 ns, 1.8558 us/op
+WorkloadActual  23: 524288 op, 1054848700.00 ns, 2.0120 us/op
+WorkloadActual  24: 524288 op, 1626621300.00 ns, 3.1025 us/op
+WorkloadActual  25: 524288 op, 1500136300.00 ns, 2.8613 us/op
+WorkloadActual  26: 524288 op, 877710500.00 ns, 1.6741 us/op
+WorkloadActual  27: 524288 op, 696000600.00 ns, 1.3275 us/op
+WorkloadActual  28: 524288 op, 625905600.00 ns, 1.1938 us/op
+WorkloadActual  29: 524288 op, 563846700.00 ns, 1.0755 us/op
+WorkloadActual  30: 524288 op, 623503400.00 ns, 1.1892 us/op
+WorkloadActual  31: 524288 op, 1670437300.00 ns, 3.1861 us/op
+WorkloadActual  32: 524288 op, 1780378800.00 ns, 3.3958 us/op
+WorkloadActual  33: 524288 op, 1725322800.00 ns, 3.2908 us/op
+WorkloadActual  34: 524288 op, 1529533300.00 ns, 2.9174 us/op
+WorkloadActual  35: 524288 op, 1242643400.00 ns, 2.3702 us/op
+WorkloadActual  36: 524288 op, 1554023000.00 ns, 2.9641 us/op
+WorkloadActual  37: 524288 op, 1214934900.00 ns, 2.3173 us/op
+WorkloadActual  38: 524288 op, 1351941900.00 ns, 2.5786 us/op
+WorkloadActual  39: 524288 op, 1510680400.00 ns, 2.8814 us/op
+WorkloadActual  40: 524288 op, 1279629200.00 ns, 2.4407 us/op
+WorkloadActual  41: 524288 op, 1493247800.00 ns, 2.8481 us/op
+WorkloadActual  42: 524288 op, 836843800.00 ns, 1.5962 us/op
+WorkloadActual  43: 524288 op, 819327700.00 ns, 1.5627 us/op
+WorkloadActual  44: 524288 op, 596439000.00 ns, 1.1376 us/op
+WorkloadActual  45: 524288 op, 481155600.00 ns, 917.7315 ns/op
+WorkloadActual  46: 524288 op, 503341600.00 ns, 960.0479 ns/op
+WorkloadActual  47: 524288 op, 509830900.00 ns, 972.4253 ns/op
+WorkloadActual  48: 524288 op, 520061200.00 ns, 991.9380 ns/op
+WorkloadActual  49: 524288 op, 536485400.00 ns, 1.0233 us/op
+WorkloadActual  50: 524288 op, 561347800.00 ns, 1.0707 us/op
+WorkloadActual  51: 524288 op, 682875800.00 ns, 1.3025 us/op
+WorkloadActual  52: 524288 op, 593977900.00 ns, 1.1329 us/op
+WorkloadActual  53: 524288 op, 579736900.00 ns, 1.1058 us/op
+WorkloadActual  54: 524288 op, 639907300.00 ns, 1.2205 us/op
+WorkloadActual  55: 524288 op, 614920400.00 ns, 1.1729 us/op
+WorkloadActual  56: 524288 op, 570620100.00 ns, 1.0884 us/op
+WorkloadActual  57: 524288 op, 701056500.00 ns, 1.3372 us/op
+WorkloadActual  58: 524288 op, 1090951200.00 ns, 2.0808 us/op
+WorkloadActual  59: 524288 op, 1253111500.00 ns, 2.3901 us/op
+WorkloadActual  60: 524288 op, 861977300.00 ns, 1.6441 us/op
+WorkloadActual  61: 524288 op, 758012700.00 ns, 1.4458 us/op
+WorkloadActual  62: 524288 op, 693014400.00 ns, 1.3218 us/op
+WorkloadActual  63: 524288 op, 605661900.00 ns, 1.1552 us/op
+WorkloadActual  64: 524288 op, 567424500.00 ns, 1.0823 us/op
+WorkloadActual  65: 524288 op, 537497300.00 ns, 1.0252 us/op
+WorkloadActual  66: 524288 op, 509003100.00 ns, 970.8464 ns/op
+WorkloadActual  67: 524288 op, 494773000.00 ns, 943.7046 ns/op
+WorkloadActual  68: 524288 op, 494005100.00 ns, 942.2400 ns/op
+WorkloadActual  69: 524288 op, 490598300.00 ns, 935.7420 ns/op
+WorkloadActual  70: 524288 op, 495094100.00 ns, 944.3171 ns/op
+WorkloadActual  71: 524288 op, 489848700.00 ns, 934.3122 ns/op
+WorkloadActual  72: 524288 op, 512336400.00 ns, 977.2041 ns/op
+WorkloadActual  73: 524288 op, 514525700.00 ns, 981.3799 ns/op
+WorkloadActual  74: 524288 op, 508681900.00 ns, 970.2337 ns/op
+WorkloadActual  75: 524288 op, 503405000.00 ns, 960.1688 ns/op
+WorkloadActual  76: 524288 op, 479047800.00 ns, 913.7112 ns/op
+WorkloadActual  77: 524288 op, 493454200.00 ns, 941.1892 ns/op
+WorkloadActual  78: 524288 op, 477482200.00 ns, 910.7250 ns/op
+WorkloadActual  79: 524288 op, 506534100.00 ns, 966.1371 ns/op
+WorkloadActual  80: 524288 op, 528833700.00 ns, 1.0087 us/op
+WorkloadActual  81: 524288 op, 490214600.00 ns, 935.0101 ns/op
+WorkloadActual  82: 524288 op, 489757200.00 ns, 934.1377 ns/op
+WorkloadActual  83: 524288 op, 479812700.00 ns, 915.1701 ns/op
+WorkloadActual  84: 524288 op, 491347300.00 ns, 937.1706 ns/op
+WorkloadActual  85: 524288 op, 491384800.00 ns, 937.2421 ns/op
+WorkloadActual  86: 524288 op, 579294500.00 ns, 1.1049 us/op
+WorkloadActual  87: 524288 op, 552581300.00 ns, 1.0540 us/op
+WorkloadActual  88: 524288 op, 714439500.00 ns, 1.3627 us/op
+WorkloadActual  89: 524288 op, 1145949600.00 ns, 2.1857 us/op
+WorkloadActual  90: 524288 op, 735731900.00 ns, 1.4033 us/op
+WorkloadActual  91: 524288 op, 585133500.00 ns, 1.1161 us/op
+WorkloadActual  92: 524288 op, 597295100.00 ns, 1.1392 us/op
+WorkloadActual  93: 524288 op, 631912200.00 ns, 1.2053 us/op
+WorkloadActual  94: 524288 op, 513305800.00 ns, 979.0531 ns/op
+WorkloadActual  95: 524288 op, 485649600.00 ns, 926.3031 ns/op
+WorkloadActual  96: 524288 op, 518347500.00 ns, 988.6694 ns/op
+WorkloadActual  97: 524288 op, 552167500.00 ns, 1.0532 us/op
+WorkloadActual  98: 524288 op, 523808300.00 ns, 999.0850 ns/op
+WorkloadActual  99: 524288 op, 529332100.00 ns, 1.0096 us/op
+WorkloadActual  100: 524288 op, 535783000.00 ns, 1.0219 us/op
+
+// AfterActualRun
+WorkloadResult   1: 524288 op, 493077300.00 ns, 940.4703 ns/op
+WorkloadResult   2: 524288 op, 491599200.00 ns, 937.6511 ns/op
+WorkloadResult   3: 524288 op, 477209900.00 ns, 910.2057 ns/op
+WorkloadResult   4: 524288 op, 481939100.00 ns, 919.2259 ns/op
+WorkloadResult   5: 524288 op, 488882800.00 ns, 932.4699 ns/op
+WorkloadResult   6: 524288 op, 493956000.00 ns, 942.1463 ns/op
+WorkloadResult   7: 524288 op, 487694700.00 ns, 930.2038 ns/op
+WorkloadResult   8: 524288 op, 492297500.00 ns, 938.9830 ns/op
+WorkloadResult   9: 524288 op, 636523700.00 ns, 1.2141 us/op
+WorkloadResult  10: 524288 op, 717735700.00 ns, 1.3690 us/op
+WorkloadResult  11: 524288 op, 535989800.00 ns, 1.0223 us/op
+WorkloadResult  12: 524288 op, 558110800.00 ns, 1.0645 us/op
+WorkloadResult  13: 524288 op, 517050200.00 ns, 986.1950 ns/op
+WorkloadResult  14: 524288 op, 568010900.00 ns, 1.0834 us/op
+WorkloadResult  15: 524288 op, 608981700.00 ns, 1.1615 us/op
+WorkloadResult  16: 524288 op, 601340800.00 ns, 1.1470 us/op
+WorkloadResult  17: 524288 op, 870238200.00 ns, 1.6598 us/op
+WorkloadResult  18: 524288 op, 1276591600.00 ns, 2.4349 us/op
+WorkloadResult  19: 524288 op, 1103082900.00 ns, 2.1040 us/op
+WorkloadResult  20: 524288 op, 937440700.00 ns, 1.7880 us/op
+WorkloadResult  21: 524288 op, 1050174900.00 ns, 2.0030 us/op
+WorkloadResult  22: 524288 op, 972991700.00 ns, 1.8558 us/op
+WorkloadResult  23: 524288 op, 1054848700.00 ns, 2.0120 us/op
+WorkloadResult  24: 524288 op, 877710500.00 ns, 1.6741 us/op
+WorkloadResult  25: 524288 op, 696000600.00 ns, 1.3275 us/op
+WorkloadResult  26: 524288 op, 625905600.00 ns, 1.1938 us/op
+WorkloadResult  27: 524288 op, 563846700.00 ns, 1.0755 us/op
+WorkloadResult  28: 524288 op, 623503400.00 ns, 1.1892 us/op
+WorkloadResult  29: 524288 op, 1242643400.00 ns, 2.3702 us/op
+WorkloadResult  30: 524288 op, 1214934900.00 ns, 2.3173 us/op
+WorkloadResult  31: 524288 op, 1279629200.00 ns, 2.4407 us/op
+WorkloadResult  32: 524288 op, 836843800.00 ns, 1.5962 us/op
+WorkloadResult  33: 524288 op, 819327700.00 ns, 1.5627 us/op
+WorkloadResult  34: 524288 op, 596439000.00 ns, 1.1376 us/op
+WorkloadResult  35: 524288 op, 481155600.00 ns, 917.7315 ns/op
+WorkloadResult  36: 524288 op, 503341600.00 ns, 960.0479 ns/op
+WorkloadResult  37: 524288 op, 509830900.00 ns, 972.4253 ns/op
+WorkloadResult  38: 524288 op, 520061200.00 ns, 991.9380 ns/op
+WorkloadResult  39: 524288 op, 536485400.00 ns, 1.0233 us/op
+WorkloadResult  40: 524288 op, 561347800.00 ns, 1.0707 us/op
+WorkloadResult  41: 524288 op, 682875800.00 ns, 1.3025 us/op
+WorkloadResult  42: 524288 op, 593977900.00 ns, 1.1329 us/op
+WorkloadResult  43: 524288 op, 579736900.00 ns, 1.1058 us/op
+WorkloadResult  44: 524288 op, 639907300.00 ns, 1.2205 us/op
+WorkloadResult  45: 524288 op, 614920400.00 ns, 1.1729 us/op
+WorkloadResult  46: 524288 op, 570620100.00 ns, 1.0884 us/op
+WorkloadResult  47: 524288 op, 701056500.00 ns, 1.3372 us/op
+WorkloadResult  48: 524288 op, 1090951200.00 ns, 2.0808 us/op
+WorkloadResult  49: 524288 op, 1253111500.00 ns, 2.3901 us/op
+WorkloadResult  50: 524288 op, 861977300.00 ns, 1.6441 us/op
+WorkloadResult  51: 524288 op, 758012700.00 ns, 1.4458 us/op
+WorkloadResult  52: 524288 op, 693014400.00 ns, 1.3218 us/op
+WorkloadResult  53: 524288 op, 605661900.00 ns, 1.1552 us/op
+WorkloadResult  54: 524288 op, 567424500.00 ns, 1.0823 us/op
+WorkloadResult  55: 524288 op, 537497300.00 ns, 1.0252 us/op
+WorkloadResult  56: 524288 op, 509003100.00 ns, 970.8464 ns/op
+WorkloadResult  57: 524288 op, 494773000.00 ns, 943.7046 ns/op
+WorkloadResult  58: 524288 op, 494005100.00 ns, 942.2400 ns/op
+WorkloadResult  59: 524288 op, 490598300.00 ns, 935.7420 ns/op
+WorkloadResult  60: 524288 op, 495094100.00 ns, 944.3171 ns/op
+WorkloadResult  61: 524288 op, 489848700.00 ns, 934.3122 ns/op
+WorkloadResult  62: 524288 op, 512336400.00 ns, 977.2041 ns/op
+WorkloadResult  63: 524288 op, 514525700.00 ns, 981.3799 ns/op
+WorkloadResult  64: 524288 op, 508681900.00 ns, 970.2337 ns/op
+WorkloadResult  65: 524288 op, 503405000.00 ns, 960.1688 ns/op
+WorkloadResult  66: 524288 op, 479047800.00 ns, 913.7112 ns/op
+WorkloadResult  67: 524288 op, 493454200.00 ns, 941.1892 ns/op
+WorkloadResult  68: 524288 op, 477482200.00 ns, 910.7250 ns/op
+WorkloadResult  69: 524288 op, 506534100.00 ns, 966.1371 ns/op
+WorkloadResult  70: 524288 op, 528833700.00 ns, 1.0087 us/op
+WorkloadResult  71: 524288 op, 490214600.00 ns, 935.0101 ns/op
+WorkloadResult  72: 524288 op, 489757200.00 ns, 934.1377 ns/op
+WorkloadResult  73: 524288 op, 479812700.00 ns, 915.1701 ns/op
+WorkloadResult  74: 524288 op, 491347300.00 ns, 937.1706 ns/op
+WorkloadResult  75: 524288 op, 491384800.00 ns, 937.2421 ns/op
+WorkloadResult  76: 524288 op, 579294500.00 ns, 1.1049 us/op
+WorkloadResult  77: 524288 op, 552581300.00 ns, 1.0540 us/op
+WorkloadResult  78: 524288 op, 714439500.00 ns, 1.3627 us/op
+WorkloadResult  79: 524288 op, 1145949600.00 ns, 2.1857 us/op
+WorkloadResult  80: 524288 op, 735731900.00 ns, 1.4033 us/op
+WorkloadResult  81: 524288 op, 585133500.00 ns, 1.1161 us/op
+WorkloadResult  82: 524288 op, 597295100.00 ns, 1.1392 us/op
+WorkloadResult  83: 524288 op, 631912200.00 ns, 1.2053 us/op
+WorkloadResult  84: 524288 op, 513305800.00 ns, 979.0531 ns/op
+WorkloadResult  85: 524288 op, 485649600.00 ns, 926.3031 ns/op
+WorkloadResult  86: 524288 op, 518347500.00 ns, 988.6694 ns/op
+WorkloadResult  87: 524288 op, 552167500.00 ns, 1.0532 us/op
+WorkloadResult  88: 524288 op, 523808300.00 ns, 999.0850 ns/op
+WorkloadResult  89: 524288 op, 529332100.00 ns, 1.0096 us/op
+WorkloadResult  90: 524288 op, 535783000.00 ns, 1.0219 us/op
+// GC:  504 0 0 2109735312 524288
+// Threading:  0 0 524288
+
+// AfterAll
+// Benchmark Process 37412 has exited with code 0.
+
+Mean = 1.235 μs, StdErr = 0.044 μs (3.56%), N = 90, StdDev = 0.417 μs
+Min = 0.910 μs, Q1 = 0.948 μs, Median = 1.068 μs, Q3 = 1.326 μs, Max = 2.441 μs
+IQR = 0.378 μs, LowerFence = 0.381 μs, UpperFence = 1.893 μs
+ConfidenceInterval = [1.086 μs; 1.385 μs] (CI 99.9%), Margin = 0.149 μs (12.10% of Mean)
+Skewness = 1.62, Kurtosis = 4.51, MValue = 2.43
+
+// ** Remained 4 (66.7%) benchmark(s) to run. Estimated finish 2025-01-07 20:58 (0h 5m from now) **
+Setup power plan (GUID: 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c FriendlyName: High performance)
+// **************************
+// Benchmark: SimpleJsonBenchmark.STJSingleMapping: DefaultJob
+// *** Execute ***
+// Launch: 1 / 1
+// Execute: dotnet 9808b21c-fa84-4582-92c9-e5fe6b77b208.dll --anonymousPipes 1788 1872 --benchmarkName Ferris.Json.Benchmark.SimpleJsonBenchmark.STJSingleMapping --job Default --benchmarkId 2 in C:\dev\Ferris.Json\benchmark\bin\Release\net8.0\9808b21c-fa84-4582-92c9-e5fe6b77b208\bin\Release\net8.0
+// BeforeAnythingElse
+
+// Benchmark Process Environment Information:
+// BenchmarkDotNet v0.14.0
+// Runtime=.NET 8.0.11 (8.0.1124.51707), X64 RyuJIT AVX2
+// GC=Concurrent Workstation
+// HardwareIntrinsics=AVX2,AES,BMI1,BMI2,FMA,LZCNT,PCLMUL,POPCNT VectorSize=256
+// Job: DefaultJob
+
+OverheadJitting  1: 1 op, 316800.00 ns, 316.8000 us/op
+WorkloadJitting  1: 1 op, 147035300.00 ns, 147.0353 ms/op
+
+WorkloadPilot    1: 2 op, 303200.00 ns, 151.6000 us/op
+WorkloadPilot    2: 3 op, 88900.00 ns, 29.6333 us/op
+WorkloadPilot    3: 4 op, 63100.00 ns, 15.7750 us/op
+WorkloadPilot    4: 5 op, 51800.00 ns, 10.3600 us/op
+WorkloadPilot    5: 6 op, 66900.00 ns, 11.1500 us/op
+WorkloadPilot    6: 7 op, 53100.00 ns, 7.5857 us/op
+WorkloadPilot    7: 8 op, 48000.00 ns, 6.0000 us/op
+WorkloadPilot    8: 9 op, 49900.00 ns, 5.5444 us/op
+WorkloadPilot    9: 10 op, 60500.00 ns, 6.0500 us/op
+WorkloadPilot   10: 11 op, 59000.00 ns, 5.3636 us/op
+WorkloadPilot   11: 12 op, 62200.00 ns, 5.1833 us/op
+WorkloadPilot   12: 13 op, 69300.00 ns, 5.3308 us/op
+WorkloadPilot   13: 14 op, 72300.00 ns, 5.1643 us/op
+WorkloadPilot   14: 15 op, 90100.00 ns, 6.0067 us/op
+WorkloadPilot   15: 16 op, 91300.00 ns, 5.7063 us/op
+WorkloadPilot   16: 32 op, 141600.00 ns, 4.4250 us/op
+WorkloadPilot   17: 64 op, 266200.00 ns, 4.1594 us/op
+WorkloadPilot   18: 128 op, 637500.00 ns, 4.9805 us/op
+WorkloadPilot   19: 256 op, 825400.00 ns, 3.2242 us/op
+WorkloadPilot   20: 512 op, 1587100.00 ns, 3.0998 us/op
+WorkloadPilot   21: 1024 op, 3176700.00 ns, 3.1022 us/op
+WorkloadPilot   22: 2048 op, 6929400.00 ns, 3.3835 us/op
+WorkloadPilot   23: 4096 op, 12549900.00 ns, 3.0639 us/op
+WorkloadPilot   24: 8192 op, 27273400.00 ns, 3.3293 us/op
+WorkloadPilot   25: 16384 op, 52222700.00 ns, 3.1874 us/op
+WorkloadPilot   26: 32768 op, 108817000.00 ns, 3.3208 us/op
+WorkloadPilot   27: 65536 op, 223215400.00 ns, 3.4060 us/op
+WorkloadPilot   28: 131072 op, 101560500.00 ns, 774.8451 ns/op
+WorkloadPilot   29: 262144 op, 158671800.00 ns, 605.2849 ns/op
+WorkloadPilot   30: 524288 op, 323326900.00 ns, 616.6971 ns/op
+WorkloadPilot   31: 1048576 op, 566587800.00 ns, 540.3402 ns/op
+
+WorkloadWarmup   1: 1048576 op, 544671400.00 ns, 519.4391 ns/op
+WorkloadWarmup   2: 1048576 op, 648700500.00 ns, 618.6490 ns/op
+WorkloadWarmup   3: 1048576 op, 761534900.00 ns, 726.2563 ns/op
+WorkloadWarmup   4: 1048576 op, 1024096400.00 ns, 976.6544 ns/op
+WorkloadWarmup   5: 1048576 op, 756654000.00 ns, 721.6015 ns/op
+WorkloadWarmup   6: 1048576 op, 558138100.00 ns, 532.2820 ns/op
+WorkloadWarmup   7: 1048576 op, 520259400.00 ns, 496.1580 ns/op
+WorkloadWarmup   8: 1048576 op, 533498200.00 ns, 508.7835 ns/op
+WorkloadWarmup   9: 1048576 op, 546618700.00 ns, 521.2962 ns/op
+WorkloadWarmup  10: 1048576 op, 603805100.00 ns, 575.8334 ns/op
+WorkloadWarmup  11: 1048576 op, 616507100.00 ns, 587.9470 ns/op
+WorkloadWarmup  12: 1048576 op, 544764600.00 ns, 519.5280 ns/op
+
+// BeforeActualRun
+WorkloadActual   1: 1048576 op, 518050100.00 ns, 494.0511 ns/op
+WorkloadActual   2: 1048576 op, 494196800.00 ns, 471.3028 ns/op
+WorkloadActual   3: 1048576 op, 503197400.00 ns, 479.8864 ns/op
+WorkloadActual   4: 1048576 op, 563499100.00 ns, 537.3946 ns/op
+WorkloadActual   5: 1048576 op, 588657600.00 ns, 561.3876 ns/op
+WorkloadActual   6: 1048576 op, 582717000.00 ns, 555.7222 ns/op
+WorkloadActual   7: 1048576 op, 599895900.00 ns, 572.1053 ns/op
+WorkloadActual   8: 1048576 op, 576217000.00 ns, 549.5234 ns/op
+WorkloadActual   9: 1048576 op, 554196700.00 ns, 528.5232 ns/op
+WorkloadActual  10: 1048576 op, 560414900.00 ns, 534.4533 ns/op
+WorkloadActual  11: 1048576 op, 527746700.00 ns, 503.2985 ns/op
+WorkloadActual  12: 1048576 op, 559270000.00 ns, 533.3614 ns/op
+WorkloadActual  13: 1048576 op, 571863700.00 ns, 545.3717 ns/op
+WorkloadActual  14: 1048576 op, 542037700.00 ns, 516.9274 ns/op
+WorkloadActual  15: 1048576 op, 522928700.00 ns, 498.7037 ns/op
+WorkloadActual  16: 1048576 op, 501502100.00 ns, 478.2697 ns/op
+WorkloadActual  17: 1048576 op, 471127700.00 ns, 449.3024 ns/op
+WorkloadActual  18: 1048576 op, 475527000.00 ns, 453.4979 ns/op
+WorkloadActual  19: 1048576 op, 515845400.00 ns, 491.9485 ns/op
+WorkloadActual  20: 1048576 op, 532509800.00 ns, 507.8409 ns/op
+WorkloadActual  21: 1048576 op, 509046000.00 ns, 485.4641 ns/op
+WorkloadActual  22: 1048576 op, 518972900.00 ns, 494.9311 ns/op
+WorkloadActual  23: 1048576 op, 517781300.00 ns, 493.7947 ns/op
+WorkloadActual  24: 1048576 op, 502980900.00 ns, 479.6800 ns/op
+WorkloadActual  25: 1048576 op, 502572400.00 ns, 479.2904 ns/op
+WorkloadActual  26: 1048576 op, 518710300.00 ns, 494.6807 ns/op
+WorkloadActual  27: 1048576 op, 491254700.00 ns, 468.4970 ns/op
+WorkloadActual  28: 1048576 op, 500915800.00 ns, 477.7105 ns/op
+WorkloadActual  29: 1048576 op, 505815900.00 ns, 482.3836 ns/op
+WorkloadActual  30: 1048576 op, 503333400.00 ns, 480.0161 ns/op
+WorkloadActual  31: 1048576 op, 497806300.00 ns, 474.7451 ns/op
+WorkloadActual  32: 1048576 op, 505884800.00 ns, 482.4493 ns/op
+WorkloadActual  33: 1048576 op, 490679700.00 ns, 467.9486 ns/op
+WorkloadActual  34: 1048576 op, 534467400.00 ns, 509.7078 ns/op
+WorkloadActual  35: 1048576 op, 519521300.00 ns, 495.4541 ns/op
+WorkloadActual  36: 1048576 op, 555264400.00 ns, 529.5414 ns/op
+WorkloadActual  37: 1048576 op, 550318300.00 ns, 524.8244 ns/op
+WorkloadActual  38: 1048576 op, 547898700.00 ns, 522.5169 ns/op
+WorkloadActual  39: 1048576 op, 542966400.00 ns, 517.8131 ns/op
+WorkloadActual  40: 1048576 op, 530830800.00 ns, 506.2397 ns/op
+WorkloadActual  41: 1048576 op, 590645300.00 ns, 563.2833 ns/op
+WorkloadActual  42: 1048576 op, 894098700.00 ns, 852.6790 ns/op
+WorkloadActual  43: 1048576 op, 860811300.00 ns, 820.9336 ns/op
+WorkloadActual  44: 1048576 op, 628065200.00 ns, 598.9697 ns/op
+WorkloadActual  45: 1048576 op, 567971800.00 ns, 541.6601 ns/op
+WorkloadActual  46: 1048576 op, 547531200.00 ns, 522.1664 ns/op
+WorkloadActual  47: 1048576 op, 558147200.00 ns, 532.2906 ns/op
+WorkloadActual  48: 1048576 op, 526152800.00 ns, 501.7784 ns/op
+WorkloadActual  49: 1048576 op, 518287100.00 ns, 494.2771 ns/op
+WorkloadActual  50: 1048576 op, 525315700.00 ns, 500.9801 ns/op
+WorkloadActual  51: 1048576 op, 538851900.00 ns, 513.8892 ns/op
+WorkloadActual  52: 1048576 op, 547809100.00 ns, 522.4315 ns/op
+WorkloadActual  53: 1048576 op, 554709900.00 ns, 529.0126 ns/op
+WorkloadActual  54: 1048576 op, 545801000.00 ns, 520.5164 ns/op
+WorkloadActual  55: 1048576 op, 520384400.00 ns, 496.2772 ns/op
+WorkloadActual  56: 1048576 op, 533224500.00 ns, 508.5225 ns/op
+WorkloadActual  57: 1048576 op, 514013000.00 ns, 490.2010 ns/op
+WorkloadActual  58: 1048576 op, 527486000.00 ns, 503.0499 ns/op
+WorkloadActual  59: 1048576 op, 525715700.00 ns, 501.3616 ns/op
+WorkloadActual  60: 1048576 op, 522780000.00 ns, 498.5619 ns/op
+WorkloadActual  61: 1048576 op, 530321600.00 ns, 505.7541 ns/op
+WorkloadActual  62: 1048576 op, 575421900.00 ns, 548.7651 ns/op
+WorkloadActual  63: 1048576 op, 547695800.00 ns, 522.3234 ns/op
+WorkloadActual  64: 1048576 op, 558960200.00 ns, 533.0660 ns/op
+WorkloadActual  65: 1048576 op, 505020300.00 ns, 481.6249 ns/op
+WorkloadActual  66: 1048576 op, 504333000.00 ns, 480.9694 ns/op
+WorkloadActual  67: 1048576 op, 522514200.00 ns, 498.3084 ns/op
+WorkloadActual  68: 1048576 op, 525275800.00 ns, 500.9420 ns/op
+WorkloadActual  69: 1048576 op, 536001500.00 ns, 511.1709 ns/op
+WorkloadActual  70: 1048576 op, 600085900.00 ns, 572.2865 ns/op
+WorkloadActual  71: 1048576 op, 647872400.00 ns, 617.8593 ns/op
+WorkloadActual  72: 1048576 op, 544618500.00 ns, 519.3887 ns/op
+WorkloadActual  73: 1048576 op, 535241400.00 ns, 510.4460 ns/op
+WorkloadActual  74: 1048576 op, 535406000.00 ns, 510.6030 ns/op
+WorkloadActual  75: 1048576 op, 542693800.00 ns, 517.5531 ns/op
+WorkloadActual  76: 1048576 op, 565536900.00 ns, 539.3380 ns/op
+WorkloadActual  77: 1048576 op, 530422600.00 ns, 505.8504 ns/op
+WorkloadActual  78: 1048576 op, 512040100.00 ns, 488.3195 ns/op
+WorkloadActual  79: 1048576 op, 518028300.00 ns, 494.0303 ns/op
+WorkloadActual  80: 1048576 op, 535213000.00 ns, 510.4189 ns/op
+WorkloadActual  81: 1048576 op, 527189300.00 ns, 502.7669 ns/op
+WorkloadActual  82: 1048576 op, 504213900.00 ns, 480.8558 ns/op
+WorkloadActual  83: 1048576 op, 509278400.00 ns, 485.6857 ns/op
+
+// AfterActualRun
+WorkloadResult   1: 1048576 op, 518050100.00 ns, 494.0511 ns/op
+WorkloadResult   2: 1048576 op, 494196800.00 ns, 471.3028 ns/op
+WorkloadResult   3: 1048576 op, 503197400.00 ns, 479.8864 ns/op
+WorkloadResult   4: 1048576 op, 563499100.00 ns, 537.3946 ns/op
+WorkloadResult   5: 1048576 op, 588657600.00 ns, 561.3876 ns/op
+WorkloadResult   6: 1048576 op, 582717000.00 ns, 555.7222 ns/op
+WorkloadResult   7: 1048576 op, 599895900.00 ns, 572.1053 ns/op
+WorkloadResult   8: 1048576 op, 576217000.00 ns, 549.5234 ns/op
+WorkloadResult   9: 1048576 op, 554196700.00 ns, 528.5232 ns/op
+WorkloadResult  10: 1048576 op, 560414900.00 ns, 534.4533 ns/op
+WorkloadResult  11: 1048576 op, 527746700.00 ns, 503.2985 ns/op
+WorkloadResult  12: 1048576 op, 559270000.00 ns, 533.3614 ns/op
+WorkloadResult  13: 1048576 op, 571863700.00 ns, 545.3717 ns/op
+WorkloadResult  14: 1048576 op, 542037700.00 ns, 516.9274 ns/op
+WorkloadResult  15: 1048576 op, 522928700.00 ns, 498.7037 ns/op
+WorkloadResult  16: 1048576 op, 501502100.00 ns, 478.2697 ns/op
+WorkloadResult  17: 1048576 op, 471127700.00 ns, 449.3024 ns/op
+WorkloadResult  18: 1048576 op, 475527000.00 ns, 453.4979 ns/op
+WorkloadResult  19: 1048576 op, 515845400.00 ns, 491.9485 ns/op
+WorkloadResult  20: 1048576 op, 532509800.00 ns, 507.8409 ns/op
+WorkloadResult  21: 1048576 op, 509046000.00 ns, 485.4641 ns/op
+WorkloadResult  22: 1048576 op, 518972900.00 ns, 494.9311 ns/op
+WorkloadResult  23: 1048576 op, 517781300.00 ns, 493.7947 ns/op
+WorkloadResult  24: 1048576 op, 502980900.00 ns, 479.6800 ns/op
+WorkloadResult  25: 1048576 op, 502572400.00 ns, 479.2904 ns/op
+WorkloadResult  26: 1048576 op, 518710300.00 ns, 494.6807 ns/op
+WorkloadResult  27: 1048576 op, 491254700.00 ns, 468.4970 ns/op
+WorkloadResult  28: 1048576 op, 500915800.00 ns, 477.7105 ns/op
+WorkloadResult  29: 1048576 op, 505815900.00 ns, 482.3836 ns/op
+WorkloadResult  30: 1048576 op, 503333400.00 ns, 480.0161 ns/op
+WorkloadResult  31: 1048576 op, 497806300.00 ns, 474.7451 ns/op
+WorkloadResult  32: 1048576 op, 505884800.00 ns, 482.4493 ns/op
+WorkloadResult  33: 1048576 op, 490679700.00 ns, 467.9486 ns/op
+WorkloadResult  34: 1048576 op, 534467400.00 ns, 509.7078 ns/op
+WorkloadResult  35: 1048576 op, 519521300.00 ns, 495.4541 ns/op
+WorkloadResult  36: 1048576 op, 555264400.00 ns, 529.5414 ns/op
+WorkloadResult  37: 1048576 op, 550318300.00 ns, 524.8244 ns/op
+WorkloadResult  38: 1048576 op, 547898700.00 ns, 522.5169 ns/op
+WorkloadResult  39: 1048576 op, 542966400.00 ns, 517.8131 ns/op
+WorkloadResult  40: 1048576 op, 530830800.00 ns, 506.2397 ns/op
+WorkloadResult  41: 1048576 op, 590645300.00 ns, 563.2833 ns/op
+WorkloadResult  42: 1048576 op, 567971800.00 ns, 541.6601 ns/op
+WorkloadResult  43: 1048576 op, 547531200.00 ns, 522.1664 ns/op
+WorkloadResult  44: 1048576 op, 558147200.00 ns, 532.2906 ns/op
+WorkloadResult  45: 1048576 op, 526152800.00 ns, 501.7784 ns/op
+WorkloadResult  46: 1048576 op, 518287100.00 ns, 494.2771 ns/op
+WorkloadResult  47: 1048576 op, 525315700.00 ns, 500.9801 ns/op
+WorkloadResult  48: 1048576 op, 538851900.00 ns, 513.8892 ns/op
+WorkloadResult  49: 1048576 op, 547809100.00 ns, 522.4315 ns/op
+WorkloadResult  50: 1048576 op, 554709900.00 ns, 529.0126 ns/op
+WorkloadResult  51: 1048576 op, 545801000.00 ns, 520.5164 ns/op
+WorkloadResult  52: 1048576 op, 520384400.00 ns, 496.2772 ns/op
+WorkloadResult  53: 1048576 op, 533224500.00 ns, 508.5225 ns/op
+WorkloadResult  54: 1048576 op, 514013000.00 ns, 490.2010 ns/op
+WorkloadResult  55: 1048576 op, 527486000.00 ns, 503.0499 ns/op
+WorkloadResult  56: 1048576 op, 525715700.00 ns, 501.3616 ns/op
+WorkloadResult  57: 1048576 op, 522780000.00 ns, 498.5619 ns/op
+WorkloadResult  58: 1048576 op, 530321600.00 ns, 505.7541 ns/op
+WorkloadResult  59: 1048576 op, 575421900.00 ns, 548.7651 ns/op
+WorkloadResult  60: 1048576 op, 547695800.00 ns, 522.3234 ns/op
+WorkloadResult  61: 1048576 op, 558960200.00 ns, 533.0660 ns/op
+WorkloadResult  62: 1048576 op, 505020300.00 ns, 481.6249 ns/op
+WorkloadResult  63: 1048576 op, 504333000.00 ns, 480.9694 ns/op
+WorkloadResult  64: 1048576 op, 522514200.00 ns, 498.3084 ns/op
+WorkloadResult  65: 1048576 op, 525275800.00 ns, 500.9420 ns/op
+WorkloadResult  66: 1048576 op, 536001500.00 ns, 511.1709 ns/op
+WorkloadResult  67: 1048576 op, 600085900.00 ns, 572.2865 ns/op
+WorkloadResult  68: 1048576 op, 544618500.00 ns, 519.3887 ns/op
+WorkloadResult  69: 1048576 op, 535241400.00 ns, 510.4460 ns/op
+WorkloadResult  70: 1048576 op, 535406000.00 ns, 510.6030 ns/op
+WorkloadResult  71: 1048576 op, 542693800.00 ns, 517.5531 ns/op
+WorkloadResult  72: 1048576 op, 565536900.00 ns, 539.3380 ns/op
+WorkloadResult  73: 1048576 op, 530422600.00 ns, 505.8504 ns/op
+WorkloadResult  74: 1048576 op, 512040100.00 ns, 488.3195 ns/op
+WorkloadResult  75: 1048576 op, 518028300.00 ns, 494.0303 ns/op
+WorkloadResult  76: 1048576 op, 535213000.00 ns, 510.4189 ns/op
+WorkloadResult  77: 1048576 op, 527189300.00 ns, 502.7669 ns/op
+WorkloadResult  78: 1048576 op, 504213900.00 ns, 480.8558 ns/op
+WorkloadResult  79: 1048576 op, 509278400.00 ns, 485.6857 ns/op
+// GC:  38 0 0 159400696 1048576
+// Threading:  0 0 1048576
+
+// AfterAll
+// Benchmark Process 11864 has exited with code 0.
+
+Mean = 507.485 ns, StdErr = 2.966 ns (0.58%), N = 79, StdDev = 26.365 ns
+Min = 449.302 ns, Q1 = 489.260 ns, Median = 503.298 ns, Q3 = 522.474 ns, Max = 572.287 ns
+IQR = 33.214 ns, LowerFence = 439.439 ns, UpperFence = 572.295 ns
+ConfidenceInterval = [497.341 ns; 517.628 ns] (CI 99.9%), Margin = 10.144 ns (2.00% of Mean)
+Skewness = 0.39, Kurtosis = 2.81, MValue = 2
+
+// ** Remained 3 (50.0%) benchmark(s) to run. Estimated finish 2025-01-07 20:57 (0h 3m from now) **
+Setup power plan (GUID: 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c FriendlyName: High performance)
+// **************************
+// Benchmark: SimpleJsonBenchmark.FerrisValueMapping: DefaultJob
+// *** Execute ***
+// Launch: 1 / 1
+// Execute: dotnet 9808b21c-fa84-4582-92c9-e5fe6b77b208.dll --anonymousPipes 2084 1964 --benchmarkName Ferris.Json.Benchmark.SimpleJsonBenchmark.FerrisValueMapping --job Default --benchmarkId 3 in C:\dev\Ferris.Json\benchmark\bin\Release\net8.0\9808b21c-fa84-4582-92c9-e5fe6b77b208\bin\Release\net8.0
+// BeforeAnythingElse
+
+// Benchmark Process Environment Information:
+// BenchmarkDotNet v0.14.0
+// Runtime=.NET 8.0.11 (8.0.1124.51707), X64 RyuJIT AVX2
+// GC=Concurrent Workstation
+// HardwareIntrinsics=AVX2,AES,BMI1,BMI2,FMA,LZCNT,PCLMUL,POPCNT VectorSize=256
+// Job: DefaultJob
+
+OverheadJitting  1: 1 op, 251000.00 ns, 251.0000 us/op
+WorkloadJitting  1: 1 op, 61491700.00 ns, 61.4917 ms/op
+
+WorkloadPilot    1: 2 op, 3463500.00 ns, 1.7318 ms/op
+WorkloadPilot    2: 3 op, 4782300.00 ns, 1.5941 ms/op
+WorkloadPilot    3: 4 op, 5238100.00 ns, 1.3095 ms/op
+WorkloadPilot    4: 5 op, 5114100.00 ns, 1.0228 ms/op
+WorkloadPilot    5: 6 op, 5457400.00 ns, 909.5667 us/op
+WorkloadPilot    6: 7 op, 5280000.00 ns, 754.2857 us/op
+WorkloadPilot    7: 8 op, 5270200.00 ns, 658.7750 us/op
+WorkloadPilot    8: 9 op, 5885500.00 ns, 653.9444 us/op
+WorkloadPilot    9: 10 op, 5577800.00 ns, 557.7800 us/op
+WorkloadPilot   10: 11 op, 5289300.00 ns, 480.8455 us/op
+WorkloadPilot   11: 12 op, 5418100.00 ns, 451.5083 us/op
+WorkloadPilot   12: 13 op, 5385000.00 ns, 414.2308 us/op
+WorkloadPilot   13: 14 op, 6655500.00 ns, 475.3929 us/op
+WorkloadPilot   14: 15 op, 5406700.00 ns, 360.4467 us/op
+WorkloadPilot   15: 16 op, 6436200.00 ns, 402.2625 us/op
+WorkloadPilot   16: 32 op, 6270400.00 ns, 195.9500 us/op
+WorkloadPilot   17: 64 op, 10752000.00 ns, 168.0000 us/op
+WorkloadPilot   18: 128 op, 12923600.00 ns, 100.9656 us/op
+WorkloadPilot   19: 256 op, 20133900.00 ns, 78.6480 us/op
+WorkloadPilot   20: 512 op, 36646900.00 ns, 71.5760 us/op
+WorkloadPilot   21: 1024 op, 61589800.00 ns, 60.1463 us/op
+WorkloadPilot   22: 2048 op, 110080100.00 ns, 53.7500 us/op
+WorkloadPilot   23: 4096 op, 201026100.00 ns, 49.0786 us/op
+WorkloadPilot   24: 8192 op, 396638700.00 ns, 48.4178 us/op
+WorkloadPilot   25: 16384 op, 533604300.00 ns, 32.5686 us/op
+
+WorkloadWarmup   1: 16384 op, 273359100.00 ns, 16.6845 us/op
+WorkloadWarmup   2: 16384 op, 247834300.00 ns, 15.1266 us/op
+WorkloadWarmup   3: 16384 op, 230682500.00 ns, 14.0797 us/op
+WorkloadWarmup   4: 16384 op, 214076800.00 ns, 13.0662 us/op
+WorkloadWarmup   5: 16384 op, 208327500.00 ns, 12.7153 us/op
+WorkloadWarmup   6: 16384 op, 199569200.00 ns, 12.1807 us/op
+WorkloadWarmup   7: 16384 op, 186936400.00 ns, 11.4097 us/op
+WorkloadWarmup   8: 16384 op, 184210400.00 ns, 11.2433 us/op
+WorkloadWarmup   9: 16384 op, 179584900.00 ns, 10.9610 us/op
+WorkloadWarmup  10: 16384 op, 192400800.00 ns, 11.7432 us/op
+WorkloadWarmup  11: 16384 op, 182406100.00 ns, 11.1332 us/op
+WorkloadWarmup  12: 16384 op, 197733900.00 ns, 12.0687 us/op
+WorkloadWarmup  13: 16384 op, 209759100.00 ns, 12.8027 us/op
+WorkloadWarmup  14: 16384 op, 229794500.00 ns, 14.0255 us/op
+WorkloadWarmup  15: 16384 op, 217136100.00 ns, 13.2529 us/op
+
+// BeforeActualRun
+WorkloadActual   1: 16384 op, 221643300.00 ns, 13.5280 us/op
+WorkloadActual   2: 16384 op, 224132500.00 ns, 13.6800 us/op
+WorkloadActual   3: 16384 op, 230522800.00 ns, 14.0700 us/op
+WorkloadActual   4: 16384 op, 238523100.00 ns, 14.5583 us/op
+WorkloadActual   5: 16384 op, 224564500.00 ns, 13.7063 us/op
+WorkloadActual   6: 16384 op, 212923700.00 ns, 12.9958 us/op
+WorkloadActual   7: 16384 op, 240062000.00 ns, 14.6522 us/op
+WorkloadActual   8: 16384 op, 228084700.00 ns, 13.9212 us/op
+WorkloadActual   9: 16384 op, 188176000.00 ns, 11.4854 us/op
+WorkloadActual  10: 16384 op, 180524500.00 ns, 11.0183 us/op
+WorkloadActual  11: 16384 op, 177222500.00 ns, 10.8168 us/op
+WorkloadActual  12: 16384 op, 173404200.00 ns, 10.5838 us/op
+WorkloadActual  13: 16384 op, 188483700.00 ns, 11.5041 us/op
+WorkloadActual  14: 16384 op, 223338000.00 ns, 13.6315 us/op
+WorkloadActual  15: 16384 op, 205473300.00 ns, 12.5411 us/op
+WorkloadActual  16: 16384 op, 193882700.00 ns, 11.8337 us/op
+WorkloadActual  17: 16384 op, 186492900.00 ns, 11.3826 us/op
+WorkloadActual  18: 16384 op, 178074100.00 ns, 10.8688 us/op
+WorkloadActual  19: 16384 op, 179340400.00 ns, 10.9461 us/op
+WorkloadActual  20: 16384 op, 172838500.00 ns, 10.5492 us/op
+WorkloadActual  21: 16384 op, 171548500.00 ns, 10.4705 us/op
+WorkloadActual  22: 16384 op, 174588700.00 ns, 10.6560 us/op
+WorkloadActual  23: 16384 op, 176378400.00 ns, 10.7653 us/op
+WorkloadActual  24: 16384 op, 174394900.00 ns, 10.6442 us/op
+WorkloadActual  25: 16384 op, 163540500.00 ns, 9.9817 us/op
+WorkloadActual  26: 16384 op, 157459200.00 ns, 9.6105 us/op
+WorkloadActual  27: 16384 op, 166078000.00 ns, 10.1366 us/op
+WorkloadActual  28: 16384 op, 157105500.00 ns, 9.5890 us/op
+WorkloadActual  29: 16384 op, 168692300.00 ns, 10.2962 us/op
+WorkloadActual  30: 16384 op, 168203600.00 ns, 10.2663 us/op
+WorkloadActual  31: 16384 op, 177210700.00 ns, 10.8161 us/op
+WorkloadActual  32: 16384 op, 177024600.00 ns, 10.8047 us/op
+WorkloadActual  33: 16384 op, 188814700.00 ns, 11.5243 us/op
+WorkloadActual  34: 16384 op, 171894600.00 ns, 10.4916 us/op
+WorkloadActual  35: 16384 op, 176174800.00 ns, 10.7529 us/op
+WorkloadActual  36: 16384 op, 170963600.00 ns, 10.4348 us/op
+WorkloadActual  37: 16384 op, 172060200.00 ns, 10.5017 us/op
+WorkloadActual  38: 16384 op, 175398200.00 ns, 10.7055 us/op
+WorkloadActual  39: 16384 op, 174227700.00 ns, 10.6340 us/op
+WorkloadActual  40: 16384 op, 171600000.00 ns, 10.4736 us/op
+WorkloadActual  41: 16384 op, 172591200.00 ns, 10.5341 us/op
+WorkloadActual  42: 16384 op, 170825600.00 ns, 10.4264 us/op
+WorkloadActual  43: 16384 op, 171253800.00 ns, 10.4525 us/op
+WorkloadActual  44: 16384 op, 169811400.00 ns, 10.3645 us/op
+WorkloadActual  45: 16384 op, 167339300.00 ns, 10.2136 us/op
+WorkloadActual  46: 16384 op, 171984400.00 ns, 10.4971 us/op
+WorkloadActual  47: 16384 op, 172579500.00 ns, 10.5334 us/op
+WorkloadActual  48: 16384 op, 173300000.00 ns, 10.5774 us/op
+WorkloadActual  49: 16384 op, 176371500.00 ns, 10.7649 us/op
+WorkloadActual  50: 16384 op, 179189400.00 ns, 10.9369 us/op
+WorkloadActual  51: 16384 op, 182140700.00 ns, 11.1170 us/op
+WorkloadActual  52: 16384 op, 181177500.00 ns, 11.0582 us/op
+WorkloadActual  53: 16384 op, 180332600.00 ns, 11.0066 us/op
+WorkloadActual  54: 16384 op, 181135800.00 ns, 11.0557 us/op
+WorkloadActual  55: 16384 op, 171792300.00 ns, 10.4854 us/op
+WorkloadActual  56: 16384 op, 170940900.00 ns, 10.4334 us/op
+WorkloadActual  57: 16384 op, 175622800.00 ns, 10.7192 us/op
+WorkloadActual  58: 16384 op, 177280900.00 ns, 10.8204 us/op
+WorkloadActual  59: 16384 op, 173241400.00 ns, 10.5738 us/op
+WorkloadActual  60: 16384 op, 177787600.00 ns, 10.8513 us/op
+WorkloadActual  61: 16384 op, 181692200.00 ns, 11.0896 us/op
+
+// AfterActualRun
+WorkloadResult   1: 16384 op, 188176000.00 ns, 11.4854 us/op
+WorkloadResult   2: 16384 op, 180524500.00 ns, 11.0183 us/op
+WorkloadResult   3: 16384 op, 177222500.00 ns, 10.8168 us/op
+WorkloadResult   4: 16384 op, 173404200.00 ns, 10.5838 us/op
+WorkloadResult   5: 16384 op, 188483700.00 ns, 11.5041 us/op
+WorkloadResult   6: 16384 op, 193882700.00 ns, 11.8337 us/op
+WorkloadResult   7: 16384 op, 186492900.00 ns, 11.3826 us/op
+WorkloadResult   8: 16384 op, 178074100.00 ns, 10.8688 us/op
+WorkloadResult   9: 16384 op, 179340400.00 ns, 10.9461 us/op
+WorkloadResult  10: 16384 op, 172838500.00 ns, 10.5492 us/op
+WorkloadResult  11: 16384 op, 171548500.00 ns, 10.4705 us/op
+WorkloadResult  12: 16384 op, 174588700.00 ns, 10.6560 us/op
+WorkloadResult  13: 16384 op, 176378400.00 ns, 10.7653 us/op
+WorkloadResult  14: 16384 op, 174394900.00 ns, 10.6442 us/op
+WorkloadResult  15: 16384 op, 163540500.00 ns, 9.9817 us/op
+WorkloadResult  16: 16384 op, 157459200.00 ns, 9.6105 us/op
+WorkloadResult  17: 16384 op, 166078000.00 ns, 10.1366 us/op
+WorkloadResult  18: 16384 op, 157105500.00 ns, 9.5890 us/op
+WorkloadResult  19: 16384 op, 168692300.00 ns, 10.2962 us/op
+WorkloadResult  20: 16384 op, 168203600.00 ns, 10.2663 us/op
+WorkloadResult  21: 16384 op, 177210700.00 ns, 10.8161 us/op
+WorkloadResult  22: 16384 op, 177024600.00 ns, 10.8047 us/op
+WorkloadResult  23: 16384 op, 188814700.00 ns, 11.5243 us/op
+WorkloadResult  24: 16384 op, 171894600.00 ns, 10.4916 us/op
+WorkloadResult  25: 16384 op, 176174800.00 ns, 10.7529 us/op
+WorkloadResult  26: 16384 op, 170963600.00 ns, 10.4348 us/op
+WorkloadResult  27: 16384 op, 172060200.00 ns, 10.5017 us/op
+WorkloadResult  28: 16384 op, 175398200.00 ns, 10.7055 us/op
+WorkloadResult  29: 16384 op, 174227700.00 ns, 10.6340 us/op
+WorkloadResult  30: 16384 op, 171600000.00 ns, 10.4736 us/op
+WorkloadResult  31: 16384 op, 172591200.00 ns, 10.5341 us/op
+WorkloadResult  32: 16384 op, 170825600.00 ns, 10.4264 us/op
+WorkloadResult  33: 16384 op, 171253800.00 ns, 10.4525 us/op
+WorkloadResult  34: 16384 op, 169811400.00 ns, 10.3645 us/op
+WorkloadResult  35: 16384 op, 167339300.00 ns, 10.2136 us/op
+WorkloadResult  36: 16384 op, 171984400.00 ns, 10.4971 us/op
+WorkloadResult  37: 16384 op, 172579500.00 ns, 10.5334 us/op
+WorkloadResult  38: 16384 op, 173300000.00 ns, 10.5774 us/op
+WorkloadResult  39: 16384 op, 176371500.00 ns, 10.7649 us/op
+WorkloadResult  40: 16384 op, 179189400.00 ns, 10.9369 us/op
+WorkloadResult  41: 16384 op, 182140700.00 ns, 11.1170 us/op
+WorkloadResult  42: 16384 op, 181177500.00 ns, 11.0582 us/op
+WorkloadResult  43: 16384 op, 180332600.00 ns, 11.0066 us/op
+WorkloadResult  44: 16384 op, 181135800.00 ns, 11.0557 us/op
+WorkloadResult  45: 16384 op, 171792300.00 ns, 10.4854 us/op
+WorkloadResult  46: 16384 op, 170940900.00 ns, 10.4334 us/op
+WorkloadResult  47: 16384 op, 175622800.00 ns, 10.7192 us/op
+WorkloadResult  48: 16384 op, 177280900.00 ns, 10.8204 us/op
+WorkloadResult  49: 16384 op, 173241400.00 ns, 10.5738 us/op
+WorkloadResult  50: 16384 op, 177787600.00 ns, 10.8513 us/op
+WorkloadResult  51: 16384 op, 181692200.00 ns, 11.0896 us/op
+// GC:  36 0 0 151618512 16384
+// Threading:  0 0 16384
+
+// AfterAll
+// Benchmark Process 7140 has exited with code 0.
+
+Mean = 10.687 μs, StdErr = 0.060 μs (0.57%), N = 51, StdDev = 0.432 μs
+Min = 9.589 μs, Q1 = 10.472 μs, Median = 10.644 μs, Q3 = 10.903 μs, Max = 11.834 μs
+IQR = 0.431 μs, LowerFence = 9.826 μs, UpperFence = 11.549 μs
+ConfidenceInterval = [10.476 μs; 10.899 μs] (CI 99.9%), Margin = 0.211 μs (1.98% of Mean)
+Skewness = 0.09, Kurtosis = 3.78, MValue = 2
+
+// ** Remained 2 (33.3%) benchmark(s) to run. Estimated finish 2025-01-07 20:56 (0h 1m from now) **
+Setup power plan (GUID: 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c FriendlyName: High performance)
+// **************************
+// Benchmark: SimpleJsonBenchmark.NewtonsoftValueMapping: DefaultJob
+// *** Execute ***
+// Launch: 1 / 1
+// Execute: dotnet 9808b21c-fa84-4582-92c9-e5fe6b77b208.dll --anonymousPipes 1092 1144 --benchmarkName Ferris.Json.Benchmark.SimpleJsonBenchmark.NewtonsoftValueMapping --job Default --benchmarkId 4 in C:\dev\Ferris.Json\benchmark\bin\Release\net8.0\9808b21c-fa84-4582-92c9-e5fe6b77b208\bin\Release\net8.0
+// BeforeAnythingElse
+
+// Benchmark Process Environment Information:
+// BenchmarkDotNet v0.14.0
+// Runtime=.NET 8.0.11 (8.0.1124.51707), X64 RyuJIT AVX2
+// GC=Concurrent Workstation
+// HardwareIntrinsics=AVX2,AES,BMI1,BMI2,FMA,LZCNT,PCLMUL,POPCNT VectorSize=256
+// Job: DefaultJob
+
+OverheadJitting  1: 1 op, 403500.00 ns, 403.5000 us/op
+WorkloadJitting  1: 1 op, 159994200.00 ns, 159.9942 ms/op
+
+WorkloadPilot    1: 2 op, 419900.00 ns, 209.9500 us/op
+WorkloadPilot    2: 3 op, 282300.00 ns, 94.1000 us/op
+WorkloadPilot    3: 4 op, 437300.00 ns, 109.3250 us/op
+WorkloadPilot    4: 5 op, 455800.00 ns, 91.1600 us/op
+WorkloadPilot    5: 6 op, 533900.00 ns, 88.9833 us/op
+WorkloadPilot    6: 7 op, 588600.00 ns, 84.0857 us/op
+WorkloadPilot    7: 8 op, 634600.00 ns, 79.3250 us/op
+WorkloadPilot    8: 9 op, 698100.00 ns, 77.5667 us/op
+WorkloadPilot    9: 10 op, 778000.00 ns, 77.8000 us/op
+WorkloadPilot   10: 11 op, 936500.00 ns, 85.1364 us/op
+WorkloadPilot   11: 12 op, 1013900.00 ns, 84.4917 us/op
+WorkloadPilot   12: 13 op, 1057200.00 ns, 81.3231 us/op
+WorkloadPilot   13: 14 op, 1087700.00 ns, 77.6929 us/op
+WorkloadPilot   14: 15 op, 1169500.00 ns, 77.9667 us/op
+WorkloadPilot   15: 16 op, 1218700.00 ns, 76.1688 us/op
+WorkloadPilot   16: 32 op, 2547000.00 ns, 79.5938 us/op
+WorkloadPilot   17: 64 op, 4745100.00 ns, 74.1422 us/op
+WorkloadPilot   18: 128 op, 10272700.00 ns, 80.2555 us/op
+WorkloadPilot   19: 256 op, 19404800.00 ns, 75.8000 us/op
+WorkloadPilot   20: 512 op, 39406700.00 ns, 76.9662 us/op
+WorkloadPilot   21: 1024 op, 95706100.00 ns, 93.4630 us/op
+WorkloadPilot   22: 2048 op, 186803600.00 ns, 91.2127 us/op
+WorkloadPilot   23: 4096 op, 361137800.00 ns, 88.1684 us/op
+WorkloadPilot   24: 8192 op, 268999400.00 ns, 32.8368 us/op
+WorkloadPilot   25: 16384 op, 253859300.00 ns, 15.4943 us/op
+WorkloadPilot   26: 32768 op, 445767000.00 ns, 13.6037 us/op
+WorkloadPilot   27: 65536 op, 1038425600.00 ns, 15.8451 us/op
+
+WorkloadWarmup   1: 65536 op, 909782600.00 ns, 13.8822 us/op
+WorkloadWarmup   2: 65536 op, 977870300.00 ns, 14.9211 us/op
+WorkloadWarmup   3: 65536 op, 1017910500.00 ns, 15.5321 us/op
+WorkloadWarmup   4: 65536 op, 1321071400.00 ns, 20.1579 us/op
+WorkloadWarmup   5: 65536 op, 1025956600.00 ns, 15.6549 us/op
+WorkloadWarmup   6: 65536 op, 875633500.00 ns, 13.3611 us/op
+WorkloadWarmup   7: 65536 op, 861400800.00 ns, 13.1439 us/op
+WorkloadWarmup   8: 65536 op, 964879300.00 ns, 14.7229 us/op
+WorkloadWarmup   9: 65536 op, 847203600.00 ns, 12.9273 us/op
+
+// BeforeActualRun
+WorkloadActual   1: 65536 op, 760146400.00 ns, 11.5989 us/op
+WorkloadActual   2: 65536 op, 857929100.00 ns, 13.0910 us/op
+WorkloadActual   3: 65536 op, 760729800.00 ns, 11.6078 us/op
+WorkloadActual   4: 65536 op, 910373400.00 ns, 13.8912 us/op
+WorkloadActual   5: 65536 op, 886525100.00 ns, 13.5273 us/op
+WorkloadActual   6: 65536 op, 778616500.00 ns, 11.8807 us/op
+WorkloadActual   7: 65536 op, 726432100.00 ns, 11.0845 us/op
+WorkloadActual   8: 65536 op, 739669500.00 ns, 11.2865 us/op
+WorkloadActual   9: 65536 op, 881317000.00 ns, 13.4478 us/op
+WorkloadActual  10: 65536 op, 870121200.00 ns, 13.2770 us/op
+WorkloadActual  11: 65536 op, 784749400.00 ns, 11.9743 us/op
+WorkloadActual  12: 65536 op, 761191700.00 ns, 11.6149 us/op
+WorkloadActual  13: 65536 op, 758478000.00 ns, 11.5735 us/op
+WorkloadActual  14: 65536 op, 1022465700.00 ns, 15.6016 us/op
+WorkloadActual  15: 65536 op, 865642100.00 ns, 13.2087 us/op
+WorkloadActual  16: 65536 op, 800190700.00 ns, 12.2099 us/op
+WorkloadActual  17: 65536 op, 934612500.00 ns, 14.2611 us/op
+WorkloadActual  18: 65536 op, 1038730200.00 ns, 15.8498 us/op
+WorkloadActual  19: 65536 op, 853311600.00 ns, 13.0205 us/op
+WorkloadActual  20: 65536 op, 808287900.00 ns, 12.3335 us/op
+WorkloadActual  21: 65536 op, 768280500.00 ns, 11.7230 us/op
+WorkloadActual  22: 65536 op, 815616700.00 ns, 12.4453 us/op
+WorkloadActual  23: 65536 op, 917341700.00 ns, 13.9975 us/op
+WorkloadActual  24: 65536 op, 941464900.00 ns, 14.3656 us/op
+WorkloadActual  25: 65536 op, 859780700.00 ns, 13.1192 us/op
+WorkloadActual  26: 65536 op, 776385300.00 ns, 11.8467 us/op
+WorkloadActual  27: 65536 op, 854040900.00 ns, 13.0316 us/op
+WorkloadActual  28: 65536 op, 802766300.00 ns, 12.2492 us/op
+WorkloadActual  29: 65536 op, 742509100.00 ns, 11.3298 us/op
+WorkloadActual  30: 65536 op, 730221100.00 ns, 11.1423 us/op
+WorkloadActual  31: 65536 op, 737124700.00 ns, 11.2476 us/op
+WorkloadActual  32: 65536 op, 741336100.00 ns, 11.3119 us/op
+WorkloadActual  33: 65536 op, 873726200.00 ns, 13.3320 us/op
+WorkloadActual  34: 65536 op, 817147500.00 ns, 12.4687 us/op
+WorkloadActual  35: 65536 op, 766335100.00 ns, 11.6933 us/op
+WorkloadActual  36: 65536 op, 714448500.00 ns, 10.9016 us/op
+WorkloadActual  37: 65536 op, 711973500.00 ns, 10.8639 us/op
+WorkloadActual  38: 65536 op, 829780100.00 ns, 12.6614 us/op
+WorkloadActual  39: 65536 op, 812394700.00 ns, 12.3962 us/op
+WorkloadActual  40: 65536 op, 791545800.00 ns, 12.0780 us/op
+WorkloadActual  41: 65536 op, 773662500.00 ns, 11.8052 us/op
+WorkloadActual  42: 65536 op, 700398400.00 ns, 10.6872 us/op
+WorkloadActual  43: 65536 op, 872391300.00 ns, 13.3116 us/op
+WorkloadActual  44: 65536 op, 1539860600.00 ns, 23.4964 us/op
+WorkloadActual  45: 65536 op, 1504408700.00 ns, 22.9555 us/op
+WorkloadActual  46: 65536 op, 1320980300.00 ns, 20.1566 us/op
+WorkloadActual  47: 65536 op, 900387000.00 ns, 13.7388 us/op
+WorkloadActual  48: 65536 op, 975055800.00 ns, 14.8782 us/op
+WorkloadActual  49: 65536 op, 1265723300.00 ns, 19.3134 us/op
+WorkloadActual  50: 65536 op, 940513700.00 ns, 14.3511 us/op
+WorkloadActual  51: 65536 op, 894948400.00 ns, 13.6558 us/op
+WorkloadActual  52: 65536 op, 1124638100.00 ns, 17.1606 us/op
+WorkloadActual  53: 65536 op, 1002939800.00 ns, 15.3036 us/op
+WorkloadActual  54: 65536 op, 885922100.00 ns, 13.5181 us/op
+WorkloadActual  55: 65536 op, 857469300.00 ns, 13.0839 us/op
+WorkloadActual  56: 65536 op, 1089813300.00 ns, 16.6292 us/op
+WorkloadActual  57: 65536 op, 1054865300.00 ns, 16.0960 us/op
+WorkloadActual  58: 65536 op, 926762700.00 ns, 14.1413 us/op
+WorkloadActual  59: 65536 op, 894889400.00 ns, 13.6549 us/op
+WorkloadActual  60: 65536 op, 1061914400.00 ns, 16.2035 us/op
+WorkloadActual  61: 65536 op, 1148999200.00 ns, 17.5323 us/op
+WorkloadActual  62: 65536 op, 1102741100.00 ns, 16.8265 us/op
+WorkloadActual  63: 65536 op, 784837900.00 ns, 11.9757 us/op
+WorkloadActual  64: 65536 op, 826451100.00 ns, 12.6106 us/op
+WorkloadActual  65: 65536 op, 942542900.00 ns, 14.3821 us/op
+WorkloadActual  66: 65536 op, 1052988100.00 ns, 16.0673 us/op
+WorkloadActual  67: 65536 op, 932606800.00 ns, 14.2305 us/op
+WorkloadActual  68: 65536 op, 825163000.00 ns, 12.5910 us/op
+WorkloadActual  69: 65536 op, 867322300.00 ns, 13.2343 us/op
+WorkloadActual  70: 65536 op, 989374000.00 ns, 15.0966 us/op
+WorkloadActual  71: 65536 op, 891265900.00 ns, 13.5996 us/op
+WorkloadActual  72: 65536 op, 776653800.00 ns, 11.8508 us/op
+WorkloadActual  73: 65536 op, 725595300.00 ns, 11.0717 us/op
+WorkloadActual  74: 65536 op, 780948300.00 ns, 11.9163 us/op
+WorkloadActual  75: 65536 op, 880341600.00 ns, 13.4329 us/op
+WorkloadActual  76: 65536 op, 846208400.00 ns, 12.9121 us/op
+WorkloadActual  77: 65536 op, 809338100.00 ns, 12.3495 us/op
+WorkloadActual  78: 65536 op, 715201800.00 ns, 10.9131 us/op
+WorkloadActual  79: 65536 op, 826659700.00 ns, 12.6138 us/op
+WorkloadActual  80: 65536 op, 898647400.00 ns, 13.7123 us/op
+WorkloadActual  81: 65536 op, 959079400.00 ns, 14.6344 us/op
+WorkloadActual  82: 65536 op, 910036100.00 ns, 13.8860 us/op
+WorkloadActual  83: 65536 op, 919785900.00 ns, 14.0348 us/op
+WorkloadActual  84: 65536 op, 824410200.00 ns, 12.5795 us/op
+WorkloadActual  85: 65536 op, 782699200.00 ns, 11.9430 us/op
+WorkloadActual  86: 65536 op, 852698500.00 ns, 13.0111 us/op
+WorkloadActual  87: 65536 op, 802561900.00 ns, 12.2461 us/op
+WorkloadActual  88: 65536 op, 778172200.00 ns, 11.8740 us/op
+WorkloadActual  89: 65536 op, 788272900.00 ns, 12.0281 us/op
+WorkloadActual  90: 65536 op, 809563100.00 ns, 12.3530 us/op
+WorkloadActual  91: 65536 op, 782244700.00 ns, 11.9361 us/op
+WorkloadActual  92: 65536 op, 779029600.00 ns, 11.8870 us/op
+WorkloadActual  93: 65536 op, 791351700.00 ns, 12.0751 us/op
+WorkloadActual  94: 65536 op, 782600900.00 ns, 11.9415 us/op
+WorkloadActual  95: 65536 op, 786812300.00 ns, 12.0058 us/op
+WorkloadActual  96: 65536 op, 785059400.00 ns, 11.9791 us/op
+WorkloadActual  97: 65536 op, 786190700.00 ns, 11.9963 us/op
+WorkloadActual  98: 65536 op, 792448600.00 ns, 12.0918 us/op
+WorkloadActual  99: 65536 op, 795330400.00 ns, 12.1358 us/op
+WorkloadActual  100: 65536 op, 785769200.00 ns, 11.9899 us/op
+
+// AfterActualRun
+WorkloadResult   1: 65536 op, 760146400.00 ns, 11.5989 us/op
+WorkloadResult   2: 65536 op, 857929100.00 ns, 13.0910 us/op
+WorkloadResult   3: 65536 op, 760729800.00 ns, 11.6078 us/op
+WorkloadResult   4: 65536 op, 910373400.00 ns, 13.8912 us/op
+WorkloadResult   5: 65536 op, 886525100.00 ns, 13.5273 us/op
+WorkloadResult   6: 65536 op, 778616500.00 ns, 11.8807 us/op
+WorkloadResult   7: 65536 op, 726432100.00 ns, 11.0845 us/op
+WorkloadResult   8: 65536 op, 739669500.00 ns, 11.2865 us/op
+WorkloadResult   9: 65536 op, 881317000.00 ns, 13.4478 us/op
+WorkloadResult  10: 65536 op, 870121200.00 ns, 13.2770 us/op
+WorkloadResult  11: 65536 op, 784749400.00 ns, 11.9743 us/op
+WorkloadResult  12: 65536 op, 761191700.00 ns, 11.6149 us/op
+WorkloadResult  13: 65536 op, 758478000.00 ns, 11.5735 us/op
+WorkloadResult  14: 65536 op, 1022465700.00 ns, 15.6016 us/op
+WorkloadResult  15: 65536 op, 865642100.00 ns, 13.2087 us/op
+WorkloadResult  16: 65536 op, 800190700.00 ns, 12.2099 us/op
+WorkloadResult  17: 65536 op, 934612500.00 ns, 14.2611 us/op
+WorkloadResult  18: 65536 op, 1038730200.00 ns, 15.8498 us/op
+WorkloadResult  19: 65536 op, 853311600.00 ns, 13.0205 us/op
+WorkloadResult  20: 65536 op, 808287900.00 ns, 12.3335 us/op
+WorkloadResult  21: 65536 op, 768280500.00 ns, 11.7230 us/op
+WorkloadResult  22: 65536 op, 815616700.00 ns, 12.4453 us/op
+WorkloadResult  23: 65536 op, 917341700.00 ns, 13.9975 us/op
+WorkloadResult  24: 65536 op, 941464900.00 ns, 14.3656 us/op
+WorkloadResult  25: 65536 op, 859780700.00 ns, 13.1192 us/op
+WorkloadResult  26: 65536 op, 776385300.00 ns, 11.8467 us/op
+WorkloadResult  27: 65536 op, 854040900.00 ns, 13.0316 us/op
+WorkloadResult  28: 65536 op, 802766300.00 ns, 12.2492 us/op
+WorkloadResult  29: 65536 op, 742509100.00 ns, 11.3298 us/op
+WorkloadResult  30: 65536 op, 730221100.00 ns, 11.1423 us/op
+WorkloadResult  31: 65536 op, 737124700.00 ns, 11.2476 us/op
+WorkloadResult  32: 65536 op, 741336100.00 ns, 11.3119 us/op
+WorkloadResult  33: 65536 op, 873726200.00 ns, 13.3320 us/op
+WorkloadResult  34: 65536 op, 817147500.00 ns, 12.4687 us/op
+WorkloadResult  35: 65536 op, 766335100.00 ns, 11.6933 us/op
+WorkloadResult  36: 65536 op, 714448500.00 ns, 10.9016 us/op
+WorkloadResult  37: 65536 op, 711973500.00 ns, 10.8639 us/op
+WorkloadResult  38: 65536 op, 829780100.00 ns, 12.6614 us/op
+WorkloadResult  39: 65536 op, 812394700.00 ns, 12.3962 us/op
+WorkloadResult  40: 65536 op, 791545800.00 ns, 12.0780 us/op
+WorkloadResult  41: 65536 op, 773662500.00 ns, 11.8052 us/op
+WorkloadResult  42: 65536 op, 700398400.00 ns, 10.6872 us/op
+WorkloadResult  43: 65536 op, 872391300.00 ns, 13.3116 us/op
+WorkloadResult  44: 65536 op, 900387000.00 ns, 13.7388 us/op
+WorkloadResult  45: 65536 op, 975055800.00 ns, 14.8782 us/op
+WorkloadResult  46: 65536 op, 940513700.00 ns, 14.3511 us/op
+WorkloadResult  47: 65536 op, 894948400.00 ns, 13.6558 us/op
+WorkloadResult  48: 65536 op, 1002939800.00 ns, 15.3036 us/op
+WorkloadResult  49: 65536 op, 885922100.00 ns, 13.5181 us/op
+WorkloadResult  50: 65536 op, 857469300.00 ns, 13.0839 us/op
+WorkloadResult  51: 65536 op, 1089813300.00 ns, 16.6292 us/op
+WorkloadResult  52: 65536 op, 1054865300.00 ns, 16.0960 us/op
+WorkloadResult  53: 65536 op, 926762700.00 ns, 14.1413 us/op
+WorkloadResult  54: 65536 op, 894889400.00 ns, 13.6549 us/op
+WorkloadResult  55: 65536 op, 1061914400.00 ns, 16.2035 us/op
+WorkloadResult  56: 65536 op, 1102741100.00 ns, 16.8265 us/op
+WorkloadResult  57: 65536 op, 784837900.00 ns, 11.9757 us/op
+WorkloadResult  58: 65536 op, 826451100.00 ns, 12.6106 us/op
+WorkloadResult  59: 65536 op, 942542900.00 ns, 14.3821 us/op
+WorkloadResult  60: 65536 op, 1052988100.00 ns, 16.0673 us/op
+WorkloadResult  61: 65536 op, 932606800.00 ns, 14.2305 us/op
+WorkloadResult  62: 65536 op, 825163000.00 ns, 12.5910 us/op
+WorkloadResult  63: 65536 op, 867322300.00 ns, 13.2343 us/op
+WorkloadResult  64: 65536 op, 989374000.00 ns, 15.0966 us/op
+WorkloadResult  65: 65536 op, 891265900.00 ns, 13.5996 us/op
+WorkloadResult  66: 65536 op, 776653800.00 ns, 11.8508 us/op
+WorkloadResult  67: 65536 op, 725595300.00 ns, 11.0717 us/op
+WorkloadResult  68: 65536 op, 780948300.00 ns, 11.9163 us/op
+WorkloadResult  69: 65536 op, 880341600.00 ns, 13.4329 us/op
+WorkloadResult  70: 65536 op, 846208400.00 ns, 12.9121 us/op
+WorkloadResult  71: 65536 op, 809338100.00 ns, 12.3495 us/op
+WorkloadResult  72: 65536 op, 715201800.00 ns, 10.9131 us/op
+WorkloadResult  73: 65536 op, 826659700.00 ns, 12.6138 us/op
+WorkloadResult  74: 65536 op, 898647400.00 ns, 13.7123 us/op
+WorkloadResult  75: 65536 op, 959079400.00 ns, 14.6344 us/op
+WorkloadResult  76: 65536 op, 910036100.00 ns, 13.8860 us/op
+WorkloadResult  77: 65536 op, 919785900.00 ns, 14.0348 us/op
+WorkloadResult  78: 65536 op, 824410200.00 ns, 12.5795 us/op
+WorkloadResult  79: 65536 op, 782699200.00 ns, 11.9430 us/op
+WorkloadResult  80: 65536 op, 852698500.00 ns, 13.0111 us/op
+WorkloadResult  81: 65536 op, 802561900.00 ns, 12.2461 us/op
+WorkloadResult  82: 65536 op, 778172200.00 ns, 11.8740 us/op
+WorkloadResult  83: 65536 op, 788272900.00 ns, 12.0281 us/op
+WorkloadResult  84: 65536 op, 809563100.00 ns, 12.3530 us/op
+WorkloadResult  85: 65536 op, 782244700.00 ns, 11.9361 us/op
+WorkloadResult  86: 65536 op, 779029600.00 ns, 11.8870 us/op
+WorkloadResult  87: 65536 op, 791351700.00 ns, 12.0751 us/op
+WorkloadResult  88: 65536 op, 782600900.00 ns, 11.9415 us/op
+WorkloadResult  89: 65536 op, 786812300.00 ns, 12.0058 us/op
+WorkloadResult  90: 65536 op, 785059400.00 ns, 11.9791 us/op
+WorkloadResult  91: 65536 op, 786190700.00 ns, 11.9963 us/op
+WorkloadResult  92: 65536 op, 792448600.00 ns, 12.0918 us/op
+WorkloadResult  93: 65536 op, 795330400.00 ns, 12.1358 us/op
+WorkloadResult  94: 65536 op, 785769200.00 ns, 11.9899 us/op
+// GC:  124 0 0 522780536 65536
+// Threading:  0 0 65536
+
+// AfterAll
+// Benchmark Process 17628 has exited with code 0.
+
+Mean = 12.890 μs, StdErr = 0.145 μs (1.13%), N = 94, StdDev = 1.406 μs
+Min = 10.687 μs, Q1 = 11.921 μs, Median = 12.524 μs, Q3 = 13.656 μs, Max = 16.826 μs
+IQR = 1.734 μs, LowerFence = 9.320 μs, UpperFence = 16.257 μs
+ConfidenceInterval = [12.397 μs; 13.382 μs] (CI 99.9%), Margin = 0.493 μs (3.82% of Mean)
+Skewness = 0.86, Kurtosis = 3.18, MValue = 2.79
+
+// ** Remained 1 (16.7%) benchmark(s) to run. Estimated finish 2025-01-07 20:57 (0h 1m from now) **
+Setup power plan (GUID: 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c FriendlyName: High performance)
+// **************************
+// Benchmark: SimpleJsonBenchmark.TextJsonValueMapping: DefaultJob
+// *** Execute ***
+// Launch: 1 / 1
+// Execute: dotnet 9808b21c-fa84-4582-92c9-e5fe6b77b208.dll --anonymousPipes 1712 1284 --benchmarkName Ferris.Json.Benchmark.SimpleJsonBenchmark.TextJsonValueMapping --job Default --benchmarkId 5 in C:\dev\Ferris.Json\benchmark\bin\Release\net8.0\9808b21c-fa84-4582-92c9-e5fe6b77b208\bin\Release\net8.0
+// BeforeAnythingElse
+
+// Benchmark Process Environment Information:
+// BenchmarkDotNet v0.14.0
+// Runtime=.NET 8.0.11 (8.0.1124.51707), X64 RyuJIT AVX2
+// GC=Concurrent Workstation
+// HardwareIntrinsics=AVX2,AES,BMI1,BMI2,FMA,LZCNT,PCLMUL,POPCNT VectorSize=256
+// Job: DefaultJob
+
+OverheadJitting  1: 1 op, 279100.00 ns, 279.1000 us/op
+WorkloadJitting  1: 1 op, 225546700.00 ns, 225.5467 ms/op
+
+WorkloadPilot    1: 2 op, 465800.00 ns, 232.9000 us/op
+WorkloadPilot    2: 3 op, 223400.00 ns, 74.4667 us/op
+WorkloadPilot    3: 4 op, 256400.00 ns, 64.1000 us/op
+WorkloadPilot    4: 5 op, 298400.00 ns, 59.6800 us/op
+WorkloadPilot    5: 6 op, 1287200.00 ns, 214.5333 us/op
+WorkloadPilot    6: 7 op, 535400.00 ns, 76.4857 us/op
+WorkloadPilot    7: 8 op, 713200.00 ns, 89.1500 us/op
+WorkloadPilot    8: 9 op, 518400.00 ns, 57.6000 us/op
+WorkloadPilot    9: 10 op, 608200.00 ns, 60.8200 us/op
+WorkloadPilot   10: 11 op, 632700.00 ns, 57.5182 us/op
+WorkloadPilot   11: 12 op, 666400.00 ns, 55.5333 us/op
+WorkloadPilot   12: 13 op, 707500.00 ns, 54.4231 us/op
+WorkloadPilot   13: 14 op, 1076100.00 ns, 76.8643 us/op
+WorkloadPilot   14: 15 op, 1158800.00 ns, 77.2533 us/op
+WorkloadPilot   15: 16 op, 839900.00 ns, 52.4938 us/op
+WorkloadPilot   16: 32 op, 1629200.00 ns, 50.9125 us/op
+WorkloadPilot   17: 64 op, 3227700.00 ns, 50.4328 us/op
+WorkloadPilot   18: 128 op, 7792000.00 ns, 60.8750 us/op
+WorkloadPilot   19: 256 op, 14366700.00 ns, 56.1199 us/op
+WorkloadPilot   20: 512 op, 31156500.00 ns, 60.8525 us/op
+WorkloadPilot   21: 1024 op, 62757600.00 ns, 61.2867 us/op
+WorkloadPilot   22: 2048 op, 132257100.00 ns, 64.5787 us/op
+WorkloadPilot   23: 4096 op, 242607100.00 ns, 59.2302 us/op
+WorkloadPilot   24: 8192 op, 220165700.00 ns, 26.8757 us/op
+WorkloadPilot   25: 16384 op, 173453700.00 ns, 10.5868 us/op
+WorkloadPilot   26: 32768 op, 228592300.00 ns, 6.9761 us/op
+WorkloadPilot   27: 65536 op, 436208300.00 ns, 6.6560 us/op
+WorkloadPilot   28: 131072 op, 923529200.00 ns, 7.0460 us/op
+
+WorkloadWarmup   1: 131072 op, 822512100.00 ns, 6.2753 us/op
+WorkloadWarmup   2: 131072 op, 1138688100.00 ns, 8.6875 us/op
+WorkloadWarmup   3: 131072 op, 1377161800.00 ns, 10.5069 us/op
+WorkloadWarmup   4: 131072 op, 941048600.00 ns, 7.1796 us/op
+WorkloadWarmup   5: 131072 op, 838002100.00 ns, 6.3934 us/op
+WorkloadWarmup   6: 131072 op, 896656500.00 ns, 6.8409 us/op
+WorkloadWarmup   7: 131072 op, 796752900.00 ns, 6.0787 us/op
+
+// BeforeActualRun
+WorkloadActual   1: 131072 op, 767046600.00 ns, 5.8521 us/op
+WorkloadActual   2: 131072 op, 667991200.00 ns, 5.0964 us/op
+WorkloadActual   3: 131072 op, 665870400.00 ns, 5.0802 us/op
+WorkloadActual   4: 131072 op, 711210600.00 ns, 5.4261 us/op
+WorkloadActual   5: 131072 op, 721761900.00 ns, 5.5066 us/op
+WorkloadActual   6: 131072 op, 754708300.00 ns, 5.7580 us/op
+WorkloadActual   7: 131072 op, 763889400.00 ns, 5.8280 us/op
+WorkloadActual   8: 131072 op, 721454300.00 ns, 5.5043 us/op
+WorkloadActual   9: 131072 op, 723172300.00 ns, 5.5174 us/op
+WorkloadActual  10: 131072 op, 758711800.00 ns, 5.7885 us/op
+WorkloadActual  11: 131072 op, 728488700.00 ns, 5.5579 us/op
+WorkloadActual  12: 131072 op, 712559200.00 ns, 5.4364 us/op
+WorkloadActual  13: 131072 op, 756460600.00 ns, 5.7713 us/op
+WorkloadActual  14: 131072 op, 765755100.00 ns, 5.8422 us/op
+WorkloadActual  15: 131072 op, 779049100.00 ns, 5.9437 us/op
+WorkloadActual  16: 131072 op, 758308500.00 ns, 5.7854 us/op
+WorkloadActual  17: 131072 op, 722689800.00 ns, 5.5137 us/op
+WorkloadActual  18: 131072 op, 720476000.00 ns, 5.4968 us/op
+WorkloadActual  19: 131072 op, 769818200.00 ns, 5.8732 us/op
+WorkloadActual  20: 131072 op, 735098800.00 ns, 5.6084 us/op
+WorkloadActual  21: 131072 op, 722793000.00 ns, 5.5145 us/op
+WorkloadActual  22: 131072 op, 712174300.00 ns, 5.4335 us/op
+WorkloadActual  23: 131072 op, 748893700.00 ns, 5.7136 us/op
+WorkloadActual  24: 131072 op, 730532600.00 ns, 5.5735 us/op
+WorkloadActual  25: 131072 op, 721738400.00 ns, 5.5064 us/op
+WorkloadActual  26: 131072 op, 758427400.00 ns, 5.7863 us/op
+WorkloadActual  27: 131072 op, 737073400.00 ns, 5.6234 us/op
+WorkloadActual  28: 131072 op, 723371900.00 ns, 5.5189 us/op
+WorkloadActual  29: 131072 op, 760356700.00 ns, 5.8011 us/op
+WorkloadActual  30: 131072 op, 755885300.00 ns, 5.7669 us/op
+WorkloadActual  31: 131072 op, 758282800.00 ns, 5.7852 us/op
+WorkloadActual  32: 131072 op, 719999100.00 ns, 5.4932 us/op
+WorkloadActual  33: 131072 op, 717896600.00 ns, 5.4771 us/op
+WorkloadActual  34: 131072 op, 756280400.00 ns, 5.7700 us/op
+WorkloadActual  35: 131072 op, 895215400.00 ns, 6.8300 us/op
+WorkloadActual  36: 131072 op, 916075900.00 ns, 6.9891 us/op
+WorkloadActual  37: 131072 op, 890923400.00 ns, 6.7972 us/op
+WorkloadActual  38: 131072 op, 903730200.00 ns, 6.8949 us/op
+WorkloadActual  39: 131072 op, 937610700.00 ns, 7.1534 us/op
+WorkloadActual  40: 131072 op, 1044029100.00 ns, 7.9653 us/op
+WorkloadActual  41: 131072 op, 1095124700.00 ns, 8.3551 us/op
+WorkloadActual  42: 131072 op, 900436600.00 ns, 6.8698 us/op
+WorkloadActual  43: 131072 op, 1006761400.00 ns, 7.6810 us/op
+WorkloadActual  44: 131072 op, 959702100.00 ns, 7.3219 us/op
+WorkloadActual  45: 131072 op, 908652000.00 ns, 6.9325 us/op
+WorkloadActual  46: 131072 op, 870552200.00 ns, 6.6418 us/op
+WorkloadActual  47: 131072 op, 842601800.00 ns, 6.4285 us/op
+WorkloadActual  48: 131072 op, 747917900.00 ns, 5.7062 us/op
+WorkloadActual  49: 131072 op, 735912600.00 ns, 5.6146 us/op
+WorkloadActual  50: 131072 op, 764988700.00 ns, 5.8364 us/op
+WorkloadActual  51: 131072 op, 796745700.00 ns, 6.0787 us/op
+WorkloadActual  52: 131072 op, 827436500.00 ns, 6.3128 us/op
+WorkloadActual  53: 131072 op, 941555700.00 ns, 7.1835 us/op
+WorkloadActual  54: 131072 op, 828411800.00 ns, 6.3203 us/op
+WorkloadActual  55: 131072 op, 848145800.00 ns, 6.4708 us/op
+WorkloadActual  56: 131072 op, 928667000.00 ns, 7.0852 us/op
+WorkloadActual  57: 131072 op, 883669100.00 ns, 6.7419 us/op
+WorkloadActual  58: 131072 op, 842910700.00 ns, 6.4309 us/op
+WorkloadActual  59: 131072 op, 790363900.00 ns, 6.0300 us/op
+WorkloadActual  60: 131072 op, 732391500.00 ns, 5.5877 us/op
+WorkloadActual  61: 131072 op, 732144700.00 ns, 5.5858 us/op
+WorkloadActual  62: 131072 op, 723781400.00 ns, 5.5220 us/op
+WorkloadActual  63: 131072 op, 716860900.00 ns, 5.4692 us/op
+WorkloadActual  64: 131072 op, 723693600.00 ns, 5.5213 us/op
+WorkloadActual  65: 131072 op, 808776900.00 ns, 6.1705 us/op
+WorkloadActual  66: 131072 op, 821502700.00 ns, 6.2676 us/op
+WorkloadActual  67: 131072 op, 760915500.00 ns, 5.8053 us/op
+WorkloadActual  68: 131072 op, 748208200.00 ns, 5.7084 us/op
+WorkloadActual  69: 131072 op, 712878300.00 ns, 5.4388 us/op
+WorkloadActual  70: 131072 op, 770106300.00 ns, 5.8754 us/op
+WorkloadActual  71: 131072 op, 788756800.00 ns, 6.0177 us/op
+WorkloadActual  72: 131072 op, 785473700.00 ns, 5.9927 us/op
+WorkloadActual  73: 131072 op, 732289600.00 ns, 5.5869 us/op
+WorkloadActual  74: 131072 op, 720198000.00 ns, 5.4947 us/op
+WorkloadActual  75: 131072 op, 745916800.00 ns, 5.6909 us/op
+WorkloadActual  76: 131072 op, 840140600.00 ns, 6.4098 us/op
+WorkloadActual  77: 131072 op, 793830300.00 ns, 6.0564 us/op
+WorkloadActual  78: 131072 op, 741091200.00 ns, 5.6541 us/op
+WorkloadActual  79: 131072 op, 738198100.00 ns, 5.6320 us/op
+WorkloadActual  80: 131072 op, 714738100.00 ns, 5.4530 us/op
+WorkloadActual  81: 131072 op, 722728200.00 ns, 5.5140 us/op
+WorkloadActual  82: 131072 op, 741203800.00 ns, 5.6549 us/op
+WorkloadActual  83: 131072 op, 777876800.00 ns, 5.9347 us/op
+WorkloadActual  84: 131072 op, 782113700.00 ns, 5.9671 us/op
+WorkloadActual  85: 131072 op, 749718500.00 ns, 5.7199 us/op
+WorkloadActual  86: 131072 op, 737208300.00 ns, 5.6245 us/op
+WorkloadActual  87: 131072 op, 731866400.00 ns, 5.5837 us/op
+WorkloadActual  88: 131072 op, 707851700.00 ns, 5.4005 us/op
+WorkloadActual  89: 131072 op, 707293200.00 ns, 5.3962 us/op
+WorkloadActual  90: 131072 op, 716142600.00 ns, 5.4637 us/op
+WorkloadActual  91: 131072 op, 719590500.00 ns, 5.4900 us/op
+WorkloadActual  92: 131072 op, 710430600.00 ns, 5.4202 us/op
+WorkloadActual  93: 131072 op, 744813900.00 ns, 5.6825 us/op
+WorkloadActual  94: 131072 op, 811653100.00 ns, 6.1924 us/op
+WorkloadActual  95: 131072 op, 773789900.00 ns, 5.9035 us/op
+WorkloadActual  96: 131072 op, 753236300.00 ns, 5.7467 us/op
+WorkloadActual  97: 131072 op, 796889900.00 ns, 6.0798 us/op
+WorkloadActual  98: 131072 op, 982234600.00 ns, 7.4939 us/op
+WorkloadActual  99: 131072 op, 1332438200.00 ns, 10.1657 us/op
+WorkloadActual  100: 131072 op, 1007875300.00 ns, 7.6895 us/op
+
+// AfterActualRun
+WorkloadResult   1: 131072 op, 767046600.00 ns, 5.8521 us/op
+WorkloadResult   2: 131072 op, 667991200.00 ns, 5.0964 us/op
+WorkloadResult   3: 131072 op, 665870400.00 ns, 5.0802 us/op
+WorkloadResult   4: 131072 op, 711210600.00 ns, 5.4261 us/op
+WorkloadResult   5: 131072 op, 721761900.00 ns, 5.5066 us/op
+WorkloadResult   6: 131072 op, 754708300.00 ns, 5.7580 us/op
+WorkloadResult   7: 131072 op, 763889400.00 ns, 5.8280 us/op
+WorkloadResult   8: 131072 op, 721454300.00 ns, 5.5043 us/op
+WorkloadResult   9: 131072 op, 723172300.00 ns, 5.5174 us/op
+WorkloadResult  10: 131072 op, 758711800.00 ns, 5.7885 us/op
+WorkloadResult  11: 131072 op, 728488700.00 ns, 5.5579 us/op
+WorkloadResult  12: 131072 op, 712559200.00 ns, 5.4364 us/op
+WorkloadResult  13: 131072 op, 756460600.00 ns, 5.7713 us/op
+WorkloadResult  14: 131072 op, 765755100.00 ns, 5.8422 us/op
+WorkloadResult  15: 131072 op, 779049100.00 ns, 5.9437 us/op
+WorkloadResult  16: 131072 op, 758308500.00 ns, 5.7854 us/op
+WorkloadResult  17: 131072 op, 722689800.00 ns, 5.5137 us/op
+WorkloadResult  18: 131072 op, 720476000.00 ns, 5.4968 us/op
+WorkloadResult  19: 131072 op, 769818200.00 ns, 5.8732 us/op
+WorkloadResult  20: 131072 op, 735098800.00 ns, 5.6084 us/op
+WorkloadResult  21: 131072 op, 722793000.00 ns, 5.5145 us/op
+WorkloadResult  22: 131072 op, 712174300.00 ns, 5.4335 us/op
+WorkloadResult  23: 131072 op, 748893700.00 ns, 5.7136 us/op
+WorkloadResult  24: 131072 op, 730532600.00 ns, 5.5735 us/op
+WorkloadResult  25: 131072 op, 721738400.00 ns, 5.5064 us/op
+WorkloadResult  26: 131072 op, 758427400.00 ns, 5.7863 us/op
+WorkloadResult  27: 131072 op, 737073400.00 ns, 5.6234 us/op
+WorkloadResult  28: 131072 op, 723371900.00 ns, 5.5189 us/op
+WorkloadResult  29: 131072 op, 760356700.00 ns, 5.8011 us/op
+WorkloadResult  30: 131072 op, 755885300.00 ns, 5.7669 us/op
+WorkloadResult  31: 131072 op, 758282800.00 ns, 5.7852 us/op
+WorkloadResult  32: 131072 op, 719999100.00 ns, 5.4932 us/op
+WorkloadResult  33: 131072 op, 717896600.00 ns, 5.4771 us/op
+WorkloadResult  34: 131072 op, 756280400.00 ns, 5.7700 us/op
+WorkloadResult  35: 131072 op, 895215400.00 ns, 6.8300 us/op
+WorkloadResult  36: 131072 op, 916075900.00 ns, 6.9891 us/op
+WorkloadResult  37: 131072 op, 890923400.00 ns, 6.7972 us/op
+WorkloadResult  38: 131072 op, 903730200.00 ns, 6.8949 us/op
+WorkloadResult  39: 131072 op, 937610700.00 ns, 7.1534 us/op
+WorkloadResult  40: 131072 op, 900436600.00 ns, 6.8698 us/op
+WorkloadResult  41: 131072 op, 908652000.00 ns, 6.9325 us/op
+WorkloadResult  42: 131072 op, 870552200.00 ns, 6.6418 us/op
+WorkloadResult  43: 131072 op, 842601800.00 ns, 6.4285 us/op
+WorkloadResult  44: 131072 op, 747917900.00 ns, 5.7062 us/op
+WorkloadResult  45: 131072 op, 735912600.00 ns, 5.6146 us/op
+WorkloadResult  46: 131072 op, 764988700.00 ns, 5.8364 us/op
+WorkloadResult  47: 131072 op, 796745700.00 ns, 6.0787 us/op
+WorkloadResult  48: 131072 op, 827436500.00 ns, 6.3128 us/op
+WorkloadResult  49: 131072 op, 941555700.00 ns, 7.1835 us/op
+WorkloadResult  50: 131072 op, 828411800.00 ns, 6.3203 us/op
+WorkloadResult  51: 131072 op, 848145800.00 ns, 6.4708 us/op
+WorkloadResult  52: 131072 op, 928667000.00 ns, 7.0852 us/op
+WorkloadResult  53: 131072 op, 883669100.00 ns, 6.7419 us/op
+WorkloadResult  54: 131072 op, 842910700.00 ns, 6.4309 us/op
+WorkloadResult  55: 131072 op, 790363900.00 ns, 6.0300 us/op
+WorkloadResult  56: 131072 op, 732391500.00 ns, 5.5877 us/op
+WorkloadResult  57: 131072 op, 732144700.00 ns, 5.5858 us/op
+WorkloadResult  58: 131072 op, 723781400.00 ns, 5.5220 us/op
+WorkloadResult  59: 131072 op, 716860900.00 ns, 5.4692 us/op
+WorkloadResult  60: 131072 op, 723693600.00 ns, 5.5213 us/op
+WorkloadResult  61: 131072 op, 808776900.00 ns, 6.1705 us/op
+WorkloadResult  62: 131072 op, 821502700.00 ns, 6.2676 us/op
+WorkloadResult  63: 131072 op, 760915500.00 ns, 5.8053 us/op
+WorkloadResult  64: 131072 op, 748208200.00 ns, 5.7084 us/op
+WorkloadResult  65: 131072 op, 712878300.00 ns, 5.4388 us/op
+WorkloadResult  66: 131072 op, 770106300.00 ns, 5.8754 us/op
+WorkloadResult  67: 131072 op, 788756800.00 ns, 6.0177 us/op
+WorkloadResult  68: 131072 op, 785473700.00 ns, 5.9927 us/op
+WorkloadResult  69: 131072 op, 732289600.00 ns, 5.5869 us/op
+WorkloadResult  70: 131072 op, 720198000.00 ns, 5.4947 us/op
+WorkloadResult  71: 131072 op, 745916800.00 ns, 5.6909 us/op
+WorkloadResult  72: 131072 op, 840140600.00 ns, 6.4098 us/op
+WorkloadResult  73: 131072 op, 793830300.00 ns, 6.0564 us/op
+WorkloadResult  74: 131072 op, 741091200.00 ns, 5.6541 us/op
+WorkloadResult  75: 131072 op, 738198100.00 ns, 5.6320 us/op
+WorkloadResult  76: 131072 op, 714738100.00 ns, 5.4530 us/op
+WorkloadResult  77: 131072 op, 722728200.00 ns, 5.5140 us/op
+WorkloadResult  78: 131072 op, 741203800.00 ns, 5.6549 us/op
+WorkloadResult  79: 131072 op, 777876800.00 ns, 5.9347 us/op
+WorkloadResult  80: 131072 op, 782113700.00 ns, 5.9671 us/op
+WorkloadResult  81: 131072 op, 749718500.00 ns, 5.7199 us/op
+WorkloadResult  82: 131072 op, 737208300.00 ns, 5.6245 us/op
+WorkloadResult  83: 131072 op, 731866400.00 ns, 5.5837 us/op
+WorkloadResult  84: 131072 op, 707851700.00 ns, 5.4005 us/op
+WorkloadResult  85: 131072 op, 707293200.00 ns, 5.3962 us/op
+WorkloadResult  86: 131072 op, 716142600.00 ns, 5.4637 us/op
+WorkloadResult  87: 131072 op, 719590500.00 ns, 5.4900 us/op
+WorkloadResult  88: 131072 op, 710430600.00 ns, 5.4202 us/op
+WorkloadResult  89: 131072 op, 744813900.00 ns, 5.6825 us/op
+WorkloadResult  90: 131072 op, 811653100.00 ns, 6.1924 us/op
+WorkloadResult  91: 131072 op, 773789900.00 ns, 5.9035 us/op
+WorkloadResult  92: 131072 op, 753236300.00 ns, 5.7467 us/op
+WorkloadResult  93: 131072 op, 796889900.00 ns, 6.0798 us/op
+// GC:  34 0 0 143674128 131072
+// Threading:  0 0 131072
+
+// AfterAll
+// Benchmark Process 32476 has exited with code 0.
+
+Mean = 5.871 μs, StdErr = 0.049 μs (0.84%), N = 93, StdDev = 0.477 μs
+Min = 5.080 μs, Q1 = 5.517 μs, Median = 5.747 μs, Q3 = 6.030 μs, Max = 7.183 μs
+IQR = 0.513 μs, LowerFence = 4.748 μs, UpperFence = 6.799 μs
+ConfidenceInterval = [5.703 μs; 6.039 μs] (CI 99.9%), Margin = 0.168 μs (2.87% of Mean)
+Skewness = 1.17, Kurtosis = 3.58, MValue = 2.63
+
+// ** Remained 0 (0.0%) benchmark(s) to run. Estimated finish 2025-01-07 20:58 (0h 0m from now) **
+Successfully reverted power plan (GUID: 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c FriendlyName: High performance)
+// ***** BenchmarkRunner: Finish  *****
+
+// * Export *
+  BenchmarkDotNet.Artifacts\results\Ferris.Json.Benchmark.SimpleJsonBenchmark-report.csv
+  BenchmarkDotNet.Artifacts\results\Ferris.Json.Benchmark.SimpleJsonBenchmark-report-github.md
+  BenchmarkDotNet.Artifacts\results\Ferris.Json.Benchmark.SimpleJsonBenchmark-report.html
+  BenchmarkDotNet.Artifacts\results\Ferris.Json.Benchmark.SimpleJsonBenchmark-asm.md
+
+// * Detailed results *
+SimpleJsonBenchmark.FerrisSingleMapping: DefaultJob
+Runtime = .NET 8.0.11 (8.0.1124.51707), X64 RyuJIT AVX2; GC = Concurrent Workstation
+Mean = 530.637 ns, StdErr = 6.424 ns (1.21%), N = 92, StdDev = 61.612 ns
+Min = 436.957 ns, Q1 = 486.507 ns, Median = 520.620 ns, Q3 = 564.833 ns, Max = 714.372 ns
+IQR = 78.326 ns, LowerFence = 369.018 ns, UpperFence = 682.322 ns
+ConfidenceInterval = [508.793 ns; 552.482 ns] (CI 99.9%), Margin = 21.844 ns (4.12% of Mean)
+Skewness = 0.83, Kurtosis = 3.32, MValue = 3.16
+-------------------- Histogram --------------------
+[432.310 ns ; 469.538 ns) | @@@@@@@@@@@
+[469.538 ns ; 505.364 ns) | @@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+[505.364 ns ; 547.361 ns) | @@@@@@@@@@@@@@@@@@@@@@@
+[547.361 ns ; 594.110 ns) | @@@@@@@@@@@@@@@@@
+[594.110 ns ; 620.909 ns) | @@
+[620.909 ns ; 656.735 ns) | @@@@@@
+[656.735 ns ; 702.784 ns) | @@@
+[702.784 ns ; 732.285 ns) | @
+---------------------------------------------------
+
+SimpleJsonBenchmark.NewtonsoftSingleMapping: DefaultJob
+Runtime = .NET 8.0.11 (8.0.1124.51707), X64 RyuJIT AVX2; GC = Concurrent Workstation
+Mean = 1.235 μs, StdErr = 0.044 μs (3.56%), N = 90, StdDev = 0.417 μs
+Min = 0.910 μs, Q1 = 0.948 μs, Median = 1.068 μs, Q3 = 1.326 μs, Max = 2.441 μs
+IQR = 0.378 μs, LowerFence = 0.381 μs, UpperFence = 1.893 μs
+ConfidenceInterval = [1.086 μs; 1.385 μs] (CI 99.9%), Margin = 0.149 μs (12.10% of Mean)
+Skewness = 1.62, Kurtosis = 4.51, MValue = 2.43
+-------------------- Histogram --------------------
+[0.907 μs ; 1.151 μs) | @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+[1.151 μs ; 1.384 μs) | @@@@@@@@@@@@@@
+[1.384 μs ; 1.553 μs) | @@
+[1.553 μs ; 1.797 μs) | @@@@@@
+[1.797 μs ; 1.972 μs) | @
+[1.972 μs ; 2.257 μs) | @@@@@
+[2.257 μs ; 2.501 μs) | @@@@@
+---------------------------------------------------
+
+SimpleJsonBenchmark.STJSingleMapping: DefaultJob
+Runtime = .NET 8.0.11 (8.0.1124.51707), X64 RyuJIT AVX2; GC = Concurrent Workstation
+Mean = 507.485 ns, StdErr = 2.966 ns (0.58%), N = 79, StdDev = 26.365 ns
+Min = 449.302 ns, Q1 = 489.260 ns, Median = 503.298 ns, Q3 = 522.474 ns, Max = 572.287 ns
+IQR = 33.214 ns, LowerFence = 439.439 ns, UpperFence = 572.295 ns
+ConfidenceInterval = [497.341 ns; 517.628 ns] (CI 99.9%), Margin = 10.144 ns (2.00% of Mean)
+Skewness = 0.39, Kurtosis = 2.81, MValue = 2
+-------------------- Histogram --------------------
+[443.336 ns ; 459.465 ns) | @@
+[459.465 ns ; 476.765 ns) | @@@@
+[476.765 ns ; 493.687 ns) | @@@@@@@@@@@@@@@@
+[493.687 ns ; 509.816 ns) | @@@@@@@@@@@@@@@@@@@@@@@@
+[509.816 ns ; 525.686 ns) | @@@@@@@@@@@@@@@
+[525.686 ns ; 543.156 ns) | @@@@@@@@@@
+[543.156 ns ; 564.089 ns) | @@@@@@
+[564.089 ns ; 580.351 ns) | @@
+---------------------------------------------------
+
+SimpleJsonBenchmark.FerrisValueMapping: DefaultJob
+Runtime = .NET 8.0.11 (8.0.1124.51707), X64 RyuJIT AVX2; GC = Concurrent Workstation
+Mean = 10.687 μs, StdErr = 0.060 μs (0.57%), N = 51, StdDev = 0.432 μs
+Min = 9.589 μs, Q1 = 10.472 μs, Median = 10.644 μs, Q3 = 10.903 μs, Max = 11.834 μs
+IQR = 0.431 μs, LowerFence = 9.826 μs, UpperFence = 11.549 μs
+ConfidenceInterval = [10.476 μs; 10.899 μs] (CI 99.9%), Margin = 0.211 μs (1.98% of Mean)
+Skewness = 0.09, Kurtosis = 3.78, MValue = 2
+-------------------- Histogram --------------------
+[ 9.436 μs ;  9.753 μs) | @@
+[ 9.753 μs ; 10.098 μs) | @
+[10.098 μs ; 10.420 μs) | @@@@@
+[10.420 μs ; 10.726 μs) | @@@@@@@@@@@@@@@@@@@@@
+[10.726 μs ; 11.058 μs) | @@@@@@@@@@@@@@@
+[11.058 μs ; 11.301 μs) | @@
+[11.301 μs ; 11.681 μs) | @@@@
+[11.681 μs ; 11.987 μs) | @
+---------------------------------------------------
+
+SimpleJsonBenchmark.NewtonsoftValueMapping: DefaultJob
+Runtime = .NET 8.0.11 (8.0.1124.51707), X64 RyuJIT AVX2; GC = Concurrent Workstation
+Mean = 12.890 μs, StdErr = 0.145 μs (1.13%), N = 94, StdDev = 1.406 μs
+Min = 10.687 μs, Q1 = 11.921 μs, Median = 12.524 μs, Q3 = 13.656 μs, Max = 16.826 μs
+IQR = 1.734 μs, LowerFence = 9.320 μs, UpperFence = 16.257 μs
+ConfidenceInterval = [12.397 μs; 13.382 μs] (CI 99.9%), Margin = 0.493 μs (3.82% of Mean)
+Skewness = 0.86, Kurtosis = 3.18, MValue = 2.79
+-------------------- Histogram --------------------
+[10.281 μs ; 10.833 μs) | @
+[10.833 μs ; 11.804 μs) | @@@@@@@@@@@@@@@@
+[11.804 μs ; 12.615 μs) | @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+[12.615 μs ; 12.969 μs) | @@
+[12.969 μs ; 13.781 μs) | @@@@@@@@@@@@@@@@@@@@
+[13.781 μs ; 14.666 μs) | @@@@@@@@@@@
+[14.666 μs ; 15.497 μs) | @@@
+[15.497 μs ; 16.308 μs) | @@@@@
+[16.308 μs ; 17.232 μs) | @@
+---------------------------------------------------
+
+SimpleJsonBenchmark.TextJsonValueMapping: DefaultJob
+Runtime = .NET 8.0.11 (8.0.1124.51707), X64 RyuJIT AVX2; GC = Concurrent Workstation
+Mean = 5.871 μs, StdErr = 0.049 μs (0.84%), N = 93, StdDev = 0.477 μs
+Min = 5.080 μs, Q1 = 5.517 μs, Median = 5.747 μs, Q3 = 6.030 μs, Max = 7.183 μs
+IQR = 0.513 μs, LowerFence = 4.748 μs, UpperFence = 6.799 μs
+ConfidenceInterval = [5.703 μs; 6.039 μs] (CI 99.9%), Margin = 0.168 μs (2.87% of Mean)
+Skewness = 1.17, Kurtosis = 3.58, MValue = 2.63
+-------------------- Histogram --------------------
+[4.942 μs ; 5.227 μs) | @@
+[5.227 μs ; 5.387 μs) | 
+[5.387 μs ; 5.664 μs) | @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+[5.664 μs ; 5.951 μs) | @@@@@@@@@@@@@@@@@@@@@@@@@@
+[5.951 μs ; 6.218 μs) | @@@@@@@@@
+[6.218 μs ; 6.507 μs) | @@@@@@@
+[6.507 μs ; 6.727 μs) | @
+[6.727 μs ; 7.004 μs) | @@@@@@@
+[7.004 μs ; 7.322 μs) | @@@
+---------------------------------------------------
+
+// * Summary *
+
+BenchmarkDotNet v0.14.0, Windows 11 (10.0.22631.4602/23H2/2023Update/SunValley3)
+Intel Core i7-8565U CPU 1.80GHz (Whiskey Lake), 1 CPU, 8 logical and 4 physical cores
+.NET SDK 8.0.307
+  [Host]     : .NET 8.0.11 (8.0.1124.51707), X64 RyuJIT AVX2
+  DefaultJob : .NET 8.0.11 (8.0.1124.51707), X64 RyuJIT AVX2
+
+
+| Method                  | Categories | Mean        | Error     | StdDev      | Median      | Ratio | RatioSD | Gen0   | Code Size | Allocated | Alloc Ratio |
+|------------------------ |----------- |------------:|----------:|------------:|------------:|------:|--------:|-------:|----------:|----------:|------------:|
+| FerrisSingleMapping     | Single     |    530.6 ns |  21.84 ns |    61.61 ns |    520.6 ns |  1.05 |    0.13 | 0.1926 |  17,027 B |     808 B |        5.32 |
+| NewtonsoftSingleMapping | Single     |  1,235.5 ns | 149.49 ns |   416.72 ns |  1,067.6 ns |  2.44 |    0.83 | 0.9613 |   2,204 B |    4024 B |       26.47 |
+| STJSingleMapping        | Single     |    507.5 ns |  10.14 ns |    26.36 ns |    503.3 ns |  1.00 |    0.07 | 0.0362 |   4,124 B |     152 B |        1.00 |
+|                         |            |             |           |             |             |       |         |        |           |           |             |
+| FerrisValueMapping      | Value      | 10,687.4 ns | 211.49 ns |   432.03 ns | 10,644.2 ns |  1.83 |    0.16 | 2.1973 |  16,004 B |    9254 B |        8.44 |
+| NewtonsoftValueMapping  | Value      | 12,889.6 ns | 492.83 ns | 1,406.06 ns | 12,524.1 ns |  2.21 |    0.29 | 1.8921 |   2,201 B |    7977 B |        7.28 |
+| TextJsonValueMapping    | Value      |  5,871.1 ns | 168.22 ns |   477.20 ns |  5,746.7 ns |  1.01 |    0.11 | 0.2594 |   4,890 B |    1096 B |        1.00 |
+
+// * Warnings *
+MultimodalDistribution
+  SimpleJsonBenchmark.FerrisSingleMapping: Default -> It seems that the distribution can have several modes (mValue = 3.16)
+
+// * Hints *
+Outliers
+  SimpleJsonBenchmark.FerrisSingleMapping: Default     -> 8 outliers were removed (728.64 ns..1.11 μs)
+  SimpleJsonBenchmark.NewtonsoftSingleMapping: Default -> 10 outliers were removed (2.58 μs..3.40 μs)
+  SimpleJsonBenchmark.STJSingleMapping: Default        -> 4 outliers were removed (598.97 ns..852.68 ns)
+  SimpleJsonBenchmark.FerrisValueMapping: Default      -> 10 outliers were removed (12.54 μs..14.65 μs)
+  SimpleJsonBenchmark.NewtonsoftValueMapping: Default  -> 6 outliers were removed (17.16 μs..23.50 μs)
+  SimpleJsonBenchmark.TextJsonValueMapping: Default    -> 7 outliers were removed (7.32 μs..10.17 μs)
+
+// * Legends *
+  Categories  : All categories of the corresponded method, class, and assembly
+  Mean        : Arithmetic mean of all measurements
+  Error       : Half of 99.9% confidence interval
+  StdDev      : Standard deviation of all measurements
+  Median      : Value separating the higher half of all measurements (50th percentile)
+  Ratio       : Mean of the ratio distribution ([Current]/[Baseline])
+  RatioSD     : Standard deviation of the ratio distribution ([Current]/[Baseline])
+  Gen0        : GC Generation 0 collects per 1000 operations
+  Code Size   : Native code size of the disassembled method(s)
+  Allocated   : Allocated memory per single operation (managed only, inclusive, 1KB = 1024B)
+  Alloc Ratio : Allocated memory ratio distribution ([Current]/[Baseline])
+  1 ns        : 1 Nanosecond (0.000000001 sec)
+
+// * Diagnostic Output - MemoryDiagnoser *
+
+// * Diagnostic Output - DisassemblyDiagnoser *
+Disassembled benchmarks got exported to ".\BenchmarkDotNet.Artifacts\results\*asm.md"
+
+// ***** BenchmarkRunner: End *****
+Run time: 00:06:52 (412.83 sec), executed benchmarks: 6
+
+Global total time: 00:07:08 (428.58 sec), executed benchmarks: 6
+// * Artifacts cleanup *
+Artifacts cleanup is finished

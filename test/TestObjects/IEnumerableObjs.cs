@@ -15,7 +15,7 @@ internal class LinkedListObj
 {
     public LinkedList<StringPropertyObj>? Strings { get; set; }
 }
-internal class MixedListTestObj
+public class MixedListTestObj
 {
     public List<StringPropertyObj>? Strings { get; set; }
     public string? Property { get; set; }

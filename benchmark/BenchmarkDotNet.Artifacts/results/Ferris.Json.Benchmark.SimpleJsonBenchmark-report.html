@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='utf-8' />
+<title>Ferris.Json.Benchmark.SimpleJsonBenchmark-20250107-210906</title>
+
+<style type="text/css">
+	table { border-collapse: collapse; display: block; width: 100%; overflow: auto; }
+	td, th { padding: 6px 13px; border: 1px solid #ddd; text-align: right; }
+	tr { background-color: #fff; border-top: 1px solid #ccc; }
+	tr:nth-child(even) { background: #f8f8f8; }
+</style>
+</head>
+<body>
+<pre><code>
+BenchmarkDotNet v0.14.0, Windows 11 (10.0.22631.4602/23H2/2023Update/SunValley3)
+Intel Core i7-8565U CPU 1.80GHz (Whiskey Lake), 1 CPU, 8 logical and 4 physical cores
+.NET SDK 8.0.307
+  [Host]     : .NET 8.0.11 (8.0.1124.51707), X64 RyuJIT AVX2
+  DefaultJob : .NET 8.0.11 (8.0.1124.51707), X64 RyuJIT AVX2
+</code></pre>
+<pre><code></code></pre>
+
+<table>
+<thead><tr><th>Method           </th><th>Categories</th><th>Mean </th><th>Error</th><th>StdDev</th><th>Median</th><th>Ratio</th><th>RatioSD</th><th>Code Size</th><th>Gen0</th><th>Allocated</th><th>Alloc Ratio</th>
+</tr>
+</thead><tbody><tr><td>FerrisListMapping</td><td>List</td><td>3,972.7 ns</td><td>126.01 ns</td><td>371.56 ns</td><td>3,957.0 ns</td><td>1.76</td><td>0.17</td><td>19,355 B</td><td>1.2550</td><td>5257 B</td><td>3.65</td>
+</tr><tr><td>NewtonsoftListMapping</td><td>List</td><td>3,534.4 ns</td><td>89.41 ns</td><td>257.97 ns</td><td>3,450.2 ns</td><td>1.56</td><td>0.12</td><td>1,843 B</td><td>1.1597</td><td>4872 B</td><td>3.38</td>
+</tr><tr><td>TextJsonListMapping</td><td>List</td><td>2,260.4 ns</td><td>40.31 ns</td><td>35.73 ns</td><td>2,267.5 ns</td><td>1.00</td><td>0.02</td><td>4,524 B</td><td>0.3433</td><td>1440 B</td><td>1.00</td>
+</tr><tr><td>FerrisSingleMapping</td><td>Single</td><td>462.4 ns</td><td>9.30 ns</td><td>15.79 ns</td><td>464.5 ns</td><td>0.81</td><td>0.12</td><td>16,996 B</td><td>0.1926</td><td>808 B</td><td>5.32</td>
+</tr><tr><td>NewtonsoftSingleMapping</td><td>Single</td><td>2,125.5 ns</td><td>126.60 ns</td><td>369.30 ns</td><td>2,088.5 ns</td><td>3.72</td><td>0.85</td><td>2,201 B</td><td>0.9613</td><td>4024 B</td><td>26.47</td>
+</tr><tr><td>STJSingleMapping</td><td>Single</td><td>585.3 ns</td><td>34.32 ns</td><td>97.36 ns</td><td>556.5 ns</td><td>1.02</td><td>0.23</td><td>4,130 B</td><td>0.0362</td><td>152 B</td><td>1.00</td>
+</tr><tr><td>FerrisValueMapping</td><td>Value</td><td>8,996.5 ns</td><td>199.51 ns</td><td>572.43 ns</td><td>8,809.5 ns</td><td>1.88</td><td>0.12</td><td>16,413 B</td><td>2.1973</td><td>9250 B</td><td>8.44</td>
+</tr><tr><td>NewtonsoftValueMapping</td><td>Value</td><td>13,409.9 ns</td><td>658.60 ns</td><td>1,835.92 ns</td><td>12,891.0 ns</td><td>2.80</td><td>0.39</td><td>2,204 B</td><td>1.8921</td><td>7977 B</td><td>7.28</td>
+</tr><tr><td>TextJsonValueMapping</td><td>Value</td><td>4,788.0 ns</td><td>93.40 ns</td><td>95.91 ns</td><td>4,784.3 ns</td><td>1.00</td><td>0.03</td><td>4,892 B</td><td>0.2594</td><td>1096 B</td><td>1.00</td>
+</tr></tbody></table>
+</body>
+</html>
