@@ -1,0 +1,7 @@
+// Validating benchmarks:
+// ***** BenchmarkRunner: Start   *****
+// ***** Found 9 benchmark(s) in total *****
+// ***** Building 1 exe(s) in Parallel: Start   *****
+// start dotnet  restore /p:UseSharedCompilation=false /p:BuildInParallel=false /m:1 /p:Deterministic=true /p:Optimize=true /p:IntermediateOutputPath="C:\dev\Ferris.Json\benchmark\bin\Release\net481\b6164b33-7ff6-48de-9c47-d0bd8d5130c7\obj\Release\net481/" /p:OutDir="C:\dev\Ferris.Json\benchmark\bin\Release\net481\b6164b33-7ff6-48de-9c47-d0bd8d5130c7\bin\Release\net481/" /p:OutputPath="C:\dev\Ferris.Json\benchmark\bin\Release\net481\b6164b33-7ff6-48de-9c47-d0bd8d5130c7\bin\Release\net481/" in C:\dev\Ferris.Json\benchmark\bin\Release\net481\b6164b33-7ff6-48de-9c47-d0bd8d5130c7
+// command took 1.95 sec and exited with 0
+// start dotnet  build -c Release --no-restore /p:UseSharedCompilation=false /p:BuildInParallel=false /m:1 /p:Deterministic=true /p:Optimize=true /p:IntermediateOutputPath="C:\dev\Ferris.Json\benchmark\bin\Release\net481\b6164b33-7ff6-48de-9c47-d0bd8d5130c7\obj\Release\net481/" /p:OutDir="C:\dev\Ferris.Json\benchmark\bin\Release\net481\b6164b33-7ff6-48de-9c47-d0bd8d5130c7\bin\Release\net481/" /p:OutputPath="C:\dev\Ferris.Json\benchmark\bin\Release\net481\b6164b33-7ff6-48de-9c47-d0bd8d5130c7\bin\Release\net481/" --output "C:\dev\Ferris.Json\benchmark\bin\Release\net481\b6164b33-7ff6-48de-9c47-d0bd8d5130c7\bin\Release\net481/" in C:\dev\Ferris.Json\benchmark\bin\Release\net481\b6164b33-7ff6-48de-9c47-d0bd8d5130c7

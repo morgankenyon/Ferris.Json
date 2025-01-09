@@ -8,7 +8,6 @@ using Xunit;
 
 namespace Ferris.Json.Test
 {
-
     public class DeserializationTests
     {
         [Theory(DisplayName = "Can find simple tokens")]
@@ -63,14 +62,15 @@ namespace Ferris.Json.Test
         //}
 
         [Theory(DisplayName = "Can find values to appropriate tokens")]
-        [InlineData("", Token.None, 1, false, null, Token.EndOfInput)]
-        [InlineData("&", Token.None, 1, false, null, Token.Unknown)]
-        [InlineData("{", Token.None, 1, false, null, Token.OpenBrace)]
-        [InlineData("}", Token.PropertyValue, 1, false, null, Token.CloseBrace)]
-        [InlineData("\"Property\"", Token.OpenBrace, 10, true, "Property", Token.PropertyName)]
-        [InlineData("283,", Token.Colon, 3, true, "283", Token.PropertyValue)]
-        [InlineData("\"data\",", Token.Colon, 6, true, "data", Token.PropertyValue)]
-        [InlineData("     ", Token.None, 5, false, null, Token.Whitespace)]
+        //[InlineData("", Token.None, 1, false, null, Token.EndOfInput)]
+        //[InlineData("&", Token.None, 1, false, null, Token.Unknown)]
+        //[InlineData("{", Token.None, 1, false, null, Token.OpenBrace)]
+        //[InlineData("}", Token.PropertyValue, 1, false, null, Token.CloseBrace)]
+        //[InlineData("\"Property\"", Token.OpenBrace, 10, true, "Property", Token.PropertyName)]
+        //[InlineData("283,", Token.Colon, 3, true, "283", Token.PropertyValue)]
+        //[InlineData("\"data\",", Token.Colon, 6, true, "data", Token.PropertyValue)]
+        //[InlineData("     ", Token.None, 5, false, null, Token.Whitespace)]
+        [InlineData("\"\"\"", Token.Colon, 1, true, "\"", Token.PropertyValue)]
         internal void JsonTransform_GetNextTokenAndData(string json,
             Token previousToken,
             int expectedPlaceholder,

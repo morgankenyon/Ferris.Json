@@ -1,11 +1,12 @@
 ﻿using BenchmarkDotNet.Running;
 
-namespace Ferris.Json.Benchmark;
-
-class Program
+namespace Ferris.Json.Benchmark
 {
-    static void Main(string[] args)
+    class Program
     {
-        var summary = BenchmarkRunner.Run<SimpleJsonBenchmark>();
+        static void Main(string[] args)
+        {
+            var summary = BenchmarkRunner.Run<SimpleJsonBenchmark>();
+        }
     }
 }

@@ -455,7 +455,7 @@ namespace Ferris.Json
             //parsing offset is 4, colon + two double qoutes
             var (valueOffset, parsingOffset) = (1, 2);
             var valueSpan = jsonSpan.Slice(valueOffset);
-
+            var valueSpanCount = valueSpan.Length;
             //does not handle escaped double quotes
             var endOfValue = valueSpan.IndexOf('"');
             var data = valueSpan.Slice(0, endOfValue);

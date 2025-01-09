@@ -3,72 +3,73 @@ using BenchmarkDotNet.Configs;
 using Ferris.Json.Test.TestObjects;
 using Newtonsoft.Json;
 
-namespace Ferris.Json.Benchmark;
-
-[MemoryDiagnoser]
-[DisassemblyDiagnoser]
-[CategoriesColumn]
-[GroupBenchmarksBy(BenchmarkLogicalGroupRule.ByCategory)]
-public class SerializationBenchmarks
+namespace Ferris.Json.Benchmark
 {
-    private static ValueTestObject testObj = TestObjs.GetValueTestObject();
-    private int count = 0;
-    private int N = 25;
-
-    [Benchmark]
-    [BenchmarkCategory("Single")]
-    public void FerrisValueMapping()
+    [MemoryDiagnoser]
+    [DisassemblyDiagnoser]
+    [CategoriesColumn]
+    [GroupBenchmarksBy(BenchmarkLogicalGroupRule.ByCategory)]
+    public class SerializationBenchmarks
     {
-        var json = JsonTransformer.Serialize(testObj);
-        count += json.GetHashCode();
-    }
+        private static ValueTestObject testObj = TestObjs.GetValueTestObject();
+        private int count = 0;
+        private int N = 25;
 
-    [Benchmark]
-    [BenchmarkCategory("Single")]
-    public void NewtonsoftValueMapping()
-    {
-        var json = JsonConvert.SerializeObject(testObj);
-        count += json.GetHashCode();
-    }
-
-    [Benchmark(Baseline = true)]
-    [BenchmarkCategory("Single")]
-    public void TextJsonValueMapping()
-    {
-        var json = System.Text.Json.JsonSerializer.Serialize(testObj);
-        count += json.GetHashCode();
-    }
-
-    [Benchmark]
-    [BenchmarkCategory("Loop")]
-    public void FerrisValueLoopMapping()
-    {
-        for (int i = 0; i < N; i++)
+        [Benchmark]
+        [BenchmarkCategory("Single")]
+        public void FerrisValueMapping()
         {
             var json = JsonTransformer.Serialize(testObj);
             count += json.GetHashCode();
         }
-    }
 
-    [Benchmark]
-    [BenchmarkCategory("Loop")]
-    public void NewtonsoftValueLoopMapping()
-    {
-        for (int i = 0; i < N; i++)
+        [Benchmark]
+        [BenchmarkCategory("Single")]
+        public void NewtonsoftValueMapping()
         {
             var json = JsonConvert.SerializeObject(testObj);
             count += json.GetHashCode();
         }
-    }
 
-    [Benchmark(Baseline = true)]
-    [BenchmarkCategory("Loop")]
-    public void TextJsonValueLoopMapping()
-    {
-        for (int i = 0; i < N; i++)
+        [Benchmark(Baseline = true)]
+        [BenchmarkCategory("Single")]
+        public void TextJsonValueMapping()
         {
             var json = System.Text.Json.JsonSerializer.Serialize(testObj);
             count += json.GetHashCode();
+        }
+
+        [Benchmark]
+        [BenchmarkCategory("Loop")]
+        public void FerrisValueLoopMapping()
+        {
+            for (int i = 0; i < N; i++)
+            {
+                var json = JsonTransformer.Serialize(testObj);
+                count += json.GetHashCode();
+            }
+        }
+
+        [Benchmark]
+        [BenchmarkCategory("Loop")]
+        public void NewtonsoftValueLoopMapping()
+        {
+            for (int i = 0; i < N; i++)
+            {
+                var json = JsonConvert.SerializeObject(testObj);
+                count += json.GetHashCode();
+            }
+        }
+
+        [Benchmark(Baseline = true)]
+        [BenchmarkCategory("Loop")]
+        public void TextJsonValueLoopMapping()
+        {
+            for (int i = 0; i < N; i++)
+            {
+                var json = System.Text.Json.JsonSerializer.Serialize(testObj);
+                count += json.GetHashCode();
+            }
         }
     }
 }
