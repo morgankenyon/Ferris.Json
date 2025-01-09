@@ -58,6 +58,17 @@ var obj = JsonTransformer.Deserialize<TestObject>(jsonString);
 - [ ] - Supporting data classes
 - [ ] - Supporting enums
 
+## Json Spec
+
+https://ecma-international.org/wp-content/uploads/ECMA-404.pdf
+
 ## Todo items
 
 - [ ] - How does parsing Double.MaxValue/Double.MinValue impact numbers: https://stackoverflow.com/questions/4441782/why-does-double-tryparse-return-false-for-a-string-containing-double-maxvalue
+
+## Notes
+
+* String with escaped double quotes 
+  * https://stackoverflow.com/questions/50261853/regex-non-escaped-quotation-marks
+  * https://stackoverflow.com/a/2149780/1352766
+  * https://stackoverflow.com/a/5695337/1352766
