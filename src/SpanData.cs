@@ -1,11 +1,15 @@
-﻿namespace Ferris.Json;
-ref struct SpanData
+﻿using System;
+
+namespace Ferris.Json
 {
-    public SpanData(ReadOnlySpan<char> jsonSpan, object? value)
+    ref struct SpanData
     {
-        JsonSpan = jsonSpan;
-        Value = value;
+        public SpanData(ReadOnlySpan<char> jsonSpan, object value)
+        {
+            JsonSpan = jsonSpan;
+            Value = value;
+        }
+        public ReadOnlySpan<char> JsonSpan;
+        public object Value;
     }
-    public ReadOnlySpan<char> JsonSpan;
-    public object? Value;
 }

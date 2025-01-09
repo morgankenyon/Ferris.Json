@@ -1,24 +1,26 @@
-﻿namespace Ferris.Json;
-internal class TokenInfo
+﻿namespace Ferris.Json
 {
-    public TokenInfo(Token token, int length)
+    internal class TokenInfo
     {
-        Token = token;
-        Length = length;
-        HasValue = false;
-    }
+        public TokenInfo(Token token, int length)
+        {
+            Token = token;
+            Length = length;
+            HasValue = false;
+        }
 
-    public TokenInfo(
-        Token token,
-        int length,
-        object data) : this(token, length)
-    {
-        HasValue = true;
-        Data = data;
-    }
+        public TokenInfo(
+            Token token,
+            int length,
+            object data) : this(token, length)
+        {
+            HasValue = true;
+            Data = data;
+        }
 
-    public Token Token { get; }
-    public int Length { get; }
-    public bool HasValue { get; }
-    public object? Data { get; }
+        public Token Token { get; }
+        public int Length { get; }
+        public bool HasValue { get; }
+        public object Data { get; }
+    }
 }

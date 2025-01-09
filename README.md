@@ -54,3 +54,7 @@ var obj = JsonTransformer.Deserialize<TestObject>(jsonString);
 - [ ] - other ienumerable types
 - [ ] - non generic data structures
 - [ ] - different input types (streams, etc)
+
+## Todo items
+
+- [ ] - How does parsing Double.MaxValue/Double.MinValue impact numbers: https://stackoverflow.com/questions/4441782/why-does-double-tryparse-return-false-for-a-string-containing-double-maxvalue

@@ -1,0 +1,3778 @@
+diff --git a/README.md b/README.md
+index 91289fc..08dabd5 100644
+--- a/README.md
++++ b/README.md
+@@ -54,3 +54,7 @@ var obj = JsonTransformer.Deserialize<TestObject>(jsonString);
+ - [ ] - other ienumerable types
+ - [ ] - non generic data structures
+ - [ ] - different input types (streams, etc)
++
++## Todo items
++
++- [ ] - How does parsing Double.MaxValue/Double.MinValue impact numbers: https://stackoverflow.com/questions/4441782/why-does-double-tryparse-return-false-for-a-string-containing-double-maxvalue
+\ No newline at end of file
+diff --git a/src/Ferris.Json.csproj b/src/Ferris.Json.csproj
+index 7ebc66c..e277d39 100644
+--- a/src/Ferris.Json.csproj
++++ b/src/Ferris.Json.csproj
+@@ -1,9 +1,9 @@
+ ﻿<Project Sdk="Microsoft.NET.Sdk">
+ 
+   <PropertyGroup>
+-    <TargetFramework>net8.0</TargetFramework>
+-    <ImplicitUsings>enable</ImplicitUsings>
+-    <Nullable>enable</Nullable>
++    <TargetFrameworks>netstandard2.0;net8.0</TargetFrameworks>
++    <!-- <ImplicitUsings>enable</ImplicitUsings>
++    <Nullable>enable</Nullable> -->
+     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+     <PackageId>Ferris.Json</PackageId>
+     <Title>Ferris.Json</Title>
+@@ -28,4 +28,8 @@
+     <ItemGroup>
+       <None Include="../README.md" Pack="true" PackagePath="" />
+     </ItemGroup>
++
++    <ItemGroup>
++      <PackageReference Include="System.Memory" Version="4.6.0" />
++    </ItemGroup>
+ </Project>
+diff --git a/src/JsonTransformer.cs b/src/JsonTransformer.cs
+index 3e76d3e..f90073c 100644
+--- a/src/JsonTransformer.cs
++++ b/src/JsonTransformer.cs
+@@ -1,7 +1,9 @@
+-﻿using System.Collections.Generic;
++﻿using System;
++using System.Collections.Generic;
++using System.Globalization;
++using System.Linq;
+ using System.Linq.Expressions;
+ using System.Reflection;
+-using System.Reflection.Metadata.Ecma335;
+ 
+ namespace Ferris.Json
+ {
+@@ -89,10 +91,8 @@ namespace Ferris.Json
+                     || propertyType == typeof(System.UInt32)
+                     || propertyType == typeof(System.Int64)
+                     || propertyType == typeof(System.UInt64)
+-                    || propertyType == typeof(System.Int128)
+-                    || propertyType == typeof(System.UInt128)
+-                    || propertyType == typeof(System.Single)
+-                    || propertyType == typeof(System.Double)
++                    //|| propertyType == typeof(System.Int128)
++                    //|| propertyType == typeof(System.UInt128)
+                     || propertyType == typeof(System.Byte)
+                     || propertyType == typeof(System.SByte)
+                     || propertyType == typeof(System.Decimal)
+@@ -102,9 +102,19 @@ namespace Ferris.Json
+                 {
+                     jsonProperties.Add($"\"{propertyInfo.Name}\":{propertyValue}");
+                 }
++                else if (propertyType == typeof(System.Single))
++                {
++                    var floatValue = (float)propertyValue;
++                    jsonProperties.Add($"\"{propertyInfo.Name}\":{floatValue.ToString("R", CultureInfo.InvariantCulture)}");
++                }
++                else if (propertyType == typeof(System.Double))
++                {
++                    var doubleValue = (double)propertyValue;
++                    jsonProperties.Add($"\"{propertyInfo.Name}\":{doubleValue.ToString("R", CultureInfo.InvariantCulture)}");
++                }
+                 else if (propertyType == typeof(System.Boolean))
+                 {
+-                    jsonProperties.Add($"\"{propertyInfo.Name}\":{propertyValue!.ToString()!.ToLower()}");
++                    jsonProperties.Add($"\"{propertyInfo.Name}\":{propertyValue.ToString().ToLower()}");
+                 }
+                 else if (propertyType == typeof(System.DateTime))
+                 {
+@@ -133,7 +143,7 @@ namespace Ferris.Json
+         {
+             Type type = typeof(T);
+ 
+-            var spanData = Deserialize(type, json);
++            var spanData = Deserialize(type, json.AsSpan());
+ 
+             var result = spanData.Value;
+ 
+@@ -145,27 +155,27 @@ namespace Ferris.Json
+         private static bool IsLineEndingToken(Token token) =>
+             token.IsComma() || token.IsCloseBrace();
+ 
+-        private static bool IsValidPropertyNameToken(TokenInfo? propertyNameInfo)
++        private static bool IsValidPropertyNameToken(TokenInfo propertyNameInfo)
+         {
+             return propertyNameInfo != null
+                 && propertyNameInfo.Token.IsPropertyName()
+                 && propertyNameInfo.Data != null;
+         }
+ 
+-        private static bool IsValidColonToken(TokenInfo? colonInfo)
++        private static bool IsValidColonToken(TokenInfo colonInfo)
+         {
+             return colonInfo != null
+                 && colonInfo.Token.IsColon();
+         }
+ 
+-        private static bool IsValidPropertyValueToken(TokenInfo? propertyValueInfo)
++        private static bool IsValidPropertyValueToken(TokenInfo propertyValueInfo)
+         {
+             return propertyValueInfo != null
+                 && propertyValueInfo.Token.IsPropertyValue()
+                 && propertyValueInfo.HasValue;
+         }
+ 
+-        private static bool AreTokensSetupForPropertyValue(TokenInfo? propertyNameInfo, TokenInfo? colonInfo)
++        private static bool AreTokensSetupForPropertyValue(TokenInfo propertyNameInfo, TokenInfo colonInfo)
+         {
+             return IsValidPropertyNameToken(propertyNameInfo)
+                 && IsValidColonToken(colonInfo);
+@@ -173,9 +183,9 @@ namespace Ferris.Json
+ 
+         private static bool AreTokensSetupForValue(
+             Token previousToken,
+-            TokenInfo? propertyNameInfo,
+-            TokenInfo? colonInfo,
+-            TokenInfo? propertyValueInfo)
++            TokenInfo propertyNameInfo,
++            TokenInfo colonInfo,
++            TokenInfo propertyValueInfo)
+         {
+             return previousToken.IsPropertyValue()
+                 && IsValidPropertyNameToken(propertyNameInfo)
+@@ -196,10 +206,10 @@ namespace Ferris.Json
+                 return new SpanData(jsonSpan, null);
+             }
+             var previousToken = Token.None;
+-            TokenInfo? openBraceInfo = null;
+-            TokenInfo? propertyNameInfo = null;
+-            TokenInfo? colonInfo = null;
+-            TokenInfo? propertyValueInfo = null;
++            TokenInfo openBraceInfo = null;
++            TokenInfo propertyNameInfo = null;
++            TokenInfo colonInfo = null;
++            TokenInfo propertyValueInfo = null;
+             while (true)
+             {
+                 var tokenInfo = GetNextTokenAndData(previousToken, jsonSpan);
+@@ -214,9 +224,9 @@ namespace Ferris.Json
+                 //Case for completing a name + value pair
+                 if (IsLineEndingToken(token)
+                     && AreTokensSetupForValue(previousToken, propertyNameInfo, colonInfo, propertyValueInfo)
+-                    && propertiesDict.TryGetValue((string)propertyNameInfo!.Data!, out var propertyInfo))
++                    && propertiesDict.TryGetValue((string)propertyNameInfo.Data, out var propertyInfo))
+                 {
+-                    Libs.MapValue(propertyInfo, instance, propertyValueInfo!);
++                    Libs.MapValue(propertyInfo, instance, propertyValueInfo);
+                 }
+                 else
+                 {
+@@ -227,7 +237,7 @@ namespace Ferris.Json
+                 if (token.IsOpenBrace() && previousToken.IsColon())
+                 {
+                     if (AreTokensSetupForPropertyValue(propertyNameInfo, colonInfo)
+-                        && propertiesDict.TryGetValue((string)propertyNameInfo!.Data!, out var objectInfo))
++                        && propertiesDict.TryGetValue((string)propertyNameInfo.Data, out var objectInfo))
+                     {
+                         var spanData = Deserialize(objectInfo.PropertyType, jsonSpan);
+ 
+@@ -248,7 +258,7 @@ namespace Ferris.Json
+                 else if (token.IsOpenBracket() && previousToken.IsColon())
+                 {
+                     if (AreTokensSetupForPropertyValue(propertyNameInfo, colonInfo)
+-                        && propertiesDict.TryGetValue((string)propertyNameInfo!.Data!, out var arrayInfo))
++                        && propertiesDict.TryGetValue((string)propertyNameInfo.Data, out var arrayInfo))
+                     {
+                         var arrayType = arrayInfo.PropertyType;
+                         //if it's a list
+@@ -257,7 +267,7 @@ namespace Ferris.Json
+                             var elementType = arrayType.GetGenericArguments()[0];
+                             var nextListToken = Token.None;
+                             //make new list
+-                            var listInstance = (System.Collections.IList?)Activator.CreateInstance(arrayType);
++                            var listInstance = (System.Collections.IList)Activator.CreateInstance(arrayType);
+                             do
+                             {
+                                 //convert all elements to C# objects
+@@ -366,7 +376,7 @@ namespace Ferris.Json
+             string json)
+         {
+             List<TokenInfo> tokens = new List<TokenInfo>();
+-            ReadOnlySpan<char> jsonSpan = json;
++            ReadOnlySpan<char> jsonSpan = json.AsSpan();
+ 
+             var previousValidToken = Token.Unknown;
+             while (true)
+diff --git a/src/Libs.cs b/src/Libs.cs
+index c49838f..79d5acf 100644
+--- a/src/Libs.cs
++++ b/src/Libs.cs
+@@ -1,211 +1,216 @@
+-﻿using System.Reflection;
++﻿using System;
++using System.Globalization;
++using System.Reflection;
+ 
+-namespace Ferris.Json;
+-internal static class Libs
++namespace Ferris.Json
+ {
+-    internal static void MapValue(PropertyInfo propertyInfo, object instance, TokenInfo dataInfo)
+-    {
+-        if (!dataInfo.HasValue)
+-        {
+-            return;
+-        }
+-        object data = dataInfo.Data!;
+ 
+-        var propertyType = propertyInfo.PropertyType;
+-        if (propertyType == typeof(string)
+-            || propertyType.BaseType == typeof(object)
+-            || propertyType.IsArray)
+-        {
+-            var stringValue = data.ToString();
+-            if (stringValue != null && stringValue.StartsWith("null"))
+-            {
+-                propertyInfo.SetValue(instance, null);
+-            }
+-            else
+-            {
+-                propertyInfo.SetValue(instance, data);
+-            }
+-        }
+-        else
++    internal static class Libs
++    {
++        internal static void MapValue(PropertyInfo propertyInfo, object instance, TokenInfo dataInfo)
+         {
+-            var stringData = (string)data;
+-            if (propertyType == typeof(int))
+-            {
+-                if (int.TryParse(stringData, out var result))
+-                {
+-                    propertyInfo.SetValue(instance, result);
+-                }
+-                else
+-                {
+-                    //add error message
+-                }
+-            }
+-            else if (propertyType == typeof(uint))
+-            {
+-                if (uint.TryParse(stringData, out var result))
+-                {
+-                    propertyInfo.SetValue(instance, result);
+-                }
+-                else
+-                {
+-                    //add error message
+-                }
+-            }
+-            else if (propertyType == typeof(float))
+-            {
+-                if (float.TryParse(stringData, out var result))
+-                {
+-                    propertyInfo.SetValue(instance, result);
+-                }
+-                else
+-                {
+-                    //add error message
+-                }
+-            }
+-            else if (propertyType == typeof(double))
+-            {
+-                if (double.TryParse(stringData, out var result))
+-                {
+-                    propertyInfo.SetValue(instance, result);
+-                }
+-                else
+-                {
+-                    //add error message
+-                }
+-            }
+-            else if (propertyType == typeof(bool))
+-            {
+-                if (bool.TryParse(stringData, out var result))
+-                {
+-                    propertyInfo.SetValue(instance, result);
+-                }
+-                else
+-                {
+-                    //add error message
+-                }
+-            }
+-            else if (propertyType == typeof(byte))
+-            {
+-                if (byte.TryParse(stringData, out var result))
+-                {
+-                    propertyInfo.SetValue(instance, result);
+-                }
+-                else
+-                {
+-                    //add error message
+-                }
+-            }
+-            else if (propertyType == typeof(sbyte))
+-            {
+-                if (sbyte.TryParse(stringData, out var result))
+-                {
+-                    propertyInfo.SetValue(instance, result);
+-                }
+-                else
+-                {
+-                    //add error message
+-                }
+-            }
+-            else if (propertyType == typeof(char))
++            if (!dataInfo.HasValue)
+             {
+-                if (char.TryParse(stringData, out var result))
+-                {
+-                    propertyInfo.SetValue(instance, result);
+-                }
+-                else
+-                {
+-                    //add error message
+-                }
+-            }
+-            else if (propertyType == typeof(decimal))
+-            {
+-                if (decimal.TryParse(stringData, out var result))
+-                {
+-                    propertyInfo.SetValue(instance, result);
+-                }
+-                else
+-                {
+-                    //add error message
+-                }
+-            }
+-            else if (propertyType == typeof(long))
+-            {
+-                if (long.TryParse(stringData, out var result))
+-                {
+-                    propertyInfo.SetValue(instance, result);
+-                }
+-                else
+-                {
+-                    //add error message
+-                }
+-            }
+-            else if (propertyType == typeof(ulong))
+-            {
+-                if (ulong.TryParse(stringData, out var result))
+-                {
+-                    propertyInfo.SetValue(instance, result);
+-                }
+-                else
+-                {
+-                    //add error message
+-                }
++                return;
+             }
+-            else if (propertyType == typeof(Int128))
+-            {
+-                if (Int128.TryParse(stringData, out var result))
+-                {
+-                    propertyInfo.SetValue(instance, result);
+-                }
+-                else
+-                {
+-                    //add error message
+-                }
+-            }
+-            else if (propertyType == typeof(UInt128))
+-            {
+-                if (UInt128.TryParse(stringData, out var result))
+-                {
+-                    propertyInfo.SetValue(instance, result);
+-                }
+-                else
+-                {
+-                    //add error message
+-                }
+-            }
+-            else if (propertyType == typeof(short))
+-            {
+-                if (short.TryParse(stringData, out var result))
+-                {
+-                    propertyInfo.SetValue(instance, result);
+-                }
+-                else
+-                {
+-                    //add error message
+-                }
+-            }
+-            else if (propertyType == typeof(ushort))
++            object data = dataInfo.Data;
++
++            var propertyType = propertyInfo.PropertyType;
++            if (propertyType == typeof(string)
++                || propertyType.BaseType == typeof(object)
++                || propertyType.IsArray)
+             {
+-                if (ushort.TryParse(stringData, out var result))
++                var stringValue = data.ToString();
++                if (stringValue != null && stringValue.StartsWith("null"))
+                 {
+-                    propertyInfo.SetValue(instance, result);
++                    propertyInfo.SetValue(instance, null);
+                 }
+                 else
+                 {
+-                    //add error message
++                    propertyInfo.SetValue(instance, data);
+                 }
+             }
+-            else if (propertyType == typeof(DateTime))
++            else
+             {
+-                if (DateTime.TryParse(stringData, out var result))
+-                {
+-                    propertyInfo.SetValue(instance, result);
+-                }
+-                else
+-                {
+-                    //add error message
+-                }
++                var stringData = (string)data;
++                if (propertyType == typeof(int))
++                {
++                    if (int.TryParse(stringData, out var result))
++                    {
++                        propertyInfo.SetValue(instance, result);
++                    }
++                    else
++                    {
++                        //add error message
++                    }
++                }
++                else if (propertyType == typeof(uint))
++                {
++                    if (uint.TryParse(stringData, out var result))
++                    {
++                        propertyInfo.SetValue(instance, result);
++                    }
++                    else
++                    {
++                        //add error message
++                    }
++                }
++                else if (propertyType == typeof(float))
++                {
++                    if (float.TryParse(stringData, out var result))
++                    {
++                        propertyInfo.SetValue(instance, result);
++                    }
++                    else
++                    {
++                        //add error message
++                    }
++                }
++                else if (propertyType == typeof(double))
++                {
++                    if (double.TryParse(stringData, out var result))
++                    {
++                        propertyInfo.SetValue(instance, result);
++                    }
++                    else
++                    {
++                        //add error message
++                    }
++                }
++                else if (propertyType == typeof(bool))
++                {
++                    if (bool.TryParse(stringData, out var result))
++                    {
++                        propertyInfo.SetValue(instance, result);
++                    }
++                    else
++                    {
++                        //add error message
++                    }
++                }
++                else if (propertyType == typeof(byte))
++                {
++                    if (byte.TryParse(stringData, out var result))
++                    {
++                        propertyInfo.SetValue(instance, result);
++                    }
++                    else
++                    {
++                        //add error message
++                    }
++                }
++                else if (propertyType == typeof(sbyte))
++                {
++                    if (sbyte.TryParse(stringData, out var result))
++                    {
++                        propertyInfo.SetValue(instance, result);
++                    }
++                    else
++                    {
++                        //add error message
++                    }
++                }
++                else if (propertyType == typeof(char))
++                {
++                    if (char.TryParse(stringData, out var result))
++                    {
++                        propertyInfo.SetValue(instance, result);
++                    }
++                    else
++                    {
++                        //add error message
++                    }
++                }
++                else if (propertyType == typeof(decimal))
++                {
++                    if (decimal.TryParse(stringData, out var result))
++                    {
++                        propertyInfo.SetValue(instance, result);
++                    }
++                    else
++                    {
++                        //add error message
++                    }
++                }
++                else if (propertyType == typeof(long))
++                {
++                    if (long.TryParse(stringData, out var result))
++                    {
++                        propertyInfo.SetValue(instance, result);
++                    }
++                    else
++                    {
++                        //add error message
++                    }
++                }
++                else if (propertyType == typeof(ulong))
++                {
++                    if (ulong.TryParse(stringData, out var result))
++                    {
++                        propertyInfo.SetValue(instance, result);
++                    }
++                    else
++                    {
++                        //add error message
++                    }
++                }
++                //else if (propertyType == typeof(Int128))
++                //{
++                //    if (Int128.TryParse(stringData, out var result))
++                //    {
++                //        propertyInfo.SetValue(instance, result);
++                //    }
++                //    else
++                //    {
++                //        //add error message
++                //    }
++                //}
++                //else if (propertyType == typeof(UInt128))
++                //{
++                //    if (UInt128.TryParse(stringData, out var result))
++                //    {
++                //        propertyInfo.SetValue(instance, result);
++                //    }
++                //    else
++                //    {
++                //        //add error message
++                //    }
++                //}
++                else if (propertyType == typeof(short))
++                {
++                    if (short.TryParse(stringData, out var result))
++                    {
++                        propertyInfo.SetValue(instance, result);
++                    }
++                    else
++                    {
++                        //add error message
++                    }
++                }
++                else if (propertyType == typeof(ushort))
++                {
++                    if (ushort.TryParse(stringData, out var result))
++                    {
++                        propertyInfo.SetValue(instance, result);
++                    }
++                    else
++                    {
++                        //add error message
++                    }
++                }
++                else if (propertyType == typeof(DateTime))
++                {
++                    if (DateTime.TryParse(stringData, out var result))
++                    {
++                        propertyInfo.SetValue(instance, result);
++                    }
++                    else
++                    {
++                        //add error message
++                    }
++                }
++                //add else statement
+             }
+-            //add else statement
+         }
+     }
+ }
+diff --git a/src/SpanData.cs b/src/SpanData.cs
+index e4f3af2..f108451 100644
+--- a/src/SpanData.cs
++++ b/src/SpanData.cs
+@@ -1,11 +1,15 @@
+-﻿namespace Ferris.Json;
+-ref struct SpanData
++﻿using System;
++
++namespace Ferris.Json
+ {
+-    public SpanData(ReadOnlySpan<char> jsonSpan, object? value)
++    ref struct SpanData
+     {
+-        JsonSpan = jsonSpan;
+-        Value = value;
++        public SpanData(ReadOnlySpan<char> jsonSpan, object value)
++        {
++            JsonSpan = jsonSpan;
++            Value = value;
++        }
++        public ReadOnlySpan<char> JsonSpan;
++        public object Value;
+     }
+-    public ReadOnlySpan<char> JsonSpan;
+-    public object? Value;
+ }
+diff --git a/src/Token.cs b/src/Token.cs
+index 6088be8..c09e287 100644
+--- a/src/Token.cs
++++ b/src/Token.cs
+@@ -1,16 +1,18 @@
+-﻿namespace Ferris.Json;
+-internal enum Token
++﻿namespace Ferris.Json
+ {
+-    Unknown,
+-    None,
+-    EndOfInput,
+-    Whitespace,
+-    OpenBrace,
+-    CloseBrace,
+-    PropertyName,
+-    PropertyValue,
+-    Comma,
+-    Colon,
+-    OpenBracket,
+-    CloseBracket
++    internal enum Token
++    {
++        Unknown,
++        None,
++        EndOfInput,
++        Whitespace,
++        OpenBrace,
++        CloseBrace,
++        PropertyName,
++        PropertyValue,
++        Comma,
++        Colon,
++        OpenBracket,
++        CloseBracket
++    }
+ }
+diff --git a/src/TokenExtensions.cs b/src/TokenExtensions.cs
+index 78d221e..98b52ea 100644
+--- a/src/TokenExtensions.cs
++++ b/src/TokenExtensions.cs
+@@ -1,48 +1,50 @@
+-﻿namespace Ferris.Json;
+-internal static class TokenExtensions
++﻿namespace Ferris.Json
+ {
+-    internal static bool IsUnknown(this Token token) =>
+-        token == Token.Unknown;
+-    internal static bool IsNone(this Token token) =>
+-        token == Token.None;
+-    internal static bool IsEndOfInput(this Token token) =>
+-        token == Token.EndOfInput;
+-    internal static bool IsWhitespace(this Token token) =>
+-        token == Token.Whitespace;
+-    /// <summary>
+-    /// Checking to see if Token is an open brace - '{'.
+-    /// </summary>
+-    /// <param name="token"></param>
+-    /// <returns></returns>
+-    internal static bool IsOpenBrace(this Token token) =>
+-        token == Token.OpenBrace;
+-    /// <summary>
+-    /// Checking to see if Token is a close brace - '}'.
+-    /// </summary>
+-    /// <param name="token"></param>
+-    /// <returns></returns>
+-    internal static bool IsCloseBrace(this Token token) =>
+-        token == Token.CloseBrace;
+-    internal static bool IsPropertyName(this Token token) =>
+-        token == Token.PropertyName;
+-    internal static bool IsPropertyValue(this Token token) =>
+-        token == Token.PropertyValue;
+-    internal static bool IsComma(this Token token) =>
+-        token == Token.Comma;
+-    internal static bool IsColon(this Token token) =>
+-        token == Token.Colon;
+-    /// <summary>
+-    /// Checking to see if Token is an open bracket - '['.
+-    /// </summary>
+-    /// <param name="token"></param>
+-    /// <returns></returns>
+-    internal static bool IsOpenBracket(this Token token) =>
+-        token == Token.OpenBracket;
+-    /// <summary>
+-    /// Checking to see if Token is a close bracket - ']'.
+-    /// </summary>
+-    /// <param name="token"></param>
+-    /// <returns></returns>
+-    internal static bool IsCloseBracket(this Token token) =>
+-        token == Token.CloseBracket;
++    internal static class TokenExtensions
++    {
++        internal static bool IsUnknown(this Token token) =>
++            token == Token.Unknown;
++        internal static bool IsNone(this Token token) =>
++            token == Token.None;
++        internal static bool IsEndOfInput(this Token token) =>
++            token == Token.EndOfInput;
++        internal static bool IsWhitespace(this Token token) =>
++            token == Token.Whitespace;
++        /// <summary>
++        /// Checking to see if Token is an open brace - '{'.
++        /// </summary>
++        /// <param name="token"></param>
++        /// <returns></returns>
++        internal static bool IsOpenBrace(this Token token) =>
++            token == Token.OpenBrace;
++        /// <summary>
++        /// Checking to see if Token is a close brace - '}'.
++        /// </summary>
++        /// <param name="token"></param>
++        /// <returns></returns>
++        internal static bool IsCloseBrace(this Token token) =>
++            token == Token.CloseBrace;
++        internal static bool IsPropertyName(this Token token) =>
++            token == Token.PropertyName;
++        internal static bool IsPropertyValue(this Token token) =>
++            token == Token.PropertyValue;
++        internal static bool IsComma(this Token token) =>
++            token == Token.Comma;
++        internal static bool IsColon(this Token token) =>
++            token == Token.Colon;
++        /// <summary>
++        /// Checking to see if Token is an open bracket - '['.
++        /// </summary>
++        /// <param name="token"></param>
++        /// <returns></returns>
++        internal static bool IsOpenBracket(this Token token) =>
++            token == Token.OpenBracket;
++        /// <summary>
++        /// Checking to see if Token is a close bracket - ']'.
++        /// </summary>
++        /// <param name="token"></param>
++        /// <returns></returns>
++        internal static bool IsCloseBracket(this Token token) =>
++            token == Token.CloseBracket;
++    }
+ }
+diff --git a/src/TokenInfo.cs b/src/TokenInfo.cs
+index a5cd61c..868f92c 100644
+--- a/src/TokenInfo.cs
++++ b/src/TokenInfo.cs
+@@ -1,24 +1,26 @@
+-﻿namespace Ferris.Json;
+-internal class TokenInfo
++﻿namespace Ferris.Json
+ {
+-    public TokenInfo(Token token, int length)
++    internal class TokenInfo
+     {
+-        Token = token;
+-        Length = length;
+-        HasValue = false;
+-    }
++        public TokenInfo(Token token, int length)
++        {
++            Token = token;
++            Length = length;
++            HasValue = false;
++        }
+ 
+-    public TokenInfo(
+-        Token token,
+-        int length,
+-        object data) : this(token, length)
+-    {
+-        HasValue = true;
+-        Data = data;
+-    }
++        public TokenInfo(
++            Token token,
++            int length,
++            object data) : this(token, length)
++        {
++            HasValue = true;
++            Data = data;
++        }
+ 
+-    public Token Token { get; }
+-    public int Length { get; }
+-    public bool HasValue { get; }
+-    public object? Data { get; }
++        public Token Token { get; }
++        public int Length { get; }
++        public bool HasValue { get; }
++        public object Data { get; }
++    }
+ }
+diff --git a/test/DeserializationTests.cs b/test/DeserializationTests.cs
+index 4027624..b9d8b94 100644
+--- a/test/DeserializationTests.cs
++++ b/test/DeserializationTests.cs
+@@ -1,741 +1,749 @@
+ ﻿using Ferris.Json.Test.TestObjects;
+ using FluentAssertions;
++using System;
++using System.Collections.Generic;
++using System.Globalization;
++using System.Linq;
++using Xunit;
+ 
+-namespace Ferris.Json.Test;
+-public class DeserializationTests
++namespace Ferris.Json.Test
+ {
+-    [Theory(DisplayName = "Can find simple tokens")]
+-    [InlineData("", Token.None, Token.EndOfInput)]
+-    [InlineData("&", Token.None, Token.Unknown)]
+-    [InlineData("{", Token.None, Token.OpenBrace)]
+-    [InlineData("}", Token.PropertyValue, Token.CloseBrace)]
+-    [InlineData("[", Token.None, Token.OpenBracket)]
+-    [InlineData("]", Token.PropertyValue, Token.CloseBracket)]
+-    [InlineData(",", Token.PropertyValue, Token.Comma)]
+-    [InlineData("\"Property\"", Token.Comma, Token.PropertyName)]
+-    [InlineData("283,", Token.Colon, Token.PropertyValue)]
+-    [InlineData(":{", Token.PropertyName, Token.Colon)]
+-    [InlineData(" ", Token.None, Token.Whitespace)]
+-    internal void JsonTransform_GetNextToken(
+-        string json,
+-        Token previousToken,
+-        Token expectedToken)
+-    {
+-        //Act
+-        var token = JsonTransformer.GetNextToken(previousToken, json);
+-
+-        //Assert
+-        token.Should().Be(expectedToken);
+-    }
+-
+-    //This was leftover from when I was using strings versus
+-    //ReadOnlySpan<char>, see if we still need these tests
+-    //[Theory(DisplayName = "Can find simple token with offset")]
+-    //[InlineData("{", 1, Token.EndOfInput, 0)]
+-    //[InlineData("{&", 1, Token.Unknown, 0)]
+-    //[InlineData("{\"n\":{", 5, Token.OpenBrace, 0)]
+-    //[InlineData("{}", 1, Token.CloseBrace, 0)]
+-    //[InlineData("{\"Property\"", 1, Token.PropertyName, 0)]
+-    //[InlineData("{\"Property\":283,", 11, Token.PropertyValue, 0)]
+-    //[InlineData("{\"Property\":{", 11, Token.OpenBrace, 1)]
+-    //public void JsonTransform_GetNextTokenWithOffset(
+-    //    string json,
+-    //    int offset,
+-    //    Token expectedToken,
+-    //    int expectedTokenOffset)
+-    //{
+-    //    //Act
+-    //    var (token, tokenOffset) = JsonTransformer.GetNextToken(json, offset);
+-
+-    //    //Assert
+-    //    Assert.Multiple(() =>
+-    //    {
+-    //        Assert.Equal(expectedToken, token);
+-    //        Assert.Equal(expectedTokenOffset, tokenOffset);
+-    //    });
+-    //}
+-
+-    [Theory(DisplayName = "Can find values to appropriate tokens")]
+-    [InlineData("", Token.None, 1, false, null, Token.EndOfInput)]
+-    [InlineData("&", Token.None, 1, false, null, Token.Unknown)]
+-    [InlineData("{", Token.None, 1, false, null, Token.OpenBrace)]
+-    [InlineData("}", Token.PropertyValue, 1, false, null, Token.CloseBrace)]
+-    [InlineData("\"Property\"", Token.OpenBrace, 10, true, "Property", Token.PropertyName)]
+-    [InlineData("283,", Token.Colon, 3, true, "283", Token.PropertyValue)]
+-    [InlineData("\"data\",", Token.Colon, 6, true, "data", Token.PropertyValue)]
+-    [InlineData("     ", Token.None, 5, false, null, Token.Whitespace)]
+-    internal void JsonTransform_GetNextTokenAndData(string json,
+-        Token previousToken,
+-        int expectedPlaceholder,
+-        bool expectedHasValue,
+-        string expectedData,
+-        Token expectedToken)
+-    {
+-        //Act
+-        var tokenInfo = JsonTransformer.GetNextTokenAndData(previousToken, json);
+-
+-        //Assert
+-        tokenInfo.Token.Should().Be(expectedToken);
+-        tokenInfo.Length.Should().Be(expectedPlaceholder);
+-        tokenInfo.HasValue.Should().Be(expectedHasValue);
+-        tokenInfo.Data.Should().Be(expectedData);
+-    }
+-
+-    //This was leftover from when I was using strings versus
+-    //ReadOnlySpan<char>, see if this is still needed
+-    [Theory(DisplayName = "Can find offset values")]
+-    [InlineData("{\"name\"", Token.Colon, Token.OpenBrace, 1, false, null)]
+-    [InlineData("\"name\"", Token.OpenBrace, Token.PropertyName, 6, true, "name")]
+-    internal void JsonTransform_GetNextTokenAndToken_IncorpratesOffset(
+-        string json,
+-        Token previousToken,
+-        Token expectedToken,
+-        int expectedPlaceholder,
+-        bool expectedHasValue,
+-        string expectedData)
+-    {
+-        //Act
+-        var tokenInfo = JsonTransformer.GetNextTokenAndData(previousToken, json);
+-
+-        //Assert
+-        tokenInfo.Token.Should().Be(expectedToken);
+-        tokenInfo.Length.Should().Be(expectedPlaceholder);
+-        tokenInfo.HasValue.Should().Be(expectedHasValue);
+-        tokenInfo.Data.Should().Be(expectedData);
+-    }
+-
+-    [Theory(DisplayName = "Can extract token data")]
+-    [InlineData("\"Property\"", "Property", 10, Token.PropertyName)]
+-    [InlineData("283,", "283", 3, Token.PropertyValue)]
+-    [InlineData("283},", "283", 3, Token.PropertyValue)]
+-    [InlineData("\"data\",", "data", 6, Token.PropertyValue)]
+-    [InlineData("\"Property Baby\"", "Property Baby", 15, Token.PropertyName)]
+-    [InlineData("283424,", "283424", 6, Token.PropertyValue)]
+-    [InlineData("\"data point\",", "data point", 12, Token.PropertyValue)]
+-    [InlineData("\"name\"", "name", 6, Token.PropertyName)]
+-    [InlineData("\"maxValue\"},", "maxValue", 10, Token.PropertyValue)]
+-    [InlineData("\"null\"},", "null", 6, Token.PropertyValue)]
+-    [InlineData("\"null\",", "null", 6, Token.PropertyValue)]
+-    internal void JsonTransform_ExtractTokenData(
+-        string json,
+-        string expectedData,
+-        int expectedLength,
+-        Token token)
+-    {
+-        //Act
+-        var tokenInfo = JsonTransformer.ExtractTokenData(token, json);
+-
+-        //Assert
+-        tokenInfo.Length.Should().Be(expectedLength);
+-        tokenInfo.Data.Should().Be(expectedData);
+-    }
+-
+-    //Leftover from using strings instead of ReadOnlySpan<char>
+-    //[Theory(DisplayName = "Can extract token data")]
+-    //[InlineData("{\"Property\"", 1, "Property", 10, Token.PropertyName)]
+-    //[InlineData("{:283,", 1, "283", 5, Token.PropertyValue)]
+-    //[InlineData("{\"val\":\"data\",", 6, "data", 8, Token.PropertyValue)]
+-    //[InlineData("{\"Property Baby\"", 1, "Property Baby", 15, Token.PropertyName)]
+-    //[InlineData("{\"val\":283424,", 6, "283424", 8, Token.PropertyValue)]
+-    //[InlineData("{\"val\":283424}", 6, "283424", 7, Token.PropertyValue)]
+-    //[InlineData("{\"bobby\":\"data point\",", 8, "data point", 14, Token.PropertyValue)]
+-    //[InlineData("{\"name\"", 1, "name", 6, Token.PropertyName)]
+-    //////[InlineData("{\"val\":283424", 6, "283424", 7, Token.PropertyValue)] //error case to cover
+-    //public void JsonTransform_ExtractTokenDataWithOffset(
+-    //    string json,
+-    //    int offset,
+-    //    string expectedData,
+-    //    int expectedLength,
+-    //    Token token)
+-    //{
+-    //    //Act
+-    //    var (data, length) = JsonTransformer.ExtractTokenData(token, json, offset);
+-
+-    //    //Assert
+-    //    Assert.Multiple(() =>
+-    //    {
+-    //        Assert.Equal(expectedData, data);
+-    //        Assert.Equal(expectedLength, length);
+-    //    });
+-    //}
+-
+-    [Fact(DisplayName = "Can extract simple tokens from string")]
+-    public void JsonTransform_ExtractSimpleTokens()
+-    {
+-        //Arrange
+-        var jsonString = "{\"name\":234}";
+-
+-        //Act
+-        var tokenInfo = JsonTransformer.TokenizeString(jsonString);
+-
+-        //Assert
+-        var expectedTokens = new List<Token> {
+-            Token.OpenBrace,
+-            Token.PropertyName,
+-            Token.Colon,
+-            Token.PropertyValue,
+-            Token.CloseBrace,
+-            Token.EndOfInput
+-        };
+-        Assert.Equal(expectedTokens.Count, tokenInfo.Count);
+-
+-        var tokens = tokenInfo.Select(ti => ti.Token).ToList();
+-
+-        Assert.Equal(expectedTokens, tokens);
+-    }
+-
+-    [Fact(DisplayName = "Can extract simple tokens from string with whitespace")]
+-    public void JsonTransform_ExtractWhitespaceTokens()
+-    {
+-        //Arrange
+-        var jsonString = " { \"name\" : 234 } ";
+-
+-        //Act
+-        var tokenInfo = JsonTransformer.TokenizeString(jsonString);
+-
+-        //Assert
+-        var expectedTokens = new List<Token> {
+-            Token.Whitespace,
+-            Token.OpenBrace,
+-            Token.Whitespace,
+-            Token.PropertyName,
+-            Token.Whitespace,
+-            Token.Colon,
+-            Token.Whitespace,
+-            Token.PropertyValue,
+-            //Token.Whitespace, //not sure if this token is needed
+-            Token.CloseBrace,
+-            Token.Whitespace,
+-            Token.EndOfInput
+-        };
+-        Assert.Equal(expectedTokens.Count, tokenInfo.Count);
+-
+-        var tokens = tokenInfo.Select(ti => ti.Token).ToList();
+-
+-        Assert.Equal(expectedTokens, tokens);
+-    }
+-
+-    [Fact(DisplayName = "Can extract tokens from nested string")]
+-    public void JsonTransform_CanExtractNestedTokens()
+-    {
+-        //Arrange
+-        var jsonString = "{\"IntProp\":{\"Property\":234},\"Number\":4242}";
+-
+-        //Act
+-        var tokenInfo = JsonTransformer.TokenizeString(jsonString);
+-
+-        //Assert
+-        var expectedTokens = new List<Token> {
+-            Token.OpenBrace,
+-            Token.PropertyName,
+-            Token.Colon,
+-            Token.OpenBrace,
+-            Token.PropertyName,
+-            Token.Colon,
+-            Token.PropertyValue,
+-            Token.CloseBrace,
+-            Token.Comma,
+-            Token.PropertyName,
+-            Token.Colon,
+-            Token.PropertyValue,
+-            Token.CloseBrace,
+-            Token.EndOfInput
+-        };
+-        Assert.Equal(expectedTokens.Count, tokenInfo.Count);
+-
+-        var tokens = tokenInfo.Select(ti => ti.Token).ToList();
+-
+-        Assert.Equal(expectedTokens, tokens);
+-    }
+-
+-    [Fact(DisplayName = "Can extract more complex tokens from string")]
+-    public void JsonTransform_ExtractMoreComplexTokens()
+-    {
+-        //Arrange
+-        var jsonString = "{\"name\":234,\"value\":\"baby\",\"second\":{\"level\":23}}";
+-
+-        //Act
+-        var tokenInfo = JsonTransformer.TokenizeString(jsonString);
+-
+-        //Assert
+-        var expectedTokens = new List<Token> {
+-            Token.OpenBrace,
+-            Token.PropertyName,
+-            Token.Colon,
+-            Token.PropertyValue,
+-            Token.Comma,
+-            Token.PropertyName,
+-            Token.Colon,
+-            Token.PropertyValue,
+-            Token.Comma,
+-            Token.PropertyName,
+-            Token.Colon,
+-            Token.OpenBrace,
+-            Token.PropertyName,
+-            Token.Colon,
+-            Token.PropertyValue,
+-            Token.CloseBrace,
+-            Token.CloseBrace,
+-            Token.EndOfInput
+-        };
+-        Assert.Equal(expectedTokens.Count, tokenInfo.Count);
+-
+-        var tokens = tokenInfo.Select(ti => ti.Token).ToList();
+-
+-        Assert.Equal(expectedTokens, tokens);
+-    }
+-
+-    [Theory(DisplayName = "Can parse json string to object")]
+-    [InlineData("{\"Property\":\"testValue\"}", false)]
+-    [InlineData(" { \"Property\" : \"testValue\" } ", false)]
+-    [InlineData("       {        \"Property\"             :          \"testValue\"     }   ", false)]
+-    [InlineData("{\"Property\":null}", true)]
+-    [InlineData(" { \"Property\" : null } ", true)]
+-    public void JsonTransform_Deserialize_SingleStringProperty(
+-        string jsonString,
+-        bool isNull)
+-    {
+-        //Act
+-        var obj = JsonTransformer.Deserialize<StringPropertyObj>(jsonString);
+-
+-        //Assert
+-        obj.Should().BeOfType<StringPropertyObj>();
+-
+-        var stringProp = obj as StringPropertyObj;
+-        if (isNull)
+-            obj.Property.Should().BeNull();
+-        else
+-            obj.Property.Should().Be("testValue");
+-    }
+-
+-    [Fact(DisplayName = "Can parse json number to integer")]
+-    public void JsonTransform_Deserialize_SingleIntProperty()
+-    {
+-        //Arrange
+-        var maxValue = int.MaxValue;
+-        var jsonString = $"{{\"Property\":{maxValue}}}";
+-
+-        //Act
+-        var obj = JsonTransformer.Deserialize<IntPropertyObj>(jsonString);
+-
+-        //Assert
+-        Assert.True(obj is IntPropertyObj);
+-
+-        var intProp = obj as IntPropertyObj;
+-        Assert.Equal(maxValue, intProp.Property);
+-    }
+-
+-    [Fact(DisplayName = "Can parse json number to uint")]
+-    public void JsonTransform_Deserialize_SingleUIntProperty()
+-    {
+-        //Arrange
+-        var maxValue = uint.MaxValue;
+-        var jsonString = $"{{\"Property\":{maxValue}}}";
+-
+-        //Act
+-        var obj = JsonTransformer.Deserialize<UIntPropertyObj>(jsonString);
+-
+-        //Assert
+-        Assert.True(obj is UIntPropertyObj);
+-
+-        var intProp = obj as UIntPropertyObj;
+-        intProp.Property.Should().Be(maxValue);
+-    }
+-
+-    [Fact(DisplayName = "Can parse json number to float")]
+-    public void JsonTransform_Deserialize_SingleFloatProperty()
+-    {
+-        //Arrange
+-        var maxValue = float.MaxValue;
+-        var jsonString = $"{{\"Property\":{maxValue}}}";
+-
+-        //Act
+-        var obj = JsonTransformer.Deserialize<FloatPropertyObj>(jsonString);
+-
+-        //Assert
+-        Assert.True(obj is FloatPropertyObj);
+-
+-        var floatProp = obj as FloatPropertyObj;
+-        floatProp.Property.Should().BeApproximately(maxValue, 0.01f);
+-    }
+-
+-    [Fact(DisplayName = "Can parse json number to double")]
+-    public void JsonTransform_Deserialize_SingleDoubleProperty()
+-    {
+-        //Arrange
+-        var maxValue = double.MaxValue;
+-        var jsonString = $"{{\"Property\":{maxValue}}}";
+-
+-        //Act
+-        var obj = JsonTransformer.Deserialize<DoublePropertyObj>(jsonString);
+-
+-        //Assert
+-        Assert.True(obj is DoublePropertyObj);
+-
+-        var prop = obj as DoublePropertyObj;
+-        prop.Property.Should().BeApproximately(maxValue, 0.01);
+-    }
+-
+-    [Fact(DisplayName = "Can parse json bool to object")]
+-    public void JsonTransform_Deserialize_SingleBoolProperty()
+-    {
+-        //Arrange
+-        var jsonString = "{\"Property\":true}";
+-
+-        //Act
+-        var obj = JsonTransformer.Deserialize<BoolPropertyObj>(jsonString);
+-
+-        //Assert
+-        Assert.True(obj is BoolPropertyObj);
+-
+-        var prop = obj as BoolPropertyObj;
+-        prop.Property.Should().BeTrue();
+-    }
+-
+-    [Fact(DisplayName = "Can parse json number to byte")]
+-    public void JsonTransform_Deserialize_SingleByteProperty()
+-    {
+-        //Arrange
+-        var maxValue = byte.MaxValue;
+-        var jsonString = $"{{\"Property\":{maxValue}}}";
+-
+-        //Act
+-        var obj = JsonTransformer.Deserialize<BytePropertyObj>(jsonString);
+-
+-        //Assert
+-        Assert.True(obj is BytePropertyObj);
+-
+-        var prop = obj as BytePropertyObj;
+-        prop.Property.Should().Be(maxValue);
+-    }
+-
+-    [Fact(DisplayName = "Can parse json number to sbyte")]
+-    public void JsonTransform_Deserialize_SingleSByteProperty()
+-    {
+-        //Arrange
+-        var maxValue = sbyte.MaxValue;
+-        var jsonString = $"{{\"Property\":{maxValue}}}";
+-
+-        //Act
+-        var obj = JsonTransformer.Deserialize<SBytePropertyObj>(jsonString);
+-
+-        //Assert
+-        Assert.True(obj is SBytePropertyObj);
+-
+-        var prop = obj as SBytePropertyObj;
+-        prop.Property.Should().Be(maxValue);
+-    }
+-
+-    [Fact(DisplayName = "Can parse json char to object")]
+-    public void JsonTransform_Deserialize_SingleCharProperty()
+-    {
+-        //Arrange
+-        var jsonString = "{\"Property\":\"a\"}";
+-
+-        //Act
+-        var obj = JsonTransformer.Deserialize<CharPropertyObj>(jsonString);
+-
+-        //Assert
+-        Assert.True(obj is CharPropertyObj);
+-
+-        var prop = obj as CharPropertyObj;
+-        prop.Property.Should().Be('a');
+-    }
+-
+-    [Fact(DisplayName = "Can parse json number to decimal")]
+-    public void JsonTransform_Deserialize_SingleDecimalProperty()
+-    {
+-        //Arrange
+-        var maxValue = decimal.MaxValue;
+-        var jsonString = $"{{\"Property\":{maxValue}}}";
+-
+-        //Act
+-        var obj = JsonTransformer.Deserialize<DecimalPropertyObj>(jsonString);
+-
+-        //Assert
+-        Assert.True(obj is DecimalPropertyObj);
+-
+-        var prop = obj as DecimalPropertyObj;
+-        prop.Property.Should().Be(maxValue);
+-    }
+-
+-    [Fact(DisplayName = "Can parse json number to long")]
+-    public void JsonTransform_Deserialize_SingleLongProperty()
+-    {
+-        //Arrange
+-        var maxValue = long.MaxValue;
+-        var jsonString = $"{{\"Property\":{maxValue}}}";
+-
+-        //Act
+-        var obj = JsonTransformer.Deserialize<LongPropertyObj>(jsonString);
+-
+-        //Assert
+-        Assert.True(obj is LongPropertyObj);
+-
+-        var prop = obj as LongPropertyObj;
+-        prop.Property.Should().Be(maxValue);
+-    }
+-
+-    [Fact(DisplayName = "Can parse json number to ulong")]
+-    public void JsonTransform_Deserialize_SingleULongProperty()
+-    {
+-        //Arrange
+-        var maxValue = ulong.MaxValue;
+-        var jsonString = $"{{\"Property\":{maxValue}}}";
+-
+-        //Act
+-        var obj = JsonTransformer.Deserialize<ULongPropertyObj>(jsonString);
+-
+-        //Assert
+-        Assert.True(obj is ULongPropertyObj);
+-
+-        var prop = obj as ULongPropertyObj;
+-        prop.Property.Should().Be(maxValue);
+-    }
+-
+-    [Fact(DisplayName = "Can parse json number to int128")]
+-    public void JsonTransform_Deserialize_SingleInt128Property()
+-    {
+-        //Arrange
+-        var maxValue = Int128.MaxValue;
+-        var jsonString = $"{{\"Property\":{maxValue}}}";
+-
+-        //Act
+-        var obj = JsonTransformer.Deserialize<Int128PropertyObj>(jsonString);
+-
+-        //Assert
+-        Assert.True(obj is Int128PropertyObj);
+-
+-        var prop = obj as Int128PropertyObj;
+-        prop.Property.Should().Be(maxValue);
+-    }
+-
+-    [Fact(DisplayName = "Can parse json number to uint128")]
+-    public void JsonTransform_Deserialize_SingleUInt128Property()
+-    {
+-        //Arrange
+-        var maxValue = UInt128.MaxValue;
+-        var jsonString = $"{{\"Property\":{maxValue}}}";
+-
+-        //Act
+-        var obj = JsonTransformer.Deserialize<UInt128PropertyObj>(jsonString);
+-
+-        //Assert
+-        Assert.True(obj is UInt128PropertyObj);
+-
+-        var prop = obj as UInt128PropertyObj;
+-        prop.Property.Should().Be(maxValue);
+-    }
+-
+-    [Fact(DisplayName = "Can parse json number to short")]
+-    public void JsonTransform_Deserialize_SingleShortProperty()
+-    {
+-        //Arrange
+-        var maxValue = short.MaxValue;
+-        var jsonString = $"{{\"Property\":{maxValue}}}";
+-
+-        //Act
+-        var obj = JsonTransformer.Deserialize<ShortPropertyObj>(jsonString);
+-
+-        //Assert
+-        Assert.True(obj is ShortPropertyObj);
+-
+-        var prop = obj as ShortPropertyObj;
+-        prop.Property.Should().Be(maxValue);
+-    }
+-
+-    [Fact(DisplayName = "Can parse json number to ushort")]
+-    public void JsonTransform_Deserialize_SingleUShortProperty()
+-    {
+-        //Arrange
+-        var maxValue = ushort.MaxValue;
+-        var jsonString = $"{{\"Property\":{maxValue}}}";
+-
+-        //Act
+-        var obj = JsonTransformer.Deserialize<UShortPropertyObj>(jsonString);
+-
+-        //Assert
+-        Assert.True(obj is UShortPropertyObj);
+-
+-        var prop = obj as UShortPropertyObj;
+-        prop.Property.Should().Be(maxValue);
+-    }
+-
+-    [Fact(DisplayName = "Can parse json to value test object")]
+-    public void JsonTransform_Deserialize_ValueTestObject()
+-    {
+-        //Arrange
+-        var json = TestObjs.GetValueTestObjectJson();
+-
+-        //Act
+-        var obj = JsonTransformer.Deserialize<ValueTestObject>(json);
+-
+-        //Assert
+-        obj.BoolProp.Should().BeTrue();
+-        obj.ByteProp.Should().Be(byte.MaxValue);
+-        obj.SByteProp.Should().Be(sbyte.MaxValue);
+-        obj.CharProp.Should().Be(char.MaxValue);
+-        obj.DecimalProp.Should().Be(decimal.MaxValue);
+-        obj.DoubleProp.Should().Be(double.MaxValue);
+-        obj.FloatProp.Should().Be(float.MaxValue);
+-        obj.IntProp.Should().Be(int.MaxValue);
+-        obj.UIntProp.Should().Be(uint.MaxValue);
+-        obj.LongProp.Should().Be(long.MaxValue);
+-        obj.ULongProp.Should().Be(ulong.MaxValue);
+-        obj.Int128Prop.Should().Be(Int128.MaxValue);
+-        obj.UInt128Prop.Should().Be(UInt128.MaxValue);
+-        obj.ShortProp.Should().Be(short.MaxValue);
+-        obj.UShortProp.Should().Be(ushort.MaxValue);
+-        obj.StringProp.Should().Be("maxValue");
+-    }
+-
+-    [Fact(DisplayName = "Can parse json date to DateTime")]
+-    public void JsonTransform_Deserialize_SingleDateTimeProperty()
+-    {
+-        //Arrange
+-        var maxValue = DateTime.MaxValue;
+-        var jsonString = $"{{\"Property\":{maxValue}}}";
+-
+-        //Act
+-        var obj = JsonTransformer.Deserialize<DateTimePropertyObj>(jsonString);
+-
+-        //Assert
+-        Assert.True(obj is DateTimePropertyObj);
+-
+-        var prop = obj as DateTimePropertyObj;
+-        prop.Property.Should().BeAfter(maxValue.AddSeconds(-1));
+-    }
+-
+-    [Fact(DisplayName = "Can parse nested json")]
+-    public void JsonTransform_Deserialize_ParseNestedString()
+-    {
+-        //Arrange
+-        var maxValue = DateTime.MaxValue;
+-        var jsonString = "{\"Property\":{\"Property\":\"maxValue\"}}";
+-
+-        //Act
+-        var obj = JsonTransformer.Deserialize<NestedStringObj>(jsonString);
+-
+-        //Assert
+-        Assert.True(obj is NestedStringObj);
+-
+-        var prop = obj as NestedStringObj;
+-        prop.Property.Should().NotBeNull();
+-        prop.Property!.Property.Should().Be("maxValue");
+-    }
+-
+-    [Fact(DisplayName = "Can parse nested json")]
+-    public void JsonTransform_Deserialize_ParseNestedNullValue()
+-    {
+-        //Arrange
+-        var maxValue = DateTime.MaxValue;
+-        var jsonString = "{\"Property\":null}";
+-
+-        //Act
+-        var obj = JsonTransformer.Deserialize<NestedStringObj>(jsonString);
+-
+-        //Assert
+-        Assert.True(obj is NestedStringObj);
+-
+-        var prop = obj as NestedStringObj;
+-        prop.Property.Should().BeNull();
+-    }
+-
+-    [Fact(DisplayName = "Can parse triple property json")]
+-    public void JsonTransform_Deserialize_ParseTriplePropertyJson()
+-    {
+-        //Arrange
+-        var maxValue = DateTime.MaxValue;
+-        var jsonString = "{\"IntProp\":2342,\"StringProp\":\"max\",\"DoubleProp\":232.23}";
+-
+-        //Act
+-        var obj = JsonTransformer.Deserialize<TriplePropertyObj>(jsonString);
+-
+-        //Assert
+-        Assert.True(obj is TriplePropertyObj);
+-
+-        var prop = obj as TriplePropertyObj;
+-        prop.IntProp.Should().Be(2342);
+-        prop.StringProp.Should().NotBeNull();
+-        prop.StringProp.Should().Be("max");
+-        prop.DoubleProp.Should().BeApproximately(232.23, 0.01);
+-    }
+-
+-    [Fact(DisplayName = "Can parse more complex json")]
+-    public void JsonTransform_Deserialize_ParseMultipleNestedString()
+-    {
+-        //Arrange
+-        var maxValue = DateTime.MaxValue;
+-        var jsonString = "{\"StringProp\":{\"Property\":\"maxValue\"},\"IntProp\":{\"Property\":234},\"Number\":4242}";
+-
+-        //Act
+-        var obj = JsonTransformer.Deserialize<NestedMultipleObj>(jsonString);
+-
+-        //Assert
+-        Assert.True(obj is NestedMultipleObj);
+-
+-        var prop = obj as NestedMultipleObj;
+-        prop.StringProp.Should().NotBeNull();
+-        prop.StringProp.Property.Should().Be("maxValue");
+-        prop.IntProp.Should().NotBeNull();
+-        prop.IntProp.Property.Should().Be(234);
+-        prop.Number.Should().Be(4242);
+-    }
+-
+-    [Fact(DisplayName = "Can parse a json array to C# List")]
+-    public void JsonTransform_Deserialize_ParseToList()
+-    {
+-        //Arrange
+-        var jsonString = """{"Strings":[{"Property":"FirstString"},{"Property":"SecondString"}]}""";
+-
+-        //Act
+-        var obj = JsonTransformer.Deserialize<ListTestObj>(jsonString);
+-
+-        //Assert
+-        obj.Should().BeOfType<ListTestObj>();
+-
+-        var prop = obj as ListTestObj;
+-        prop.Strings.Should().NotBeNull();
+-        prop.Strings.Should().HaveCount(2);
+-        prop.Strings.First().Property.Should().Be("FirstString");
+-        prop.Strings.Last().Property.Should().Be("SecondString");
+-    }
+-
+-    [Fact(DisplayName = "Can parse a json array to C# LinkedList", Skip = "Not supporting LinkedLists for now")]
+-    public void JsonTransform_Deserialize_ParseToLinkedList()
+-    {
+-        //Arrange
+-        var jsonString = """{"Strings":[{"Property":"FirstString"},{"Property":"SecondString"}]}""";
+-
+-        //Act
+-        var obj = JsonTransformer.Deserialize<LinkedListObj>(jsonString);
+-
+-        //Assert
+-        obj.Should().BeOfType<LinkedListObj>();
+-
+-        var prop = obj as LinkedListObj;
+-        prop.Strings.Should().NotBeNull();
+-        prop.Strings.Should().HaveCount(2);
+-        prop.Strings.First().Property.Should().Be("FirstString");
+-        prop.Strings.Last().Property.Should().Be("SecondString");
+-    }
+-
+-    [Fact(DisplayName = "Can parse a json array to C# array")]
+-    public void JsonTransform_Deserialize_ParseToArray()
+-    {
+-        //Arrange
+-        var jsonString = """{"Strings":[{"Property":"FirstString"},{"Property":"SecondString"}]}""";
+-
+-        //Act
+-        var obj = JsonTransformer.Deserialize<ArrayTestObj>(jsonString);
+-
+-        //Assert
+-        obj.Should().BeOfType<ArrayTestObj>();
+ 
+-        var prop = obj as ArrayTestObj;
+-        prop.Strings.Should().NotBeNull();
+-        prop.Strings.Should().HaveCount(2);
+-        prop.Strings.First().Property.Should().Be("FirstString");
+-        prop.Strings.Last().Property.Should().Be("SecondString");
++    public class DeserializationTests
++    {
++        [Theory(DisplayName = "Can find simple tokens")]
++        [InlineData("", Token.None, Token.EndOfInput)]
++        [InlineData("&", Token.None, Token.Unknown)]
++        [InlineData("{", Token.None, Token.OpenBrace)]
++        [InlineData("}", Token.PropertyValue, Token.CloseBrace)]
++        [InlineData("[", Token.None, Token.OpenBracket)]
++        [InlineData("]", Token.PropertyValue, Token.CloseBracket)]
++        [InlineData(",", Token.PropertyValue, Token.Comma)]
++        [InlineData("\"Property\"", Token.Comma, Token.PropertyName)]
++        [InlineData("283,", Token.Colon, Token.PropertyValue)]
++        [InlineData(":{", Token.PropertyName, Token.Colon)]
++        [InlineData(" ", Token.None, Token.Whitespace)]
++        internal void JsonTransform_GetNextToken(
++            string json,
++            Token previousToken,
++            Token expectedToken)
++        {
++            //Act
++            var token = JsonTransformer.GetNextToken(previousToken, json.AsSpan());
++
++            //Assert
++            token.Should().Be(expectedToken);
++        }
++
++        //This was leftover from when I was using strings versus
++        //ReadOnlySpan<char>, see if we still need these tests
++        //[Theory(DisplayName = "Can find simple token with offset")]
++        //[InlineData("{", 1, Token.EndOfInput, 0)]
++        //[InlineData("{&", 1, Token.Unknown, 0)]
++        //[InlineData("{\"n\":{", 5, Token.OpenBrace, 0)]
++        //[InlineData("{}", 1, Token.CloseBrace, 0)]
++        //[InlineData("{\"Property\"", 1, Token.PropertyName, 0)]
++        //[InlineData("{\"Property\":283,", 11, Token.PropertyValue, 0)]
++        //[InlineData("{\"Property\":{", 11, Token.OpenBrace, 1)]
++        //public void JsonTransform_GetNextTokenWithOffset(
++        //    string json,
++        //    int offset,
++        //    Token expectedToken,
++        //    int expectedTokenOffset)
++        //{
++        //    //Act
++        //    var (token, tokenOffset) = JsonTransformer.GetNextToken(json, offset);
++
++        //    //Assert
++        //    Assert.Multiple(() =>
++        //    {
++        //        Assert.Equal(expectedToken, token);
++        //        Assert.Equal(expectedTokenOffset, tokenOffset);
++        //    });
++        //}
++
++        [Theory(DisplayName = "Can find values to appropriate tokens")]
++        [InlineData("", Token.None, 1, false, null, Token.EndOfInput)]
++        [InlineData("&", Token.None, 1, false, null, Token.Unknown)]
++        [InlineData("{", Token.None, 1, false, null, Token.OpenBrace)]
++        [InlineData("}", Token.PropertyValue, 1, false, null, Token.CloseBrace)]
++        [InlineData("\"Property\"", Token.OpenBrace, 10, true, "Property", Token.PropertyName)]
++        [InlineData("283,", Token.Colon, 3, true, "283", Token.PropertyValue)]
++        [InlineData("\"data\",", Token.Colon, 6, true, "data", Token.PropertyValue)]
++        [InlineData("     ", Token.None, 5, false, null, Token.Whitespace)]
++        internal void JsonTransform_GetNextTokenAndData(string json,
++            Token previousToken,
++            int expectedPlaceholder,
++            bool expectedHasValue,
++            string expectedData,
++            Token expectedToken)
++        {
++            //Act
++            var tokenInfo = JsonTransformer.GetNextTokenAndData(previousToken, json.AsSpan());
++
++            //Assert
++            tokenInfo.Token.Should().Be(expectedToken);
++            tokenInfo.Length.Should().Be(expectedPlaceholder);
++            tokenInfo.HasValue.Should().Be(expectedHasValue);
++            tokenInfo.Data.Should().Be(expectedData);
++        }
++
++        //This was leftover from when I was using strings versus
++        //ReadOnlySpan<char>, see if this is still needed
++        [Theory(DisplayName = "Can find offset values")]
++        [InlineData("{\"name\"", Token.Colon, Token.OpenBrace, 1, false, null)]
++        [InlineData("\"name\"", Token.OpenBrace, Token.PropertyName, 6, true, "name")]
++        internal void JsonTransform_GetNextTokenAndToken_IncorpratesOffset(
++            string json,
++            Token previousToken,
++            Token expectedToken,
++            int expectedPlaceholder,
++            bool expectedHasValue,
++            string expectedData)
++        {
++            //Act
++            var tokenInfo = JsonTransformer.GetNextTokenAndData(previousToken, json.AsSpan());
++
++            //Assert
++            tokenInfo.Token.Should().Be(expectedToken);
++            tokenInfo.Length.Should().Be(expectedPlaceholder);
++            tokenInfo.HasValue.Should().Be(expectedHasValue);
++            tokenInfo.Data.Should().Be(expectedData);
++        }
++
++        [Theory(DisplayName = "Can extract token data")]
++        [InlineData("\"Property\"", "Property", 10, Token.PropertyName)]
++        [InlineData("283,", "283", 3, Token.PropertyValue)]
++        [InlineData("283},", "283", 3, Token.PropertyValue)]
++        [InlineData("\"data\",", "data", 6, Token.PropertyValue)]
++        [InlineData("\"Property Baby\"", "Property Baby", 15, Token.PropertyName)]
++        [InlineData("283424,", "283424", 6, Token.PropertyValue)]
++        [InlineData("\"data point\",", "data point", 12, Token.PropertyValue)]
++        [InlineData("\"name\"", "name", 6, Token.PropertyName)]
++        [InlineData("\"maxValue\"},", "maxValue", 10, Token.PropertyValue)]
++        [InlineData("\"null\"},", "null", 6, Token.PropertyValue)]
++        [InlineData("\"null\",", "null", 6, Token.PropertyValue)]
++        internal void JsonTransform_ExtractTokenData(
++            string json,
++            string expectedData,
++            int expectedLength,
++            Token token)
++        {
++            //Act
++            var tokenInfo = JsonTransformer.ExtractTokenData(token, json.AsSpan());
++
++            //Assert
++            tokenInfo.Length.Should().Be(expectedLength);
++            tokenInfo.Data.Should().Be(expectedData);
++        }
++
++        //Leftover from using strings instead of ReadOnlySpan<char>
++        //[Theory(DisplayName = "Can extract token data")]
++        //[InlineData("{\"Property\"", 1, "Property", 10, Token.PropertyName)]
++        //[InlineData("{:283,", 1, "283", 5, Token.PropertyValue)]
++        //[InlineData("{\"val\":\"data\",", 6, "data", 8, Token.PropertyValue)]
++        //[InlineData("{\"Property Baby\"", 1, "Property Baby", 15, Token.PropertyName)]
++        //[InlineData("{\"val\":283424,", 6, "283424", 8, Token.PropertyValue)]
++        //[InlineData("{\"val\":283424}", 6, "283424", 7, Token.PropertyValue)]
++        //[InlineData("{\"bobby\":\"data point\",", 8, "data point", 14, Token.PropertyValue)]
++        //[InlineData("{\"name\"", 1, "name", 6, Token.PropertyName)]
++        //////[InlineData("{\"val\":283424", 6, "283424", 7, Token.PropertyValue)] //error case to cover
++        //public void JsonTransform_ExtractTokenDataWithOffset(
++        //    string json,
++        //    int offset,
++        //    string expectedData,
++        //    int expectedLength,
++        //    Token token)
++        //{
++        //    //Act
++        //    var (data, length) = JsonTransformer.ExtractTokenData(token, json, offset);
++
++        //    //Assert
++        //    Assert.Multiple(() =>
++        //    {
++        //        Assert.Equal(expectedData, data);
++        //        Assert.Equal(expectedLength, length);
++        //    });
++        //}
++
++        [Fact(DisplayName = "Can extract simple tokens from string")]
++        public void JsonTransform_ExtractSimpleTokens()
++        {
++            //Arrange
++            var jsonString = "{\"name\":234}";
++
++            //Act
++            var tokenInfo = JsonTransformer.TokenizeString(jsonString);
++
++            //Assert
++            var expectedTokens = new List<Token> {
++                Token.OpenBrace,
++                Token.PropertyName,
++                Token.Colon,
++                Token.PropertyValue,
++                Token.CloseBrace,
++                Token.EndOfInput
++            };
++            Assert.Equal(expectedTokens.Count, tokenInfo.Count);
++
++            var tokens = tokenInfo.Select(ti => ti.Token).ToList();
++
++            Assert.Equal(expectedTokens, tokens);
++        }
++
++        [Fact(DisplayName = "Can extract simple tokens from string with whitespace")]
++        public void JsonTransform_ExtractWhitespaceTokens()
++        {
++            //Arrange
++            var jsonString = " { \"name\" : 234 } ";
++
++            //Act
++            var tokenInfo = JsonTransformer.TokenizeString(jsonString);
++
++            //Assert
++            var expectedTokens = new List<Token> {
++                Token.Whitespace,
++                Token.OpenBrace,
++                Token.Whitespace,
++                Token.PropertyName,
++                Token.Whitespace,
++                Token.Colon,
++                Token.Whitespace,
++                Token.PropertyValue,
++                //Token.Whitespace, //not sure if this token is needed
++                Token.CloseBrace,
++                Token.Whitespace,
++                Token.EndOfInput
++            };
++            Assert.Equal(expectedTokens.Count, tokenInfo.Count);
++
++            var tokens = tokenInfo.Select(ti => ti.Token).ToList();
++
++            Assert.Equal(expectedTokens, tokens);
++        }
++
++        [Fact(DisplayName = "Can extract tokens from nested string")]
++        public void JsonTransform_CanExtractNestedTokens()
++        {
++            //Arrange
++            var jsonString = "{\"IntProp\":{\"Property\":234},\"Number\":4242}";
++
++            //Act
++            var tokenInfo = JsonTransformer.TokenizeString(jsonString);
++
++            //Assert
++            var expectedTokens = new List<Token> {
++                Token.OpenBrace,
++                Token.PropertyName,
++                Token.Colon,
++                Token.OpenBrace,
++                Token.PropertyName,
++                Token.Colon,
++                Token.PropertyValue,
++                Token.CloseBrace,
++                Token.Comma,
++                Token.PropertyName,
++                Token.Colon,
++                Token.PropertyValue,
++                Token.CloseBrace,
++                Token.EndOfInput
++            };
++            Assert.Equal(expectedTokens.Count, tokenInfo.Count);
++
++            var tokens = tokenInfo.Select(ti => ti.Token).ToList();
++
++            Assert.Equal(expectedTokens, tokens);
++        }
++
++        [Fact(DisplayName = "Can extract more complex tokens from string")]
++        public void JsonTransform_ExtractMoreComplexTokens()
++        {
++            //Arrange
++            var jsonString = "{\"name\":234,\"value\":\"baby\",\"second\":{\"level\":23}}";
++
++            //Act
++            var tokenInfo = JsonTransformer.TokenizeString(jsonString);
++
++            //Assert
++            var expectedTokens = new List<Token> {
++                Token.OpenBrace,
++                Token.PropertyName,
++                Token.Colon,
++                Token.PropertyValue,
++                Token.Comma,
++                Token.PropertyName,
++                Token.Colon,
++                Token.PropertyValue,
++                Token.Comma,
++                Token.PropertyName,
++                Token.Colon,
++                Token.OpenBrace,
++                Token.PropertyName,
++                Token.Colon,
++                Token.PropertyValue,
++                Token.CloseBrace,
++                Token.CloseBrace,
++                Token.EndOfInput
++            };
++            Assert.Equal(expectedTokens.Count, tokenInfo.Count);
++
++            var tokens = tokenInfo.Select(ti => ti.Token).ToList();
++
++            Assert.Equal(expectedTokens, tokens);
++        }
++
++        [Theory(DisplayName = "Can parse json string to object")]
++        [InlineData("{\"Property\":\"testValue\"}", false)]
++        [InlineData(" { \"Property\" : \"testValue\" } ", false)]
++        [InlineData("       {        \"Property\"             :          \"testValue\"     }   ", false)]
++        [InlineData("{\"Property\":null}", true)]
++        [InlineData(" { \"Property\" : null } ", true)]
++        public void JsonTransform_Deserialize_SingleStringProperty(
++            string jsonString,
++            bool isNull)
++        {
++            //Act
++            var obj = JsonTransformer.Deserialize<StringPropertyObj>(jsonString);
++
++            //Assert
++            obj.Should().BeOfType<StringPropertyObj>();
++
++            var stringProp = obj as StringPropertyObj;
++            if (isNull)
++                obj.Property.Should().BeNull();
++            else
++                obj.Property.Should().Be("testValue");
++        }
++
++        [Fact(DisplayName = "Can parse json number to integer")]
++        public void JsonTransform_Deserialize_SingleIntProperty()
++        {
++            //Arrange
++            var maxValue = int.MaxValue;
++            var jsonString = $"{{\"Property\":{maxValue}}}";
++
++            //Act
++            var obj = JsonTransformer.Deserialize<IntPropertyObj>(jsonString);
++
++            //Assert
++            Assert.True(obj is IntPropertyObj);
++
++            var intProp = obj as IntPropertyObj;
++            Assert.Equal(maxValue, intProp.Property);
++        }
++
++        [Fact(DisplayName = "Can parse json number to uint")]
++        public void JsonTransform_Deserialize_SingleUIntProperty()
++        {
++            //Arrange
++            var maxValue = uint.MaxValue;
++            var jsonString = $"{{\"Property\":{maxValue}}}";
++
++            //Act
++            var obj = JsonTransformer.Deserialize<UIntPropertyObj>(jsonString);
++
++            //Assert
++            Assert.True(obj is UIntPropertyObj);
++
++            var intProp = obj as UIntPropertyObj;
++            intProp.Property.Should().Be(maxValue);
++        }
++
++        [Fact(DisplayName = "Can parse json number to float")]
++        public void JsonTransform_Deserialize_SingleFloatProperty()
++        {
++            //Arrange
++            var maxValue = float.MaxValue;
++            var jsonString = $"{{\"Property\":{maxValue.ToString("R", CultureInfo.InvariantCulture)}}}";
++
++            //Act
++            var obj = JsonTransformer.Deserialize<FloatPropertyObj>(jsonString);
++
++            //Assert
++            Assert.True(obj is FloatPropertyObj);
++
++            var floatProp = obj as FloatPropertyObj;
++            floatProp.Property.Should().BeApproximately(maxValue, 0.01f);
++        }
++
++        [Fact(DisplayName = "Can parse json number to double")]
++        public void JsonTransform_Deserialize_SingleDoubleProperty()
++        {
++            //Arrange
++            var maxValue = double.MaxValue;
++            var jsonString = $"{{\"Property\":{maxValue.ToString("R", CultureInfo.InvariantCulture)}}}";
++
++            //Act
++            var obj = JsonTransformer.Deserialize<DoublePropertyObj>(jsonString);
++
++            //Assert
++            Assert.True(obj is DoublePropertyObj);
++
++            var prop = obj as DoublePropertyObj;
++            prop.Property.Should().BeApproximately(maxValue, 0.01);
++        }
++
++        [Fact(DisplayName = "Can parse json bool to object")]
++        public void JsonTransform_Deserialize_SingleBoolProperty()
++        {
++            //Arrange
++            var jsonString = "{\"Property\":true}";
++
++            //Act
++            var obj = JsonTransformer.Deserialize<BoolPropertyObj>(jsonString);
++
++            //Assert
++            Assert.True(obj is BoolPropertyObj);
++
++            var prop = obj as BoolPropertyObj;
++            prop.Property.Should().BeTrue();
++        }
++
++        [Fact(DisplayName = "Can parse json number to byte")]
++        public void JsonTransform_Deserialize_SingleByteProperty()
++        {
++            //Arrange
++            var maxValue = byte.MaxValue;
++            var jsonString = $"{{\"Property\":{maxValue}}}";
++
++            //Act
++            var obj = JsonTransformer.Deserialize<BytePropertyObj>(jsonString);
++
++            //Assert
++            Assert.True(obj is BytePropertyObj);
++
++            var prop = obj as BytePropertyObj;
++            prop.Property.Should().Be(maxValue);
++        }
++
++        [Fact(DisplayName = "Can parse json number to sbyte")]
++        public void JsonTransform_Deserialize_SingleSByteProperty()
++        {
++            //Arrange
++            var maxValue = sbyte.MaxValue;
++            var jsonString = $"{{\"Property\":{maxValue}}}";
++
++            //Act
++            var obj = JsonTransformer.Deserialize<SBytePropertyObj>(jsonString);
++
++            //Assert
++            Assert.True(obj is SBytePropertyObj);
++
++            var prop = obj as SBytePropertyObj;
++            prop.Property.Should().Be(maxValue);
++        }
++
++        [Fact(DisplayName = "Can parse json char to object")]
++        public void JsonTransform_Deserialize_SingleCharProperty()
++        {
++            //Arrange
++            var jsonString = "{\"Property\":\"a\"}";
++
++            //Act
++            var obj = JsonTransformer.Deserialize<CharPropertyObj>(jsonString);
++
++            //Assert
++            Assert.True(obj is CharPropertyObj);
++
++            var prop = obj as CharPropertyObj;
++            prop.Property.Should().Be('a');
++        }
++
++        [Fact(DisplayName = "Can parse json number to decimal")]
++        public void JsonTransform_Deserialize_SingleDecimalProperty()
++        {
++            //Arrange
++            var maxValue = decimal.MaxValue;
++            var jsonString = $"{{\"Property\":{maxValue}}}";
++
++            //Act
++            var obj = JsonTransformer.Deserialize<DecimalPropertyObj>(jsonString);
++
++            //Assert
++            Assert.True(obj is DecimalPropertyObj);
++
++            var prop = obj as DecimalPropertyObj;
++            prop.Property.Should().Be(maxValue);
++        }
++
++        [Fact(DisplayName = "Can parse json number to long")]
++        public void JsonTransform_Deserialize_SingleLongProperty()
++        {
++            //Arrange
++            var maxValue = long.MaxValue;
++            var jsonString = $"{{\"Property\":{maxValue}}}";
++
++            //Act
++            var obj = JsonTransformer.Deserialize<LongPropertyObj>(jsonString);
++
++            //Assert
++            Assert.True(obj is LongPropertyObj);
++
++            var prop = obj as LongPropertyObj;
++            prop.Property.Should().Be(maxValue);
++        }
++
++        [Fact(DisplayName = "Can parse json number to ulong")]
++        public void JsonTransform_Deserialize_SingleULongProperty()
++        {
++            //Arrange
++            var maxValue = ulong.MaxValue;
++            var jsonString = $"{{\"Property\":{maxValue}}}";
++
++            //Act
++            var obj = JsonTransformer.Deserialize<ULongPropertyObj>(jsonString);
++
++            //Assert
++            Assert.True(obj is ULongPropertyObj);
++
++            var prop = obj as ULongPropertyObj;
++            prop.Property.Should().Be(maxValue);
++        }
++
++        //[Fact(DisplayName = "Can parse json number to int128")]
++        //public void JsonTransform_Deserialize_SingleInt128Property()
++        //{
++        //    //Arrange
++        //    var maxValue = Int128.MaxValue;
++        //    var jsonString = $"{{\"Property\":{maxValue}}}";
++
++        //    //Act
++        //    var obj = JsonTransformer.Deserialize<Int128PropertyObj>(jsonString);
++
++        //    //Assert
++        //    Assert.True(obj is Int128PropertyObj);
++
++        //    var prop = obj as Int128PropertyObj;
++        //    prop.Property.Should().Be(maxValue);
++        //}
++
++        //[Fact(DisplayName = "Can parse json number to uint128")]
++        //public void JsonTransform_Deserialize_SingleUInt128Property()
++        //{
++        //    //Arrange
++        //    var maxValue = UInt128.MaxValue;
++        //    var jsonString = $"{{\"Property\":{maxValue}}}";
++
++        //    //Act
++        //    var obj = JsonTransformer.Deserialize<UInt128PropertyObj>(jsonString);
++
++        //    //Assert
++        //    Assert.True(obj is UInt128PropertyObj);
++
++        //    var prop = obj as UInt128PropertyObj;
++        //    prop.Property.Should().Be(maxValue);
++        //}
++
++        [Fact(DisplayName = "Can parse json number to short")]
++        public void JsonTransform_Deserialize_SingleShortProperty()
++        {
++            //Arrange
++            var maxValue = short.MaxValue;
++            var jsonString = $"{{\"Property\":{maxValue}}}";
++
++            //Act
++            var obj = JsonTransformer.Deserialize<ShortPropertyObj>(jsonString);
++
++            //Assert
++            Assert.True(obj is ShortPropertyObj);
++
++            var prop = obj as ShortPropertyObj;
++            prop.Property.Should().Be(maxValue);
++        }
++
++        [Fact(DisplayName = "Can parse json number to ushort")]
++        public void JsonTransform_Deserialize_SingleUShortProperty()
++        {
++            //Arrange
++            var maxValue = ushort.MaxValue;
++            var jsonString = $"{{\"Property\":{maxValue}}}";
++
++            //Act
++            var obj = JsonTransformer.Deserialize<UShortPropertyObj>(jsonString);
++
++            //Assert
++            Assert.True(obj is UShortPropertyObj);
++
++            var prop = obj as UShortPropertyObj;
++            prop.Property.Should().Be(maxValue);
++        }
++
++        [Fact(DisplayName = "Can parse json to value test object")]
++        public void JsonTransform_Deserialize_ValueTestObject()
++        {
++            //Arrange
++            var json = TestObjs.GetValueTestObjectJson();
++
++            //Act
++            var obj = JsonTransformer.Deserialize<ValueTestObject>(json);
++
++            //Assert
++            obj.BoolProp.Should().BeTrue();
++            obj.ByteProp.Should().Be(byte.MaxValue);
++            obj.SByteProp.Should().Be(sbyte.MaxValue);
++            obj.CharProp.Should().Be(char.MaxValue);
++            obj.DecimalProp.Should().Be(decimal.MaxValue);
++            obj.DoubleProp.Should().Be(double.MaxValue);
++            obj.FloatProp.Should().Be(float.MaxValue);
++            obj.IntProp.Should().Be(int.MaxValue);
++            obj.UIntProp.Should().Be(uint.MaxValue);
++            obj.LongProp.Should().Be(long.MaxValue);
++            obj.ULongProp.Should().Be(ulong.MaxValue);
++            //obj.Int128Prop.Should().Be(Int128.MaxValue);
++            //obj.UInt128Prop.Should().Be(UInt128.MaxValue);
++            obj.ShortProp.Should().Be(short.MaxValue);
++            obj.UShortProp.Should().Be(ushort.MaxValue);
++            obj.StringProp.Should().Be("maxValue");
++        }
++
++        [Fact(DisplayName = "Can parse json date to DateTime")]
++        public void JsonTransform_Deserialize_SingleDateTimeProperty()
++        {
++            //Arrange
++            var maxValue = DateTime.MaxValue;
++            var jsonString = $"{{\"Property\":{maxValue}}}";
++
++            //Act
++            var obj = JsonTransformer.Deserialize<DateTimePropertyObj>(jsonString);
++
++            //Assert
++            Assert.True(obj is DateTimePropertyObj);
++
++            var prop = obj as DateTimePropertyObj;
++            prop.Property.Should().BeAfter(maxValue.AddSeconds(-1));
++        }
++
++        [Fact(DisplayName = "Can parse nested json")]
++        public void JsonTransform_Deserialize_ParseNestedString()
++        {
++            //Arrange
++            var maxValue = DateTime.MaxValue;
++            var jsonString = "{\"Property\":{\"Property\":\"maxValue\"}}";
++
++            //Act
++            var obj = JsonTransformer.Deserialize<NestedStringObj>(jsonString);
++
++            //Assert
++            Assert.True(obj is NestedStringObj);
++
++            var prop = obj as NestedStringObj;
++            prop.Property.Should().NotBeNull();
++            prop.Property.Property.Should().Be("maxValue");
++        }
++
++        [Fact(DisplayName = "Can parse nested json")]
++        public void JsonTransform_Deserialize_ParseNestedNullValue()
++        {
++            //Arrange
++            var maxValue = DateTime.MaxValue;
++            var jsonString = "{\"Property\":null}";
++
++            //Act
++            var obj = JsonTransformer.Deserialize<NestedStringObj>(jsonString);
++
++            //Assert
++            Assert.True(obj is NestedStringObj);
++
++            var prop = obj as NestedStringObj;
++            prop.Property.Should().BeNull();
++        }
++
++        [Fact(DisplayName = "Can parse triple property json")]
++        public void JsonTransform_Deserialize_ParseTriplePropertyJson()
++        {
++            //Arrange
++            var maxValue = DateTime.MaxValue;
++            var jsonString = "{\"IntProp\":2342,\"StringProp\":\"max\",\"DoubleProp\":232.23}";
++
++            //Act
++            var obj = JsonTransformer.Deserialize<TriplePropertyObj>(jsonString);
++
++            //Assert
++            Assert.True(obj is TriplePropertyObj);
++
++            var prop = obj as TriplePropertyObj;
++            prop.IntProp.Should().Be(2342);
++            prop.StringProp.Should().NotBeNull();
++            prop.StringProp.Should().Be("max");
++            prop.DoubleProp.Should().BeApproximately(232.23, 0.01);
++        }
++
++        [Fact(DisplayName = "Can parse more complex json")]
++        public void JsonTransform_Deserialize_ParseMultipleNestedString()
++        {
++            //Arrange
++            var maxValue = DateTime.MaxValue;
++            var jsonString = "{\"StringProp\":{\"Property\":\"maxValue\"},\"IntProp\":{\"Property\":234},\"Number\":4242}";
++
++            //Act
++            var obj = JsonTransformer.Deserialize<NestedMultipleObj>(jsonString);
++
++            //Assert
++            Assert.True(obj is NestedMultipleObj);
++
++            var prop = obj as NestedMultipleObj;
++            prop.StringProp.Should().NotBeNull();
++            prop.StringProp.Property.Should().Be("maxValue");
++            prop.IntProp.Should().NotBeNull();
++            prop.IntProp.Property.Should().Be(234);
++            prop.Number.Should().Be(4242);
++        }
++
++        [Fact(DisplayName = "Can parse a json array to C# List")]
++        public void JsonTransform_Deserialize_ParseToList()
++        {
++            //Arrange
++            var jsonString = "{\"Strings\":[{\"Property\":\"FirstString\"},{\"Property\":\"SecondString\"}]}";
++
++            //Act
++            var obj = JsonTransformer.Deserialize<ListTestObj>(jsonString);
++
++            //Assert
++            obj.Should().BeOfType<ListTestObj>();
++
++            var prop = obj as ListTestObj;
++            prop.Strings.Should().NotBeNull();
++            prop.Strings.Should().HaveCount(2);
++            prop.Strings.First().Property.Should().Be("FirstString");
++            prop.Strings.Last().Property.Should().Be("SecondString");
++        }
++
++        [Fact(DisplayName = "Can parse a json array to C# LinkedList", Skip = "Not supporting LinkedLists for now")]
++        public void JsonTransform_Deserialize_ParseToLinkedList()
++        {
++            //Arrange
++            var jsonString = "{\"Strings\":[{\"Property\":\"FirstString\"},{\"Property\":\"SecondString\"}]}";
++
++            //Act
++            var obj = JsonTransformer.Deserialize<LinkedListObj>(jsonString);
++
++            //Assert
++            obj.Should().BeOfType<LinkedListObj>();
++
++            var prop = obj as LinkedListObj;
++            prop.Strings.Should().NotBeNull();
++            prop.Strings.Should().HaveCount(2);
++            prop.Strings.First().Property.Should().Be("FirstString");
++            prop.Strings.Last().Property.Should().Be("SecondString");
++        }
++
++        [Fact(DisplayName = "Can parse a json array to C# array")]
++        public void JsonTransform_Deserialize_ParseToArray()
++        {
++            //Arrange
++            var jsonString = "{\"Strings\":[{\"Property\":\"FirstString\"},{\"Property\":\"SecondString\"}]}";
++
++            //Act
++            var obj = JsonTransformer.Deserialize<ArrayTestObj>(jsonString);
++
++            //Assert
++            obj.Should().BeOfType<ArrayTestObj>();
++
++            var prop = obj as ArrayTestObj;
++            prop.Strings.Should().NotBeNull();
++            prop.Strings.Should().HaveCount(2);
++            prop.Strings.First().Property.Should().Be("FirstString");
++            prop.Strings.Last().Property.Should().Be("SecondString");
++        }
+     }
+ }
+diff --git a/test/Ferris.Json.Test.csproj b/test/Ferris.Json.Test.csproj
+index 33803ee..60a2271 100644
+--- a/test/Ferris.Json.Test.csproj
++++ b/test/Ferris.Json.Test.csproj
+@@ -1,9 +1,7 @@
+ <Project Sdk="Microsoft.NET.Sdk">
+ 
+   <PropertyGroup>
+-    <TargetFramework>net8.0</TargetFramework>
+-    <ImplicitUsings>enable</ImplicitUsings>
+-    <Nullable>enable</Nullable>
++    <TargetFrameworks>net462;net8.0</TargetFrameworks>
+ 
+     <IsPackable>false</IsPackable>
+     <IsTestProject>true</IsTestProject>
+@@ -20,9 +18,4 @@
+   <ItemGroup>
+     <ProjectReference Include="..\src\Ferris.Json.csproj" />
+   </ItemGroup>
+-
+-  <ItemGroup>
+-    <Using Include="Xunit" />
+-  </ItemGroup>
+-
+ </Project>
+diff --git a/test/SerializationTests.cs b/test/SerializationTests.cs
+index 9e11f72..2f84c78 100644
+--- a/test/SerializationTests.cs
++++ b/test/SerializationTests.cs
+@@ -1,531 +1,535 @@
+ using Ferris.Json.Test.TestObjects;
+ using FluentAssertions;
++using System;
++using System.Collections.Generic;
++using Xunit;
+ 
+-namespace Ferris.Json.Test;
+-
+-public class SerializationTests
++namespace Ferris.Json.Test
+ {
+-    [Theory(DisplayName = "Map bool property to Json")]
+-    [InlineData(true)]
+-    [InlineData(false)]
+-    public void JsonTransformer_MapBoolProperty(bool value)
++    public class SerializationTests
+     {
+-        //Arrange
+-        var obj = new BoolPropertyObj
++        [Theory(DisplayName = "Map bool property to Json")]
++        [InlineData(true)]
++        [InlineData(false)]
++        public void JsonTransformer_MapBoolProperty(bool value)
+         {
+-            Property = value
+-        };
++            //Arrange
++            var obj = new BoolPropertyObj
++            {
++                Property = value
++            };
+ 
+-        //Act
+-        var jsonString = JsonTransformer.Serialize(obj);
++            //Act
++            var jsonString = JsonTransformer.Serialize(obj);
+ 
+-        //Assert
+-        Assert.Equal($"{{\"Property\":{value.ToString().ToLower()}}}", jsonString);
+-    }
++            //Assert
++            Assert.Equal($"{{\"Property\":{value.ToString().ToLower()}}}", jsonString);
++        }
+ 
+-    [Fact(DisplayName = "Map byte property to Json")]
+-    public void JsonTransformer_MapByteProperty()
+-    {
+-        //Arrange
+-        var obj = new BytePropertyObj
++        [Fact(DisplayName = "Map byte property to Json")]
++        public void JsonTransformer_MapByteProperty()
+         {
+-            Property = 77
+-        };
++            //Arrange
++            var obj = new BytePropertyObj
++            {
++                Property = 77
++            };
+ 
+-        //Act
+-        var jsonString = JsonTransformer.Serialize(obj);
++            //Act
++            var jsonString = JsonTransformer.Serialize(obj);
+ 
+-        //Assert
+-        Assert.Equal("{\"Property\":77}", jsonString);
+-    }
++            //Assert
++            Assert.Equal("{\"Property\":77}", jsonString);
++        }
+ 
+-    [Fact(DisplayName = "Map sbyte property to Json")]
+-    public void JsonTransformer_MapSByteProperty()
+-    {
+-        //Arrange
+-        var obj = new SBytePropertyObj
++        [Fact(DisplayName = "Map sbyte property to Json")]
++        public void JsonTransformer_MapSByteProperty()
+         {
+-            Property = 79
+-        };
++            //Arrange
++            var obj = new SBytePropertyObj
++            {
++                Property = 79
++            };
+ 
+-        //Act
+-        var jsonString = JsonTransformer.Serialize(obj);
++            //Act
++            var jsonString = JsonTransformer.Serialize(obj);
+ 
+-        //Assert
+-        Assert.Equal("{\"Property\":79}", jsonString);
+-    }
++            //Assert
++            Assert.Equal("{\"Property\":79}", jsonString);
++        }
+ 
+-    [Fact(DisplayName = "Map char property to Json")]
+-    public void JsonTransformer_MapCharProperty()
+-    {
+-        //Arrange
+-        var obj = new CharPropertyObj
++        [Fact(DisplayName = "Map char property to Json")]
++        public void JsonTransformer_MapCharProperty()
+         {
+-            Property = 'M'
+-        };
++            //Arrange
++            var obj = new CharPropertyObj
++            {
++                Property = 'M'
++            };
+ 
+-        //Act
+-        var jsonString = JsonTransformer.Serialize(obj);
++            //Act
++            var jsonString = JsonTransformer.Serialize(obj);
+ 
+-        //Assert
+-        Assert.Equal("{\"Property\":\"M\"}", jsonString);
+-    }
++            //Assert
++            Assert.Equal("{\"Property\":\"M\"}", jsonString);
++        }
+ 
+-    [Fact(DisplayName = "Map decimal property to Json")]
+-    public void JsonTransformer_MapDecimalProperty()
+-    {
+-        //Arrange
+-        var obj = new DecimalPropertyObj
++        [Fact(DisplayName = "Map decimal property to Json")]
++        public void JsonTransformer_MapDecimalProperty()
+         {
+-            Property = 23.29m
+-        };
++            //Arrange
++            var obj = new DecimalPropertyObj
++            {
++                Property = 23.29m
++            };
+ 
+-        //Act
+-        var jsonString = JsonTransformer.Serialize(obj);
++            //Act
++            var jsonString = JsonTransformer.Serialize(obj);
+ 
+-        //Assert
+-        Assert.Equal("{\"Property\":23.29}", jsonString);
+-    }
++            //Assert
++            Assert.Equal("{\"Property\":23.29}", jsonString);
++        }
+ 
+-    [Fact(DisplayName = "Map double property to Json")]
+-    public void JsonTransformer_MapDoubleProperty()
+-    {
+-        //Arrange
+-        var obj = new DoublePropertyObj
++        [Fact(DisplayName = "Map double property to Json")]
++        public void JsonTransformer_MapDoubleProperty()
+         {
+-            Property = 23.1
+-        };
++            //Arrange
++            var obj = new DoublePropertyObj
++            {
++                Property = 23.1
++            };
+ 
+-        //Act
+-        var jsonString = JsonTransformer.Serialize(obj);
++            //Act
++            var jsonString = JsonTransformer.Serialize(obj);
+ 
+-        //Assert
+-        Assert.Equal("{\"Property\":23.1}", jsonString);
+-    }
++            //Assert
++            Assert.Equal("{\"Property\":23.1}", jsonString);
++        }
+ 
+-    [Fact(DisplayName = "Map float property to Json")]
+-    public void JsonTransformer_MapFloatProperty()
+-    {
+-        //Arrange
+-        var obj = new FloatPropertyObj
++        [Fact(DisplayName = "Map float property to Json")]
++        public void JsonTransformer_MapFloatProperty()
+         {
+-            Property = 23.1f
+-        };
++            //Arrange
++            var obj = new FloatPropertyObj
++            {
++                Property = 23.1f
++            };
+ 
+-        //Act
+-        var jsonString = JsonTransformer.Serialize(obj);
++            //Act
++            var jsonString = JsonTransformer.Serialize(obj);
+ 
+-        //Assert
+-        Assert.Equal("{\"Property\":23.1}", jsonString);
+-    }
++            //Assert
++            Assert.Equal("{\"Property\":23.1}", jsonString);
++        }
+ 
+-    [Fact(DisplayName = "Map int property to Json")]
+-    public void JsonTransformer_MapIntProperty()
+-    {
+-        //Arrange
+-        var obj = new IntPropertyObj
++        [Fact(DisplayName = "Map int property to Json")]
++        public void JsonTransformer_MapIntProperty()
+         {
+-            Property = 23
+-        };
++            //Arrange
++            var obj = new IntPropertyObj
++            {
++                Property = 23
++            };
+ 
+-        //Act
+-        var jsonString = JsonTransformer.Serialize(obj);
++            //Act
++            var jsonString = JsonTransformer.Serialize(obj);
+ 
+-        //Assert
+-        Assert.Equal("{\"Property\":23}", jsonString);
+-    }
++            //Assert
++            Assert.Equal("{\"Property\":23}", jsonString);
++        }
+ 
+-    [Fact(DisplayName = "Map uint property to Json")]
+-    public void JsonTransformer_MapUIntProperty()
+-    {
+-        //Arrange
+-        var obj = new UIntPropertyObj
++        [Fact(DisplayName = "Map uint property to Json")]
++        public void JsonTransformer_MapUIntProperty()
+         {
+-            Property = 223
+-        };
+-
+-        //Act
+-        var jsonString = JsonTransformer.Serialize(obj);
+-
+-        //Assert
+-        Assert.Equal("{\"Property\":223}", jsonString);
+-    }
+-
+-    [Fact(DisplayName = "Map nint property to Json")]
+-    public void JsonTransformer_MapNIntProperty()
+-    {
+-        //Arrange
+-        var obj = new NIntPropertyObj
++            //Arrange
++            var obj = new UIntPropertyObj
++            {
++                Property = 223
++            };
++
++            //Act
++            var jsonString = JsonTransformer.Serialize(obj);
++
++            //Assert
++            Assert.Equal("{\"Property\":223}", jsonString);
++        }
++
++        //[Fact(DisplayName = "Map nint property to Json")]
++        //public void JsonTransformer_MapNIntProperty()
++        //{
++        //    //Arrange
++        //    var obj = new NIntPropertyObj
++        //    {
++        //        Property = 83
++        //    };
++
++        //    //Act
++        //    var jsonString = JsonTransformer.Serialize(obj);
++
++        //    //Assert
++        //    Assert.Equal("{\"Property\":83}", jsonString);
++        //}
++
++        //[Fact(DisplayName = "Map nuint property to Json")]
++        //public void JsonTransformer_MapNUIntProperty()
++        //{
++        //    //Arrange
++        //    var obj = new NUIntPropertyObj
++        //    {
++        //        Property = 2277
++        //    };
++
++        //    //Act
++        //    var jsonString = JsonTransformer.Serialize(obj);
++
++        //    //Assert
++        //    Assert.Equal("{\"Property\":2277}", jsonString);
++        //}
++
++        [Fact(DisplayName = "Map long property to Json")]
++        public void JsonTransformer_MapLongProperty()
+         {
+-            Property = 83
+-        };
++            //Arrange
++            var obj = new LongPropertyObj
++            {
++                Property = 832839272
++            };
+ 
+-        //Act
+-        var jsonString = JsonTransformer.Serialize(obj);
++            //Act
++            var jsonString = JsonTransformer.Serialize(obj);
+ 
+-        //Assert
+-        Assert.Equal("{\"Property\":83}", jsonString);
+-    }
++            //Assert
++            Assert.Equal("{\"Property\":832839272}", jsonString);
++        }
+ 
+-    [Fact(DisplayName = "Map nuint property to Json")]
+-    public void JsonTransformer_MapNUIntProperty()
+-    {
+-        //Arrange
+-        var obj = new NUIntPropertyObj
++        [Fact(DisplayName = "Map ulong property to Json")]
++        public void JsonTransformer_MapULongProperty()
+         {
+-            Property = 2277
+-        };
+-
+-        //Act
+-        var jsonString = JsonTransformer.Serialize(obj);
+-
+-        //Assert
+-        Assert.Equal("{\"Property\":2277}", jsonString);
+-    }
+-
+-    [Fact(DisplayName = "Map long property to Json")]
+-    public void JsonTransformer_MapLongProperty()
+-    {
+-        //Arrange
+-        var obj = new LongPropertyObj
++            //Arrange
++            var obj = new ULongPropertyObj
++            {
++                Property = 2283283927277
++            };
++
++            //Act
++            var jsonString = JsonTransformer.Serialize(obj);
++
++            //Assert
++            Assert.Equal("{\"Property\":2283283927277}", jsonString);
++        }
++
++        //[Fact(DisplayName = "Map int128 property to Json")]
++        //public void JsonTransformer_MapInt128Property()
++        //{
++        //    //Arrange
++        //    var obj = new Int128PropertyObj
++        //    {
++        //        Property = 828392722342422424
++        //    };
++
++        //    //Act
++        //    var jsonString = JsonTransformer.Serialize(obj);
++
++        //    //Assert
++        //    Assert.Equal("{\"Property\":828392722342422424}", jsonString);
++        //}
++
++        //[Fact(DisplayName = "Map uint128 property to Json")]
++        //public void JsonTransformer_MapUInt128Property()
++        //{
++        //    //Arrange
++        //    var obj = new UInt128PropertyObj
++        //    {
++        //        Property = 8328392722342422424
++        //    };
++
++        //    //Act
++        //    var jsonString = JsonTransformer.Serialize(obj);
++
++        //    //Assert
++        //    Assert.Equal("{\"Property\":8328392722342422424}", jsonString);
++        //}
++
++        [Fact(DisplayName = "Map short property to Json")]
++        public void JsonTransformer_MapShortProperty()
+         {
+-            Property = 832839272
+-        };
++            //Arrange
++            var obj = new ShortPropertyObj
++            {
++                Property = 22
++            };
+ 
+-        //Act
+-        var jsonString = JsonTransformer.Serialize(obj);
++            //Act
++            var jsonString = JsonTransformer.Serialize(obj);
+ 
+-        //Assert
+-        Assert.Equal("{\"Property\":832839272}", jsonString);
+-    }
++            //Assert
++            Assert.Equal("{\"Property\":22}", jsonString);
++        }
+ 
+-    [Fact(DisplayName = "Map ulong property to Json")]
+-    public void JsonTransformer_MapULongProperty()
+-    {
+-        //Arrange
+-        var obj = new ULongPropertyObj
++        [Fact(DisplayName = "Map ushort property to Json")]
++        public void JsonTransformer_MapUShortProperty()
+         {
+-            Property = 2283283927277
+-        };
++            //Arrange
++            var obj = new UShortPropertyObj
++            {
++                Property = 2283
++            };
+ 
+-        //Act
+-        var jsonString = JsonTransformer.Serialize(obj);
++            //Act
++            var jsonString = JsonTransformer.Serialize(obj);
+ 
+-        //Assert
+-        Assert.Equal("{\"Property\":2283283927277}", jsonString);
+-    }
++            //Assert
++            Assert.Equal("{\"Property\":2283}", jsonString);
++        }
+ 
+-    [Fact(DisplayName = "Map int128 property to Json")]
+-    public void JsonTransformer_MapInt128Property()
+-    {
+-        //Arrange
+-        var obj = new Int128PropertyObj
++        [Fact(DisplayName = "Map string property to Json")]
++        public void JsonTransformer_MapStringProperty()
+         {
+-            Property = 828392722342422424
+-        };
++            //Arrange
++            var obj = new StringPropertyObj
++            {
++                Property = "FirstTest"
++            };
+ 
+-        //Act
+-        var jsonString = JsonTransformer.Serialize(obj);
++            //Act
++            var jsonString = JsonTransformer.Serialize(obj);
+ 
+-        //Assert
+-        Assert.Equal("{\"Property\":828392722342422424}", jsonString);
+-    }
++            //Assert
++            Assert.Equal("{\"Property\":\"FirstTest\"}", jsonString);
++        }
+ 
+-    [Fact(DisplayName = "Map uint128 property to Json")]
+-    public void JsonTransformer_MapUInt128Property()
+-    {
+-        //Arrange
+-        var obj = new UInt128PropertyObj
++        [Fact(DisplayName = "Map null string property to Json")]
++        public void JsonTransformer_MapNullStringProperty()
+         {
+-            Property = 8328392722342422424
+-        };
++            //Arrange
++            var obj = new StringPropertyObj();
+ 
+-        //Act
+-        var jsonString = JsonTransformer.Serialize(obj);
++            //Act
++            var jsonString = JsonTransformer.Serialize(obj);
+ 
+-        //Assert
+-        Assert.Equal("{\"Property\":8328392722342422424}", jsonString);
+-    }
++            //Assert
++            Assert.Equal("{\"Property\":null}", jsonString);
++        }
+ 
+-    [Fact(DisplayName = "Map short property to Json")]
+-    public void JsonTransformer_MapShortProperty()
+-    {
+-        //Arrange
+-        var obj = new ShortPropertyObj
+-        {
+-            Property = 22
+-        };
++        //[Fact(DisplayName = "Map null property to Json")]
++        //public void JsonTransformer_MapNullProperty()
++        //{
++        //    //Arrange
++        //    var obj = new StringPropertyObj();
+ 
+-        //Act
+-        var jsonString = JsonTransformer.Serialize(obj);
++        //    //Act
++        //    var jsonString = JsonTransformer.Serialize(obj);
+ 
+-        //Assert
+-        Assert.Equal("{\"Property\":22}", jsonString);
+-    }
++        //    //Assert
++        //    Assert.Equal("{\"Property\":null}", jsonString);
++        //}
+ 
+-    [Fact(DisplayName = "Map ushort property to Json")]
+-    public void JsonTransformer_MapUShortProperty()
+-    {
+-        //Arrange
+-        var obj = new UShortPropertyObj
++        [Fact(DisplayName = "Map nested string property to Json")]
++        public void JsonTransformer_MapNestedProperti()
+         {
+-            Property = 2283
+-        };
++            //Arrange
++            var obj = new NestedStringObj
++            {
++                Property = new StringPropertyObj
++                {
++                    Property = "value"
++                }
++            };
+ 
+-        //Act
+-        var jsonString = JsonTransformer.Serialize(obj);
++            //Act
++            var jsonString = JsonTransformer.Serialize(obj);
+ 
+-        //Assert
+-        Assert.Equal("{\"Property\":2283}", jsonString);
+-    }
++            //Assert
++            Assert.Equal("{\"Property\":{\"Property\":\"value\"}}", jsonString);
++        }
+ 
+-    [Fact(DisplayName = "Map string property to Json")]
+-    public void JsonTransformer_MapStringProperty()
+-    {
+-        //Arrange
+-        var obj = new StringPropertyObj
++        [Fact(DisplayName = "Map ValueTestObject to Json")]
++        public void JsonTransformer_MapValueTestObject()
+         {
+-            Property = "FirstTest"
+-        };
++            //Arrange
++            var obj = TestObjs.GetValueTestObject();
+ 
+-        //Act
+-        var jsonString = JsonTransformer.Serialize(obj);
++            //Act
++            var jsonString = JsonTransformer.Serialize(obj);
+ 
+-        //Assert
+-        Assert.Equal("{\"Property\":\"FirstTest\"}", jsonString);
+-    }
+-
+-    [Fact(DisplayName = "Map null string property to Json")]
+-    public void JsonTransformer_MapNullStringProperty()
+-    {
+-        //Arrange
+-        var obj = new StringPropertyObj();
+-
+-        //Act
+-        var jsonString = JsonTransformer.Serialize(obj);
+-
+-        //Assert
+-        Assert.Equal("{\"Property\":null}", jsonString);
+-    }
+-
+-    [Fact(DisplayName = "Map null property to Json")]
+-    public void JsonTransformer_MapNullProperty()
+-    {
+-        //Arrange
+-        var obj = new StringPropertyObj();
++            //Assert
++            Assert.Equal(TestObjs.GetValueTestObjectJson(), jsonString);
++        }
+ 
+-        //Act
+-        var jsonString = JsonTransformer.Serialize(obj);
+-
+-        //Assert
+-        Assert.Equal("""{"Property":null}""", jsonString);
+-    }
+-
+-    [Fact(DisplayName = "Map nested string property to Json")]
+-    public void JsonTransformer_MapNestedProperti()
+-    {
+-        //Arrange
+-        var obj = new NestedStringObj
++        [Fact(DisplayName = "Map nullable string property to Json")]
++        public void JsonTransformer_MapNullableStringProperty()
+         {
+-            Property = new StringPropertyObj
+-            {
+-                Property = "value"
+-            }
+-        };
++            //Arrange
++            var obj = new StringNullablePropertyObj();
+ 
+-        //Act
+-        var jsonString = JsonTransformer.Serialize(obj);
++            //Act
++            var jsonString = JsonTransformer.Serialize(obj);
+ 
+-        //Assert
+-        Assert.Equal("{\"Property\":{\"Property\":\"value\"}}", jsonString);
+-    }
++            //Assert
++            Assert.Equal("{\"Property\":null}", jsonString);
++        }
+ 
+-    [Fact(DisplayName = "Map ValueTestObject to Json")]
+-    public void JsonTransformer_MapValueTestObject()
+-    {
+-        //Arrange
+-        var obj = TestObjs.GetValueTestObject();
+-
+-        //Act
+-        var jsonString = JsonTransformer.Serialize(obj);
+-
+-        //Assert
+-        Assert.Equal(TestObjs.GetValueTestObjectJson(), jsonString);
+-    }
+-
+-    [Fact(DisplayName = "Map nullable string property to Json")]
+-    public void JsonTransformer_MapNullableStringProperty()
+-    {
+-        //Arrange
+-        var obj = new StringNullablePropertyObj();
+-
+-        //Act
+-        var jsonString = JsonTransformer.Serialize(obj);
+-
+-        //Assert
+-        Assert.Equal("""{"Property":null}""", jsonString);
+-    }
+-
+-    [Fact(DisplayName = "Map datetime property to Json")]
+-    public void JsonTransformer_MapDateTimeProperty()
+-    {
+-        //Arrange
+-        var obj = new DateTimePropertyObj
++        [Fact(DisplayName = "Map datetime property to Json")]
++        public void JsonTransformer_MapDateTimeProperty()
+         {
+-            Property = DateTime.MinValue,
+-        };
++            //Arrange
++            var obj = new DateTimePropertyObj
++            {
++                Property = DateTime.MinValue,
++            };
+ 
+-        //Act
+-        var jsonString = JsonTransformer.Serialize(obj);
++            //Act
++            var jsonString = JsonTransformer.Serialize(obj);
+ 
+-        //Assert
+-        var dateString = obj.Property.ToString("s", System.Globalization.CultureInfo.InvariantCulture);
+-        Assert.Equal($"{{\"Property\":\"{dateString}\"}}", jsonString);
+-    }
++            //Assert
++            var dateString = obj.Property.ToString("s", System.Globalization.CultureInfo.InvariantCulture);
++            Assert.Equal($"{{\"Property\":\"{dateString}\"}}", jsonString);
++        }
+ 
+-    [Fact(DisplayName = "Map list property to json array")]
+-    public void JsonTransformer_MapListProperty()
+-    {
+-        //Arrange
+-        var obj = new ListTestObj
++        [Fact(DisplayName = "Map list property to json array")]
++        public void JsonTransformer_MapListProperty()
+         {
+-            Strings = new List<StringPropertyObj>
++            //Arrange
++            var obj = new ListTestObj
+             {
+-                new StringPropertyObj
+-                {
+-                    Property = "FirstString"
+-                },
+-                new StringPropertyObj
++                Strings = new List<StringPropertyObj>
+                 {
+-                    Property = "SecondString"
++                    new StringPropertyObj
++                    {
++                        Property = "FirstString"
++                    },
++                    new StringPropertyObj
++                    {
++                        Property = "SecondString"
++                    }
+                 }
+-            }
+-        };
++            };
+ 
+-        //Act
+-        var jsonString = JsonTransformer.Serialize(obj);
++            //Act
++            var jsonString = JsonTransformer.Serialize(obj);
+ 
+-        //Assert
+-        jsonString.Should().Be("""{"Strings":[{"Property":"FirstString"},{"Property":"SecondString"}]}""");
+-    }
++            //Assert
++            jsonString.Should().Be("{\"Strings\":[{\"Property\":\"FirstString\"},{\"Property\":\"SecondString\"}]}");
++        }
+ 
+-    [Fact(DisplayName = "Map linkedlist property to json array")]
+-    public void JsonTransformer_MapLinkedListProperty()
+-    {
+-        //Arrange
+-        var strings = new LinkedList<StringPropertyObj>();
+-        strings.AddLast(new StringPropertyObj
+-        {
+-            Property = "FirstString"
+-        });
+-        strings.AddLast(new StringPropertyObj
++        [Fact(DisplayName = "Map linkedlist property to json array")]
++        public void JsonTransformer_MapLinkedListProperty()
+         {
+-            Property = "SecondString"
+-        });
+-        var obj = new LinkedListObj
+-        {
+-            Strings = strings
+-        };
++            //Arrange
++            var strings = new LinkedList<StringPropertyObj>();
++            strings.AddLast(new StringPropertyObj
++            {
++                Property = "FirstString"
++            });
++            strings.AddLast(new StringPropertyObj
++            {
++                Property = "SecondString"
++            });
++            var obj = new LinkedListObj
++            {
++                Strings = strings
++            };
+ 
+-        //Act
+-        var jsonString = JsonTransformer.Serialize(obj);
++            //Act
++            var jsonString = JsonTransformer.Serialize(obj);
+ 
+-        //Assert
+-        jsonString.Should().Be("""{"Strings":[{"Property":"FirstString"},{"Property":"SecondString"}]}""");
+-    }
++            //Assert
++            jsonString.Should().Be("{\"Strings\":[{\"Property\":\"FirstString\"},{\"Property\":\"SecondString\"}]}");
++        }
+ 
+-    [Fact(DisplayName = "Map mixed list property to json array")]
+-    public void JsonTransformer_MapMixedListProperty()
+-    {
+-        //Arrange
+-        var obj = new MixedListTestObj
++        [Fact(DisplayName = "Map mixed list property to json array")]
++        public void JsonTransformer_MapMixedListProperty()
+         {
+-            Strings = new List<StringPropertyObj>
++            //Arrange
++            var obj = new MixedListTestObj
+             {
+-                new StringPropertyObj
++                Strings = new List<StringPropertyObj>
+                 {
+-                    Property = "FirstString"
++                    new StringPropertyObj
++                    {
++                        Property = "FirstString"
++                    },
++                    new StringPropertyObj
++                    {
++                        Property = "SecondString"
++                    }
+                 },
+-                new StringPropertyObj
+-                {
+-                    Property = "SecondString"
+-                }
+-            },
+-            Property = "prop"
+-        };
++                Property = "prop"
++            };
+ 
+-        //Act
+-        var jsonString = JsonTransformer.Serialize(obj);
++            //Act
++            var jsonString = JsonTransformer.Serialize(obj);
+ 
+-        //Assert
+-        jsonString.Should().Be("""{"Strings":[{"Property":"FirstString"},{"Property":"SecondString"}],"Property":"prop"}""");
+-    }
++            //Assert
++            jsonString.Should().Be("{\"Strings\":[{\"Property\":\"FirstString\"},{\"Property\":\"SecondString\"}],\"Property\":\"prop\"}");
++        }
+ 
+-    [Fact(DisplayName = "Map array property to json array")]
+-    public void JsonTransformer_MapArrayProperty()
+-    {
+-        //Arrange
+-        var obj = new ArrayTestObj
++        [Fact(DisplayName = "Map array property to json array")]
++        public void JsonTransformer_MapArrayProperty()
+         {
+-            Strings = new StringPropertyObj[2]
+-        };
++            //Arrange
++            var obj = new ArrayTestObj
++            {
++                Strings = new StringPropertyObj[2]
++            };
+ 
+-        obj.Strings[0] = new StringPropertyObj
+-        {
+-            Property = "FirstString"
+-        };
+-        obj.Strings[1] = new StringPropertyObj
+-        {
+-            Property = "SecondString"
+-        };
++            obj.Strings[0] = new StringPropertyObj
++            {
++                Property = "FirstString"
++            };
++            obj.Strings[1] = new StringPropertyObj
++            {
++                Property = "SecondString"
++            };
+ 
+-        //Act
+-        var jsonString = JsonTransformer.Serialize(obj);
++            //Act
++            var jsonString = JsonTransformer.Serialize(obj);
+ 
+-        //Assert
+-        jsonString.Should().Be("""{"Strings":[{"Property":"FirstString"},{"Property":"SecondString"}]}""");
+-    }
++            //Assert
++            jsonString.Should().Be("{\"Strings\":[{\"Property\":\"FirstString\"},{\"Property\":\"SecondString\"}]}");
++        }
+ 
+-    [Fact(DisplayName = "Map string list to json array")]
+-    public void JsonTransformer_MapStringListProperty()
+-    {
+-        //Arrange
+-        var obj = new StringListTestObj
++        [Fact(DisplayName = "Map string list to json array")]
++        public void JsonTransformer_MapStringListProperty()
+         {
+-            Strings = new List<string>
++            //Arrange
++            var obj = new StringListTestObj
+             {
+-                "one",
+-                "two",
+-                "three"
+-            }
+-        };
++                Strings = new List<string>
++                {
++                    "one",
++                    "two",
++                    "three"
++                }
++            };
+ 
+-        //Act
+-        var jsonString = JsonTransformer.Serialize(obj);
++            //Act
++            var jsonString = JsonTransformer.Serialize(obj);
+ 
+-        //Assert
+-        jsonString.Should().Be("""{"Strings":["one","two","three"]}""");
+-    }
++            //Assert
++            jsonString.Should().Be("{\"Strings\":[\"one\",\"two\",\"three\"]}");
++        }
+ 
+-    [Fact(DisplayName = "Map object list to json array")]
+-    public void JsonTransformer_MapObjectListProperty()
+-    {
+-        //Arrange
+-        var obj = new ObjectListTestObj
++        [Fact(DisplayName = "Map object list to json array")]
++        public void JsonTransformer_MapObjectListProperty()
+         {
+-            Objects = new List<object>
++            //Arrange
++            var obj = new ObjectListTestObj
+             {
+-                "one",
+-                23,
+-                '2',
+-                23.42m
+-            }
+-        };
+-
+-        //Act
+-        var jsonString = JsonTransformer.Serialize(obj);
+-
+-        //Assert
+-        jsonString.Should().Be("""{"Objects":["one",23,"2",23.42]}""");
++                Objects = new List<object>
++                {
++                    "one",
++                    23,
++                    '2',
++                    23.42m
++                }
++            };
++
++            //Act
++            var jsonString = JsonTransformer.Serialize(obj);
++
++            //Assert
++            jsonString.Should().Be("{\"Objects\":[\"one\",23,\"2\",23.42]}");
++        }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/test/TestObjects/BuildInPropertyObjs.cs b/test/TestObjects/BuildInPropertyObjs.cs
+index 895a859..8c146f6 100644
+--- a/test/TestObjects/BuildInPropertyObjs.cs
++++ b/test/TestObjects/BuildInPropertyObjs.cs
+@@ -1,84 +1,88 @@
+-﻿namespace Ferris.Json.Test.TestObjects;
+-public class BoolPropertyObj
+-{
+-    public bool Property { get; set; }
+-}
+-public class BytePropertyObj
+-{
+-    public byte Property { get; set; }
+-}
+-public class SBytePropertyObj
+-{
+-    public sbyte Property { get; set; }
+-}
+-public class CharPropertyObj
+-{
+-    public char Property { get; set; }
+-}
+-public class DecimalPropertyObj
+-{
+-    public decimal Property { get; set; }
+-}
+-public class DoublePropertyObj
+-{
+-    public double Property { get; set; }
+-}
+-public class FloatPropertyObj
+-{
+-    public float Property { get; set; }
+-}
+-public class IntPropertyObj
+-{
+-    public int Property { get; set; }
+-}
+-public class UIntPropertyObj
+-{
+-    public uint Property { get; set; }
+-}
+-public class NIntPropertyObj
+-{
+-    public nint Property { get; set; }
+-}
+-public class NUIntPropertyObj
+-{
+-    public nuint Property { get; set; }
+-}
+-public class LongPropertyObj
+-{
+-    public long Property { get; set; }
+-}
+-public class ULongPropertyObj
+-{
+-    public ulong Property { get; set; }
+-}
+-public class Int128PropertyObj
+-{
+-    public System.Int128 Property { get; set; }
+-}
+-public class UInt128PropertyObj
+-{
+-    public System.UInt128 Property { get; set; }
+-}
+-public class ShortPropertyObj
+-{
+-    public short Property { get; set; }
+-}
+-public class UShortPropertyObj
+-{
+-    public ushort Property { get; set; }
+-}
++﻿using System;
+ 
+-public class StringPropertyObj
+-{
+-    public string Property { get; set; }
+-}
++namespace Ferris.Json.Test.TestObjects
++{
++    public class BoolPropertyObj
++    {
++        public bool Property { get; set; }
++    }
++    public class BytePropertyObj
++    {
++        public byte Property { get; set; }
++    }
++    public class SBytePropertyObj
++    {
++        public sbyte Property { get; set; }
++    }
++    public class CharPropertyObj
++    {
++        public char Property { get; set; }
++    }
++    public class DecimalPropertyObj
++    {
++        public decimal Property { get; set; }
++    }
++    public class DoublePropertyObj
++    {
++        public double Property { get; set; }
++    }
++    public class FloatPropertyObj
++    {
++        public float Property { get; set; }
++    }
++    public class IntPropertyObj
++    {
++        public int Property { get; set; }
++    }
++    public class UIntPropertyObj
++    {
++        public uint Property { get; set; }
++    }
++    //public class NIntPropertyObj
++    //{
++    //    public nint Property { get; set; }
++    //}
++    //public class NUIntPropertyObj
++    //{
++    //    public nuint Property { get; set; }
++    //}
++    public class LongPropertyObj
++    {
++        public long Property { get; set; }
++    }
++    public class ULongPropertyObj
++    {
++        public ulong Property { get; set; }
++    }
++    //public class Int128PropertyObj
++    //{
++    //    public System.Int128 Property { get; set; }
++    //}
++    //public class UInt128PropertyObj
++    //{
++    //    public System.UInt128 Property { get; set; }
++    //}
++    public class ShortPropertyObj
++    {
++        public short Property { get; set; }
++    }
++    public class UShortPropertyObj
++    {
++        public ushort Property { get; set; }
++    }
+ 
+-public class StringNullablePropertyObj
+-{
+-    public string? Property { get; set; }
+-}
++    public class StringPropertyObj
++    {
++        public string Property { get; set; }
++    }
+ 
+-public class DateTimePropertyObj
+-{
+-    public DateTime Property { get; set; }
++    public class StringNullablePropertyObj
++    {
++        public string Property { get; set; }
++    }
++
++    public class DateTimePropertyObj
++    {
++        public DateTime Property { get; set; }
++    }
+ }
+\ No newline at end of file
+diff --git a/test/TestObjects/IEnumerableObjs.cs b/test/TestObjects/IEnumerableObjs.cs
+index 57c02bb..c6cb318 100644
+--- a/test/TestObjects/IEnumerableObjs.cs
++++ b/test/TestObjects/IEnumerableObjs.cs
+@@ -1,26 +1,30 @@
+-﻿namespace Ferris.Json.Test.TestObjects;
+-internal class ListTestObj
++﻿using System.Collections.Generic;
++
++namespace Ferris.Json.Test.TestObjects
+ {
+-    public List<StringPropertyObj>? Strings { get; set; }
+-}
+-internal class StringListTestObj
+-{
+-    public List<string>? Strings { get; set; }
+-}
+-internal class ObjectListTestObj
+-{
+-    public List<object>? Objects { get; set; }
+-}
+-internal class LinkedListObj
+-{
+-    public LinkedList<StringPropertyObj>? Strings { get; set; }
+-}
+-public class MixedListTestObj
+-{
+-    public List<StringPropertyObj>? Strings { get; set; }
+-    public string? Property { get; set; }
+-}
+-internal class ArrayTestObj
+-{
+-    public StringPropertyObj[]? Strings { get; set; }
++    internal class ListTestObj
++    {
++        public List<StringPropertyObj> Strings { get; set; }
++    }
++    internal class StringListTestObj
++    {
++        public List<string> Strings { get; set; }
++    }
++    internal class ObjectListTestObj
++    {
++        public List<object> Objects { get; set; }
++    }
++    internal class LinkedListObj
++    {
++        public LinkedList<StringPropertyObj> Strings { get; set; }
++    }
++    public class MixedListTestObj
++    {
++        public List<StringPropertyObj> Strings { get; set; }
++        public string Property { get; set; }
++    }
++    internal class ArrayTestObj
++    {
++        public StringPropertyObj[] Strings { get; set; }
++    }
+ }
+diff --git a/test/TestObjects/NestedObjs.cs b/test/TestObjects/NestedObjs.cs
+index 8f0e65c..8596306 100644
+--- a/test/TestObjects/NestedObjs.cs
++++ b/test/TestObjects/NestedObjs.cs
+@@ -1,11 +1,13 @@
+-﻿namespace Ferris.Json.Test.TestObjects;
+-public class NestedStringObj
++﻿namespace Ferris.Json.Test.TestObjects
+ {
+-    public StringPropertyObj? Property { get; set; }
++    public class NestedStringObj
++    {
++        public StringPropertyObj Property { get; set; }
++    }
++    public class NestedMultipleObj
++    {
++        public StringPropertyObj StringProp { get; set; }
++        public IntPropertyObj IntProp { get; set; }
++        public int Number { get; set; }
++    }
+ }
+-public class NestedMultipleObj
+-{
+-    public StringPropertyObj? StringProp { get; set; }
+-    public IntPropertyObj? IntProp { get; set; }
+-    public int Number { get; set; }
+-}
+\ No newline at end of file
+diff --git a/test/TestObjects/TestObjs.cs b/test/TestObjects/TestObjs.cs
+index 5f18b46..b63041f 100644
+--- a/test/TestObjects/TestObjs.cs
++++ b/test/TestObjects/TestObjs.cs
+@@ -1,71 +1,76 @@
+-﻿namespace Ferris.Json.Test.TestObjects;
+-public static class TestObjs
++﻿using System.Collections.Generic;
++using System.Globalization;
++
++namespace Ferris.Json.Test.TestObjects
+ {
+-    public static StringPropertyObj GetStringTestObject()
++    public static class TestObjs
+     {
+-        return new StringPropertyObj
++        public static StringPropertyObj GetStringTestObject()
+         {
+-            Property = "testProperty"
+-        };
+-    }
++            return new StringPropertyObj
++            {
++                Property = "testProperty"
++            };
++        }
+ 
+-    public static string GetStringTestObjectJson() =>
+-        $"{{\"Property\":\"testProperty\"}}";
++        public static string GetStringTestObjectJson() =>
++            $"{{\"Property\":\"testProperty\"}}";
+ 
+-    public static ValueTestObject GetValueTestObject()
+-    {
+-        return new ValueTestObject
++        public static ValueTestObject GetValueTestObject()
+         {
+-            BoolProp = true,
+-            ByteProp = byte.MaxValue,
+-            SByteProp = sbyte.MaxValue,
+-            CharProp = char.MaxValue,
+-            DecimalProp = decimal.MaxValue,
+-            DoubleProp = double.MaxValue,
+-            FloatProp = float.MaxValue,
+-            IntProp = int.MaxValue,
+-            UIntProp = uint.MaxValue,
+-            //NIntProp = 89283,
+-            //NUIntProp = 8292832,
+-            LongProp = long.MaxValue,
+-            ULongProp = ulong.MaxValue,
+-            Int128Prop = Int128.MaxValue,
+-            UInt128Prop = UInt128.MaxValue,
+-            ShortProp = short.MaxValue,
+-            UShortProp = ushort.MaxValue,
+-            StringProp = "maxValue"
+-        };
+-    }
++            return new ValueTestObject
++            {
++                BoolProp = true,
++                ByteProp = byte.MaxValue,
++                SByteProp = sbyte.MaxValue,
++                CharProp = char.MaxValue,
++                DecimalProp = decimal.MaxValue,
++                DoubleProp = double.MaxValue,
++                FloatProp = float.MaxValue,
++                IntProp = int.MaxValue,
++                UIntProp = uint.MaxValue,
++                //NIntProp = 89283,
++                //NUIntProp = 8292832,
++                LongProp = long.MaxValue,
++                ULongProp = ulong.MaxValue,
++                //Int128Prop = Int128.MaxValue,
++                //UInt128Prop = UInt128.MaxValue,
++                ShortProp = short.MaxValue,
++                UShortProp = ushort.MaxValue,
++                StringProp = "maxValue"
++            };
++        }
+ 
+-    public static string GetValueTestObjectJson() => $"{{\"BoolProp\":true,\"ByteProp\":{byte.MaxValue},\"SByteProp\":{sbyte.MaxValue},\"CharProp\":\"{char.MaxValue}\",\"DecimalProp\":{decimal.MaxValue},\"DoubleProp\":{double.MaxValue},\"FloatProp\":{float.MaxValue},\"IntProp\":{int.MaxValue},\"UIntProp\":{uint.MaxValue},\"LongProp\":{long.MaxValue},\"ULongProp\":{ulong.MaxValue},\"Int128Prop\":{Int128.MaxValue},\"UInt128Prop\":{UInt128.MaxValue},\"ShortProp\":{short.MaxValue},\"UShortProp\":{ushort.MaxValue},\"StringProp\":\"maxValue\"}}";
++        public static string GetValueTestObjectJson() => $"{{\"BoolProp\":true,\"ByteProp\":{byte.MaxValue},\"SByteProp\":{sbyte.MaxValue},\"CharProp\":\"{char.MaxValue}\",\"DecimalProp\":{decimal.MaxValue},\"DoubleProp\":{double.MaxValue.ToString("R", CultureInfo.InvariantCulture)},\"FloatProp\":{float.MaxValue.ToString("R", CultureInfo.InvariantCulture)},\"IntProp\":{int.MaxValue},\"UIntProp\":{uint.MaxValue},\"LongProp\":{long.MaxValue},\"ULongProp\":{ulong.MaxValue},\"ShortProp\":{short.MaxValue},\"UShortProp\":{ushort.MaxValue},\"StringProp\":\"maxValue\"}}";
+ 
+-    public static MixedListTestObj GetListTestObject()
+-    {
+-        return new MixedListTestObj
++        public static MixedListTestObj GetListTestObject()
+         {
+-            Strings = new List<StringPropertyObj>
++            return new MixedListTestObj
+             {
+-                new StringPropertyObj
++                Strings = new List<StringPropertyObj>
+                 {
+-                    Property = "Test1"
++                    new StringPropertyObj
++                    {
++                        Property = "Test1"
++                    },
++                    new StringPropertyObj
++                    {
++                        Property = "Test2"
++                    },
++                    new StringPropertyObj
++                    {
++                        Property = "Test3"
++                    },
++                    new StringPropertyObj
++                    {
++                        Property = "Test4"
++                    }
+                 },
+-                new StringPropertyObj
+-                {
+-                    Property = "Test2"
+-                },
+-                new StringPropertyObj
+-                {
+-                    Property = "Test3"
+-                },
+-                new StringPropertyObj
+-                {
+-                    Property = "Test4"
+-                }
+-            },
+-            Property = "BaseString"
+-        };
+-    }
++                Property = "BaseString"
++            };
++        }
+ 
+-    public static string GetListTestObjectJson() =>
+-        $"{{\"Strings\":[{{\"Property\":\"Test1\"}},{{\"Property\":\"Test2\"}},{{\"Property\":\"Test3\"}},{{\"Property\":\"Test4\"}},\"Property\":\"BaseString\"]}}";
++        public static string GetListTestObjectJson() =>
++            $"{{\"Strings\":[{{\"Property\":\"Test1\"}},{{\"Property\":\"Test2\"}},{{\"Property\":\"Test3\"}},{{\"Property\":\"Test4\"}},\"Property\":\"BaseString\"]}}";
++    }
+ }
+diff --git a/test/TestObjects/TriplePropertyObj.cs b/test/TestObjects/TriplePropertyObj.cs
+index 671805c..4fd7e46 100644
+--- a/test/TestObjects/TriplePropertyObj.cs
++++ b/test/TestObjects/TriplePropertyObj.cs
+@@ -1,7 +1,9 @@
+-﻿namespace Ferris.Json.Test.TestObjects;
+-internal class TriplePropertyObj
++﻿namespace Ferris.Json.Test.TestObjects
+ {
+-    public int IntProp { get; set; }
+-    public string? StringProp { get; set; }
+-    public double DoubleProp { get; set; }
++    internal class TriplePropertyObj
++    {
++        public int IntProp { get; set; }
++        public string StringProp { get; set; }
++        public double DoubleProp { get; set; }
++    }
+ }
+diff --git a/test/TestObjects/ValueTestObject.cs b/test/TestObjects/ValueTestObject.cs
+index 0ff243e..091a2e7 100644
+--- a/test/TestObjects/ValueTestObject.cs
++++ b/test/TestObjects/ValueTestObject.cs
+@@ -1,22 +1,24 @@
+-﻿namespace Ferris.Json.Test.TestObjects;
+-public class ValueTestObject
++﻿namespace Ferris.Json.Test.TestObjects
+ {
+-    public bool BoolProp { get; set; }
+-    public byte ByteProp { get; set; }
+-    public sbyte SByteProp { get; set; }
+-    public char CharProp { get; set; }
+-    public decimal DecimalProp { get; set; }
+-    public double DoubleProp { get; set; }
+-    public float FloatProp { get; set; }
+-    public int IntProp { get; set; }
+-    public uint UIntProp { get; set; }
+-    //public nint NIntProp { get; set; }
+-    //public nuint NUIntProp { get; set; }
+-    public long LongProp { get; set; }
+-    public ulong ULongProp { get; set; }
+-    public System.Int128 Int128Prop { get; set; }
+-    public System.UInt128 UInt128Prop { get; set; }
+-    public short ShortProp { get; set; }
+-    public ushort UShortProp { get; set; }
+-    public string StringProp { get; set; }
++    public class ValueTestObject
++    {
++        public bool BoolProp { get; set; }
++        public byte ByteProp { get; set; }
++        public sbyte SByteProp { get; set; }
++        public char CharProp { get; set; }
++        public decimal DecimalProp { get; set; }
++        public double DoubleProp { get; set; }
++        public float FloatProp { get; set; }
++        public int IntProp { get; set; }
++        public uint UIntProp { get; set; }
++        //public nint NIntProp { get; set; }
++        //public nuint NUIntProp { get; set; }
++        public long LongProp { get; set; }
++        public ulong ULongProp { get; set; }
++        //public System.Int128 Int128Prop { get; set; }
++        //public System.UInt128 UInt128Prop { get; set; }
++        public short ShortProp { get; set; }
++        public ushort UShortProp { get; set; }
++        public string StringProp { get; set; }
++    }
+ }

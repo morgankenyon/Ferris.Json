@@ -1,7 +1,9 @@
-﻿namespace Ferris.Json.Test.TestObjects;
-internal class TriplePropertyObj
+﻿namespace Ferris.Json.Test.TestObjects
 {
-    public int IntProp { get; set; }
-    public string? StringProp { get; set; }
-    public double DoubleProp { get; set; }
+    internal class TriplePropertyObj
+    {
+        public int IntProp { get; set; }
+        public string StringProp { get; set; }
+        public double DoubleProp { get; set; }
+    }
 }

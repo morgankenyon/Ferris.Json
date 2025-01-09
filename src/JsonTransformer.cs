@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Reflection.Metadata.Ecma335;
 
 namespace Ferris.Json
 {
@@ -89,10 +91,8 @@ namespace Ferris.Json
                     || propertyType == typeof(System.UInt32)
                     || propertyType == typeof(System.Int64)
                     || propertyType == typeof(System.UInt64)
-                    || propertyType == typeof(System.Int128)
-                    || propertyType == typeof(System.UInt128)
-                    || propertyType == typeof(System.Single)
-                    || propertyType == typeof(System.Double)
+                    //|| propertyType == typeof(System.Int128)
+                    //|| propertyType == typeof(System.UInt128)
                     || propertyType == typeof(System.Byte)
                     || propertyType == typeof(System.SByte)
                     || propertyType == typeof(System.Decimal)
@@ -102,9 +102,19 @@ namespace Ferris.Json
                 {
                     jsonProperties.Add($"\"{propertyInfo.Name}\":{propertyValue}");
                 }
+                else if (propertyType == typeof(System.Single))
+                {
+                    var floatValue = (float)propertyValue;
+                    jsonProperties.Add($"\"{propertyInfo.Name}\":{floatValue.ToString("R", CultureInfo.InvariantCulture)}");
+                }
+                else if (propertyType == typeof(System.Double))
+                {
+                    var doubleValue = (double)propertyValue;
+                    jsonProperties.Add($"\"{propertyInfo.Name}\":{doubleValue.ToString("R", CultureInfo.InvariantCulture)}");
+                }
                 else if (propertyType == typeof(System.Boolean))
                 {
-                    jsonProperties.Add($"\"{propertyInfo.Name}\":{propertyValue!.ToString()!.ToLower()}");
+                    jsonProperties.Add($"\"{propertyInfo.Name}\":{propertyValue.ToString().ToLower()}");
                 }
                 else if (propertyType == typeof(System.DateTime))
                 {
@@ -133,7 +143,7 @@ namespace Ferris.Json
         {
             Type type = typeof(T);
 
-            var spanData = Deserialize(type, json);
+            var spanData = Deserialize(type, json.AsSpan());
 
             var result = spanData.Value;
 
@@ -145,27 +155,27 @@ namespace Ferris.Json
         private static bool IsLineEndingToken(Token token) =>
             token.IsComma() || token.IsCloseBrace();
 
-        private static bool IsValidPropertyNameToken(TokenInfo? propertyNameInfo)
+        private static bool IsValidPropertyNameToken(TokenInfo propertyNameInfo)
         {
             return propertyNameInfo != null
                 && propertyNameInfo.Token.IsPropertyName()
                 && propertyNameInfo.Data != null;
         }
 
-        private static bool IsValidColonToken(TokenInfo? colonInfo)
+        private static bool IsValidColonToken(TokenInfo colonInfo)
         {
             return colonInfo != null
                 && colonInfo.Token.IsColon();
         }
 
-        private static bool IsValidPropertyValueToken(TokenInfo? propertyValueInfo)
+        private static bool IsValidPropertyValueToken(TokenInfo propertyValueInfo)
         {
             return propertyValueInfo != null
                 && propertyValueInfo.Token.IsPropertyValue()
                 && propertyValueInfo.HasValue;
         }
 
-        private static bool AreTokensSetupForPropertyValue(TokenInfo? propertyNameInfo, TokenInfo? colonInfo)
+        private static bool AreTokensSetupForPropertyValue(TokenInfo propertyNameInfo, TokenInfo colonInfo)
         {
             return IsValidPropertyNameToken(propertyNameInfo)
                 && IsValidColonToken(colonInfo);
@@ -173,9 +183,9 @@ namespace Ferris.Json
 
         private static bool AreTokensSetupForValue(
             Token previousToken,
-            TokenInfo? propertyNameInfo,
-            TokenInfo? colonInfo,
-            TokenInfo? propertyValueInfo)
+            TokenInfo propertyNameInfo,
+            TokenInfo colonInfo,
+            TokenInfo propertyValueInfo)
         {
             return previousToken.IsPropertyValue()
                 && IsValidPropertyNameToken(propertyNameInfo)
@@ -196,10 +206,10 @@ namespace Ferris.Json
                 return new SpanData(jsonSpan, null);
             }
             var previousToken = Token.None;
-            TokenInfo? openBraceInfo = null;
-            TokenInfo? propertyNameInfo = null;
-            TokenInfo? colonInfo = null;
-            TokenInfo? propertyValueInfo = null;
+            TokenInfo openBraceInfo = null;
+            TokenInfo propertyNameInfo = null;
+            TokenInfo colonInfo = null;
+            TokenInfo propertyValueInfo = null;
             while (true)
             {
                 var tokenInfo = GetNextTokenAndData(previousToken, jsonSpan);
@@ -214,9 +224,9 @@ namespace Ferris.Json
                 //Case for completing a name + value pair
                 if (IsLineEndingToken(token)
                     && AreTokensSetupForValue(previousToken, propertyNameInfo, colonInfo, propertyValueInfo)
-                    && propertiesDict.TryGetValue((string)propertyNameInfo!.Data!, out var propertyInfo))
+                    && propertiesDict.TryGetValue((string)propertyNameInfo.Data, out var propertyInfo))
                 {
-                    Libs.MapValue(propertyInfo, instance, propertyValueInfo!);
+                    Libs.MapValue(propertyInfo, instance, propertyValueInfo);
                 }
                 else
                 {
@@ -227,7 +237,7 @@ namespace Ferris.Json
                 if (token.IsOpenBrace() && previousToken.IsColon())
                 {
                     if (AreTokensSetupForPropertyValue(propertyNameInfo, colonInfo)
-                        && propertiesDict.TryGetValue((string)propertyNameInfo!.Data!, out var objectInfo))
+                        && propertiesDict.TryGetValue((string)propertyNameInfo.Data, out var objectInfo))
                     {
                         var spanData = Deserialize(objectInfo.PropertyType, jsonSpan);
 
@@ -248,7 +258,7 @@ namespace Ferris.Json
                 else if (token.IsOpenBracket() && previousToken.IsColon())
                 {
                     if (AreTokensSetupForPropertyValue(propertyNameInfo, colonInfo)
-                        && propertiesDict.TryGetValue((string)propertyNameInfo!.Data!, out var arrayInfo))
+                        && propertiesDict.TryGetValue((string)propertyNameInfo.Data, out var arrayInfo))
                     {
                         var arrayType = arrayInfo.PropertyType;
                         //if it's a list
@@ -257,7 +267,7 @@ namespace Ferris.Json
                             var elementType = arrayType.GetGenericArguments()[0];
                             var nextListToken = Token.None;
                             //make new list
-                            var listInstance = (System.Collections.IList?)Activator.CreateInstance(arrayType);
+                            var listInstance = (System.Collections.IList)Activator.CreateInstance(arrayType);
                             do
                             {
                                 //convert all elements to C# objects
@@ -366,7 +376,7 @@ namespace Ferris.Json
             string json)
         {
             List<TokenInfo> tokens = new List<TokenInfo>();
-            ReadOnlySpan<char> jsonSpan = json;
+            ReadOnlySpan<char> jsonSpan = json.AsSpan();
 
             var previousValidToken = Token.Unknown;
             while (true)

@@ -1,16 +1,18 @@
-﻿namespace Ferris.Json;
-internal enum Token
+﻿namespace Ferris.Json
 {
-    Unknown,
-    None,
-    EndOfInput,
-    Whitespace,
-    OpenBrace,
-    CloseBrace,
-    PropertyName,
-    PropertyValue,
-    Comma,
-    Colon,
-    OpenBracket,
-    CloseBracket
+    internal enum Token
+    {
+        Unknown,
+        None,
+        EndOfInput,
+        Whitespace,
+        OpenBrace,
+        CloseBrace,
+        PropertyName,
+        PropertyValue,
+        Comma,
+        Colon,
+        OpenBracket,
+        CloseBracket
+    }
 }
