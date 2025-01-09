@@ -54,6 +54,9 @@ var obj = JsonTransformer.Deserialize<TestObject>(jsonString);
 - [ ] - other ienumerable types
 - [ ] - non generic data structures
 - [ ] - different input types (streams, etc)
+- [ ] - F# support
+- [ ] - Supporting data classes
+- [ ] - Supporting enums
 
 ## Todo items
 
