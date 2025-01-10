@@ -4,10 +4,9 @@ A library for serializing and deserializing json.
 
 Current status: 
 
-* Handles a lot of the simple C# types
-* Can deserialize a well formed simple json string.
+* Handles a lot of the simple C# and json string use cases.
 * Does not handle more complex C# types
-* Does not invalid json string well
+* Does not handle invalid json string well
 
 ## Usages
 
@@ -49,9 +48,12 @@ var obj = JsonTransformer.Deserialize<TestObject>(jsonString);
 - [x] - handle nulls while deserializing
 - [x] - handling null values in C# while serializing
 - [x] - handle nested quotes in strings
+- [ ] - Supporting enums
 - [ ] - gracefully handling invalid json
 - [ ] - handle other types of whitespace (needed???)
-- [ ] - add serialization options (pretty print, DateTime format, etc)
+- [ ] - add serialization options (pretty print, DateTime format, enums to strings, etc)
+- [ ] - Supporting data classes
+- [ ] - Supporting classes with constructors
 - [ ] - handle numbers with exponents
 - [ ] - deserializing IList<T> types
 - [ ] - support hex
@@ -60,20 +62,3 @@ var obj = JsonTransformer.Deserialize<TestObject>(jsonString);
 - [ ] - non generic data structures
 - [ ] - different input types (streams, etc)
 - [ ] - F# support
-- [ ] - Supporting data classes
-- [ ] - Supporting enums
-
-## Json Spec
-
-https://ecma-international.org/wp-content/uploads/ECMA-404.pdf
-
-## Todo items
-
-- [ ] - How does parsing Double.MaxValue/Double.MinValue impact numbers: https://stackoverflow.com/questions/4441782/why-does-double-tryparse-return-false-for-a-string-containing-double-maxvalue
-
-## Notes
-
-* String with escaped double quotes 
-  * https://stackoverflow.com/questions/50261853/regex-non-escaped-quotation-marks
-  * https://stackoverflow.com/a/2149780/1352766
-  * https://stackoverflow.com/a/5695337/1352766

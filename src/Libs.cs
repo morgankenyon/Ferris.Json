@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Globalization;
 using System.Reflection;
 
 namespace Ferris.Json
@@ -7,6 +6,19 @@ namespace Ferris.Json
 
     internal static class Libs
     {
+        internal static object MapValue(Type type, object data)
+        {
+            if (type == typeof(string))
+            {
+                return data;
+            }
+            if (type == typeof(int) && int.TryParse(data.ToString(), out int result))
+            {
+                return result;
+            }
+
+            return data;
+        }
         internal static void MapValue(PropertyInfo propertyInfo, object instance, TokenInfo dataInfo)
         {
             if (!dataInfo.HasValue)

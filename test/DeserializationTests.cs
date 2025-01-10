@@ -41,6 +41,13 @@ namespace Ferris.Json.Test
         [InlineData("}", Token.PropertyValue, 1, false, null, Token.CloseBrace)]
         [InlineData("\"Property\"", Token.OpenBrace, 10, true, "Property", Token.PropertyName)]
         [InlineData("283,", Token.Colon, 3, true, "283", Token.PropertyValue)]
+        [InlineData("283]},", Token.Colon, 3, true, "283", Token.PropertyValue)]
+        [InlineData("283],}", Token.Colon, 3, true, "283", Token.PropertyValue)]
+        [InlineData("283,]}", Token.Colon, 3, true, "283", Token.PropertyValue)]
+        [InlineData("283,}]", Token.Colon, 3, true, "283", Token.PropertyValue)]
+        [InlineData("283}],", Token.Colon, 3, true, "283", Token.PropertyValue)]
+        [InlineData("283},]", Token.Colon, 3, true, "283", Token.PropertyValue)]
+        [InlineData("283}", Token.Colon, 3, true, "283", Token.PropertyValue)]
         [InlineData("\"data\",", Token.Colon, 6, true, "data", Token.PropertyValue)]
         [InlineData("     ", Token.None, 5, false, null, Token.Whitespace)]
         [InlineData("\"one\\\"one\"", Token.Colon, 10, true, "one\\\"one", Token.PropertyValue)]
@@ -685,6 +692,40 @@ namespace Ferris.Json.Test
             prop.Strings.Should().HaveCount(2);
             prop.Strings.First().Property.Should().Be("FirstString");
             prop.Strings.Last().Property.Should().Be("SecondString");
+        }
+
+        [Fact(DisplayName = "Can parse json array to string list")]
+        public void JsonTransformer_Deserialize_ParseToStringList()
+        {
+            //Arrange
+            var jsonString = "{\"Strings\":[\"one\",\"two\",\"three\"]}";
+
+            //Act
+            var obj = JsonTransformer.Deserialize<StringListTestObj>(jsonString);
+
+            //Assert
+            obj.Should().NotBeNull();
+            obj.Strings.Should().HaveCount(3);
+            obj.Strings.First().Should().Be("one");
+            obj.Strings.Skip(1).First().Should().Be("two");
+            obj.Strings.Last().Should().Be("three");
+        }
+
+        [Fact(DisplayName = "Can parse json array to int list")]
+        public void JsonTransformer_Deserialize_ParseToIntList()
+        {
+            //Arrange
+            var jsonString = "{\"Ints\":[1, 2, 3]}";
+
+            //Act
+            var obj = JsonTransformer.Deserialize<IntListTestObj>(jsonString);
+
+            //Assert
+            obj.Should().NotBeNull();
+            obj.Ints.Should().HaveCount(3);
+            obj.Ints.First().Should().Be(1);
+            obj.Ints.Skip(1).First().Should().Be(2);
+            obj.Ints.Last().Should().Be(3);
         }
     }
 }

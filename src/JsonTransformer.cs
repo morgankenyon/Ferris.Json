@@ -12,6 +12,18 @@ namespace Ferris.Json
     /// </summary>
     public static class JsonTransformer
     {
+        internal static bool IsPrimitiveType(Type type)
+        {
+            if (type == typeof(string))
+            {
+                return true;
+            }
+            else if (type.BaseType != typeof(object))
+            {
+                return true;
+            }
+            return false;
+        }
         /// <summary>
         /// Serialize a C# object into a json string
         /// </summary>
@@ -193,6 +205,19 @@ namespace Ferris.Json
                 && IsValidPropertyValueToken(propertyValueInfo);
         }
 
+        internal static SpanData GetElementValue(Type type, ReadOnlySpan<char> jsonSpan)
+        {
+            if (IsPrimitiveType(type))
+            {
+                var tokenInfo = ExtractTokenData(Token.PropertyValue, jsonSpan);
+                var data = Libs.MapValue(type, tokenInfo.Data);
+                jsonSpan = jsonSpan.Slice(tokenInfo.Length);
+                return new SpanData(jsonSpan, data);
+            }
+
+            return Deserialize(type, jsonSpan);
+        }
+
         private static SpanData Deserialize(Type type, ReadOnlySpan<char> jsonSpan)
         {
             PropertyInfo[] properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
@@ -272,7 +297,8 @@ namespace Ferris.Json
                             {
                                 //convert all elements to C# objects
                                 jsonSpan = jsonSpan.Slice(1);
-                                var spanData = Deserialize(elementType, jsonSpan);
+                                //if ()
+                                var spanData = GetElementValue(elementType, jsonSpan);
                                 jsonSpan = spanData.JsonSpan;
                                 nextListToken = GetNextToken(Token.None, jsonSpan);
                                 listInstance.Add(spanData.Value);
@@ -481,17 +507,25 @@ namespace Ferris.Json
         private static (string data, int length) ExtractUnquotedPropertyValue(
             ReadOnlySpan<char> jsonSpan)
         {
-            //also doesn't handle whitespace
             //need to handle invalid json at some point
             var endingComma = jsonSpan.IndexOf(',');
             var endingBrace = jsonSpan.IndexOf('}');
+            var endingBracket = jsonSpan.IndexOf(']');
             var endingChar = -1;
-            if (endingComma < 0)
+            if (endingComma < 0 && endingBrace < 0)
+                endingChar = endingBracket;
+            else if (endingComma < 0 && endingBracket < 0)
                 endingChar = endingBrace;
-            else if (endingBrace < 0)
+            else if (endingBrace < 0 && endingBracket < 0)
                 endingChar = endingComma;
-            else
+            else if (endingComma < 0)
+                endingChar = Math.Min(endingBrace, endingBracket);
+            else if (endingBrace < 0)
+                endingChar = Math.Min(endingComma, endingBracket);
+            else if (endingBracket < 0)
                 endingChar = Math.Min(endingComma, endingBrace);
+            else
+                endingChar = Math.Min(endingComma, Math.Min(endingBrace, endingBracket));
 
             var data = jsonSpan.Slice(0, endingChar);
             //don't pull in ending token
