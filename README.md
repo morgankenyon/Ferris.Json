@@ -2,7 +2,12 @@
 
 A library for serializing and deserializing json.
 
-Current status: not ready to be used for anything.
+Current status: 
+
+* Handles a lot of the simple C# types
+* Can deserialize a well formed simple json string.
+* Does not handle more complex C# types
+* Does not invalid json string well
 
 ## Usages
 
