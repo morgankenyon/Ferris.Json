@@ -34,15 +34,15 @@ namespace Ferris.Json.Test
         }
 
         [Theory]
-        [InlineData("\"\"\"", "\"")]
-        //[InlineData("\"\\\"", "\\")]
-        //[InlineData("\"/\"", "/")]
-        //[InlineData("\"\b\"", "\b")]
-        //[InlineData("\"\f\"", "\f")]
-        //[InlineData("\"\n\"", "\n")]
-        //[InlineData("\"\r\"", "\r")]
-        //[InlineData("\"\t\"", "\t")]
-        //[InlineData("\"12/\"", "12\u002f")]
+        [InlineData("\"\\\"\"", "\\\"")]
+        [InlineData("\"\\\"", "\\")]
+        [InlineData("\"/\"", "/")]
+        [InlineData("\"\b\"", "\b")]
+        [InlineData("\"\f\"", "\f")]
+        [InlineData("\"\n\"", "\n")]
+        [InlineData("\"\r\"", "\r")]
+        [InlineData("\"\t\"", "\t")]
+        [InlineData("\"12/\"", "12\u002f")]
         internal void JsonTransform_CanDeserializeEscapedCharacters(
             string propertyString,
             string expectedResult)

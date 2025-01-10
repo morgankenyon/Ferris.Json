@@ -451,15 +451,31 @@ namespace Ferris.Json
 
         private static (string data, int length) ExtractQuotedPropertyValue(ReadOnlySpan<char> jsonSpan)
         {
-            //value offset is 2, colon and one double quotes
-            //parsing offset is 4, colon + two double qoutes
+            //value offset is 1, one double quotes
+            //parsing offset is 2, two double qoutes
             var (valueOffset, parsingOffset) = (1, 2);
             var valueSpan = jsonSpan.Slice(valueOffset);
             var valueSpanCount = valueSpan.Length;
-            //does not handle escaped double quotes
-            var endOfValue = valueSpan.IndexOf('"');
-            var data = valueSpan.Slice(0, endOfValue);
-            return (data.ToString(), endOfValue + parsingOffset);
+
+            var endingQuoteIndex = valueSpan.IndexOf('"');
+
+            //if ending double quote is escaped
+            if ((endingQuoteIndex > 0) && valueSpan[endingQuoteIndex - 1] == '\\')
+            {
+                var indexAccumulator = endingQuoteIndex;
+                var nextSlice = valueSpan;
+                //loop until finding a double quote that isn't escaped
+                while ((endingQuoteIndex > 0) && valueSpan[indexAccumulator - 1] == '\\')
+                {
+                    nextSlice = nextSlice.Slice(endingQuoteIndex + 1);
+                    endingQuoteIndex = nextSlice.IndexOf('"');
+                    indexAccumulator += endingQuoteIndex + 1;
+                }
+
+                endingQuoteIndex = indexAccumulator;
+            }
+            var data = valueSpan.Slice(0, endingQuoteIndex);
+            return (data.ToString(), endingQuoteIndex + parsingOffset);
         }
 
         private static (string data, int length) ExtractUnquotedPropertyValue(

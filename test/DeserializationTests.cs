@@ -34,72 +34,25 @@ namespace Ferris.Json.Test
             token.Should().Be(expectedToken);
         }
 
-        //This was leftover from when I was using strings versus
-        //ReadOnlySpan<char>, see if we still need these tests
-        //[Theory(DisplayName = "Can find simple token with offset")]
-        //[InlineData("{", 1, Token.EndOfInput, 0)]
-        //[InlineData("{&", 1, Token.Unknown, 0)]
-        //[InlineData("{\"n\":{", 5, Token.OpenBrace, 0)]
-        //[InlineData("{}", 1, Token.CloseBrace, 0)]
-        //[InlineData("{\"Property\"", 1, Token.PropertyName, 0)]
-        //[InlineData("{\"Property\":283,", 11, Token.PropertyValue, 0)]
-        //[InlineData("{\"Property\":{", 11, Token.OpenBrace, 1)]
-        //public void JsonTransform_GetNextTokenWithOffset(
-        //    string json,
-        //    int offset,
-        //    Token expectedToken,
-        //    int expectedTokenOffset)
-        //{
-        //    //Act
-        //    var (token, tokenOffset) = JsonTransformer.GetNextToken(json, offset);
-
-        //    //Assert
-        //    Assert.Multiple(() =>
-        //    {
-        //        Assert.Equal(expectedToken, token);
-        //        Assert.Equal(expectedTokenOffset, tokenOffset);
-        //    });
-        //}
-
         [Theory(DisplayName = "Can find values to appropriate tokens")]
-        //[InlineData("", Token.None, 1, false, null, Token.EndOfInput)]
-        //[InlineData("&", Token.None, 1, false, null, Token.Unknown)]
-        //[InlineData("{", Token.None, 1, false, null, Token.OpenBrace)]
-        //[InlineData("}", Token.PropertyValue, 1, false, null, Token.CloseBrace)]
-        //[InlineData("\"Property\"", Token.OpenBrace, 10, true, "Property", Token.PropertyName)]
-        //[InlineData("283,", Token.Colon, 3, true, "283", Token.PropertyValue)]
-        //[InlineData("\"data\",", Token.Colon, 6, true, "data", Token.PropertyValue)]
-        //[InlineData("     ", Token.None, 5, false, null, Token.Whitespace)]
-        [InlineData("\"\"\"", Token.Colon, 1, true, "\"", Token.PropertyValue)]
+        [InlineData("", Token.None, 1, false, null, Token.EndOfInput)]
+        [InlineData("&", Token.None, 1, false, null, Token.Unknown)]
+        [InlineData("{", Token.None, 1, false, null, Token.OpenBrace)]
+        [InlineData("}", Token.PropertyValue, 1, false, null, Token.CloseBrace)]
+        [InlineData("\"Property\"", Token.OpenBrace, 10, true, "Property", Token.PropertyName)]
+        [InlineData("283,", Token.Colon, 3, true, "283", Token.PropertyValue)]
+        [InlineData("\"data\",", Token.Colon, 6, true, "data", Token.PropertyValue)]
+        [InlineData("     ", Token.None, 5, false, null, Token.Whitespace)]
+        [InlineData("\"one\\\"one\"", Token.Colon, 10, true, "one\\\"one", Token.PropertyValue)]
+        [InlineData("\"\\\"\"", Token.Colon, 4, true, "\\\"", Token.PropertyValue)]
+        [InlineData("\"\"", Token.Colon, 2, true, "", Token.PropertyValue)]
+        [InlineData("\"What\\\"s that\\\"s got\\\"s to\\\"s do\"", Token.Colon, 33, true, "What\\\"s that\\\"s got\\\"s to\\\"s do", Token.PropertyValue)]
         internal void JsonTransform_GetNextTokenAndData(string json,
             Token previousToken,
             int expectedPlaceholder,
             bool expectedHasValue,
             string expectedData,
             Token expectedToken)
-        {
-            //Act
-            var tokenInfo = JsonTransformer.GetNextTokenAndData(previousToken, json.AsSpan());
-
-            //Assert
-            tokenInfo.Token.Should().Be(expectedToken);
-            tokenInfo.Length.Should().Be(expectedPlaceholder);
-            tokenInfo.HasValue.Should().Be(expectedHasValue);
-            tokenInfo.Data.Should().Be(expectedData);
-        }
-
-        //This was leftover from when I was using strings versus
-        //ReadOnlySpan<char>, see if this is still needed
-        [Theory(DisplayName = "Can find offset values")]
-        [InlineData("{\"name\"", Token.Colon, Token.OpenBrace, 1, false, null)]
-        [InlineData("\"name\"", Token.OpenBrace, Token.PropertyName, 6, true, "name")]
-        internal void JsonTransform_GetNextTokenAndToken_IncorpratesOffset(
-            string json,
-            Token previousToken,
-            Token expectedToken,
-            int expectedPlaceholder,
-            bool expectedHasValue,
-            string expectedData)
         {
             //Act
             var tokenInfo = JsonTransformer.GetNextTokenAndData(previousToken, json.AsSpan());
@@ -136,35 +89,6 @@ namespace Ferris.Json.Test
             tokenInfo.Length.Should().Be(expectedLength);
             tokenInfo.Data.Should().Be(expectedData);
         }
-
-        //Leftover from using strings instead of ReadOnlySpan<char>
-        //[Theory(DisplayName = "Can extract token data")]
-        //[InlineData("{\"Property\"", 1, "Property", 10, Token.PropertyName)]
-        //[InlineData("{:283,", 1, "283", 5, Token.PropertyValue)]
-        //[InlineData("{\"val\":\"data\",", 6, "data", 8, Token.PropertyValue)]
-        //[InlineData("{\"Property Baby\"", 1, "Property Baby", 15, Token.PropertyName)]
-        //[InlineData("{\"val\":283424,", 6, "283424", 8, Token.PropertyValue)]
-        //[InlineData("{\"val\":283424}", 6, "283424", 7, Token.PropertyValue)]
-        //[InlineData("{\"bobby\":\"data point\",", 8, "data point", 14, Token.PropertyValue)]
-        //[InlineData("{\"name\"", 1, "name", 6, Token.PropertyName)]
-        //////[InlineData("{\"val\":283424", 6, "283424", 7, Token.PropertyValue)] //error case to cover
-        //public void JsonTransform_ExtractTokenDataWithOffset(
-        //    string json,
-        //    int offset,
-        //    string expectedData,
-        //    int expectedLength,
-        //    Token token)
-        //{
-        //    //Act
-        //    var (data, length) = JsonTransformer.ExtractTokenData(token, json, offset);
-
-        //    //Assert
-        //    Assert.Multiple(() =>
-        //    {
-        //        Assert.Equal(expectedData, data);
-        //        Assert.Equal(expectedLength, length);
-        //    });
-        //}
 
         [Fact(DisplayName = "Can extract simple tokens from string")]
         public void JsonTransform_ExtractSimpleTokens()
@@ -313,6 +237,23 @@ namespace Ferris.Json.Test
                 obj.Property.Should().BeNull();
             else
                 obj.Property.Should().Be("testValue");
+        }
+
+        [Theory(DisplayName = "Can parse string with escaped double quotes")]
+        [InlineData("{\"Property\":\"mo\\\"s\"}", "mo\\\"s")]
+        [InlineData("{\"Property\":\"What\\\"s that\\\"s got\\\"s to\\\"s do\"}", "What\\\"s that\\\"s got\\\"s to\\\"s do")]
+        public void JsonTransform_Deserialize_EscapedStringProperty(
+            string jsonString,
+            string expectedValue)
+        {
+            //Act
+            var obj = JsonTransformer.Deserialize<StringPropertyObj>(jsonString);
+
+            //Assert
+            obj.Should().BeOfType<StringPropertyObj>();
+
+            var stringProp = obj as StringPropertyObj;
+            obj.Property.Should().Be(expectedValue);
         }
 
         [Fact(DisplayName = "Can parse json number to integer")]
