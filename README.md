@@ -49,11 +49,11 @@ var obj = JsonTransformer.Deserialize<TestObject>(jsonString);
 - [x] - handling null values in C# while serializing
 - [x] - handle nested quotes in strings
 - [ ] - Supporting enums
-- [ ] - gracefully handling invalid json
-- [ ] - handle other types of whitespace (needed???)
 - [ ] - add serialization options (pretty print, DateTime format, enums to strings, etc)
 - [ ] - Supporting data classes
 - [ ] - Supporting classes with constructors
+- [ ] - gracefully handling invalid json
+- [ ] - handle other types of whitespace (needed???)
 - [ ] - handle numbers with exponents
 - [ ] - deserializing IList<T> types
 - [ ] - support hex
