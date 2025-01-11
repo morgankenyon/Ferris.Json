@@ -45,7 +45,6 @@ namespace Ferris.Json
             {
                 var propertyValue = propertyInfo.GetValue(obj);
                 var propertyType = propertyInfo.PropertyType;
-                //var childPropertyInfos = propertyType.GetProperties();
                 if (propertyValue == null)
                 {
                     jsonProperties.Add($"\"{propertyInfo.Name}\":null");
@@ -210,7 +209,7 @@ namespace Ferris.Json
             if (IsPrimitiveType(type))
             {
                 var tokenInfo = ExtractTokenData(Token.PropertyValue, jsonSpan);
-                var data = Libs.MapValue(type, tokenInfo.Data);
+                var (data, _) = Libs.MapValue(type, tokenInfo.Data);
                 jsonSpan = jsonSpan.Slice(tokenInfo.Length);
                 return new SpanData(jsonSpan, data);
             }

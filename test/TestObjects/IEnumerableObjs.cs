@@ -6,14 +6,14 @@ namespace Ferris.Json.Test.TestObjects
     {
         public List<StringPropertyObj> Strings { get; set; }
     }
-    internal class StringListTestObj
-    {
-        public List<string> Strings { get; set; }
-    }
-    internal class IntListTestObj
-    {
-        public List<int> Ints { get; set; }
-    }
+    //internal class StringListTestObj
+    //{
+    //    public List<string> Strings { get; set; }
+    //}
+    //internal class IntListTestObj
+    //{
+    //    public List<int> Ints { get; set; }
+    //}
     internal class ObjectListTestObj
     {
         public List<object> Objects { get; set; }

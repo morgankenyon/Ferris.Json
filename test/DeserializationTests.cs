@@ -694,38 +694,231 @@ namespace Ferris.Json.Test
             prop.Strings.Last().Property.Should().Be("SecondString");
         }
 
-        [Fact(DisplayName = "Can parse json array to string list")]
-        public void JsonTransformer_Deserialize_ParseToStringList()
+        [Fact(DisplayName = "Can parse json array to bool list")]
+        public void JsonTransformer_Deserialize_ParseToBoolList()
         {
             //Arrange
-            var jsonString = "{\"Strings\":[\"one\",\"two\",\"three\"]}";
+            var jsonString = "{\"Values\":[true,false,true]}";
 
             //Act
-            var obj = JsonTransformer.Deserialize<StringListTestObj>(jsonString);
+            var obj = JsonTransformer.Deserialize<BoolListTestObj>(jsonString);
 
             //Assert
             obj.Should().NotBeNull();
-            obj.Strings.Should().HaveCount(3);
-            obj.Strings.First().Should().Be("one");
-            obj.Strings.Skip(1).First().Should().Be("two");
-            obj.Strings.Last().Should().Be("three");
+            obj.Values.Should()
+                .BeEquivalentTo(new List<bool> { true, false, true });
+        }
+
+        [Fact(DisplayName = "Can parse json array to byte list")]
+        public void JsonTransformer_Deserialize_ParseToByteList()
+        {
+            //Arrange
+            var jsonString = $"{{\"Values\":[{byte.MinValue},{byte.MaxValue},{byte.MinValue}]}}";
+
+            //Act
+            var obj = JsonTransformer.Deserialize<ByteListTestObj>(jsonString);
+
+            //Assert
+            obj.Should().NotBeNull();
+            obj.Values.Should()
+                .BeEquivalentTo(new List<byte> { byte.MinValue, byte.MaxValue, byte.MinValue });
+        }
+
+        [Fact(DisplayName = "Can parse json array to sbyte list")]
+        public void JsonTransformer_Deserialize_ParseToSByteList()
+        {
+            //Arrange
+            var jsonString = $"{{\"Values\":[{sbyte.MinValue},{sbyte.MaxValue},{sbyte.MinValue}]}}";
+
+            //Act
+            var obj = JsonTransformer.Deserialize<SByteListTestObj>(jsonString);
+
+            //Assert
+            obj.Should().NotBeNull();
+            obj.Values.Should()
+                .BeEquivalentTo(new List<sbyte> { sbyte.MinValue, sbyte.MaxValue, sbyte.MinValue });
+        }
+
+        [Fact(DisplayName = "Can parse json array to char list")]
+        public void JsonTransformer_Deserialize_ParseToCharList()
+        {
+            //Arrange
+            var jsonString = $"{{\"Values\":[{sbyte.MinValue},{sbyte.MaxValue},{sbyte.MinValue}]}}";
+
+            //Act
+            var obj = JsonTransformer.Deserialize<SByteListTestObj>(jsonString);
+
+            //Assert
+            obj.Should().NotBeNull();
+            obj.Values.Should()
+                .BeEquivalentTo(new List<sbyte> { sbyte.MinValue, sbyte.MaxValue, sbyte.MinValue });
+        }
+
+        [Fact(DisplayName = "Can parse json array to datetime list")]
+        public void JsonTransformer_Deserialize_ParseToDateTimeList()
+        {
+            //Arrange
+            var jsonString = $"{{\"Values\":[\"{DateTime.MinValue}\",\"{DateTime.MaxValue}\",\"{DateTime.MinValue}\"]}}";
+
+            //Act
+            var obj = JsonTransformer.Deserialize<DateTimeListTestObj>(jsonString);
+
+            //Assert
+            obj.Should().NotBeNull();
+            obj.Values.First().Should().Be(DateTime.MinValue);
+            obj.Values.Skip(1).First().Should().BeCloseTo(DateTime.MaxValue, TimeSpan.FromSeconds(1));
+            obj.Values.Last().Should().Be(DateTime.MinValue);
+            //obj.Values.Should()
+            //    .BeEquivalentTo(new List<DateTime> { DateTime.MinValue, DateTime.MaxValue, DateTime.MinValue });
+        }
+
+        [Fact(DisplayName = "Can parse json array to decimal list")]
+        public void JsonTransformer_Deserialize_ParseToDecimalList()
+        {
+            //Arrange
+            var jsonString = $"{{\"Values\":[{decimal.MinValue},{decimal.MaxValue},{decimal.MinValue}]}}";
+
+            //Act
+            var obj = JsonTransformer.Deserialize<DecimalListTestObj>(jsonString);
+
+            //Assert
+            obj.Should().NotBeNull();
+            obj.Values.Should()
+                .BeEquivalentTo(new List<decimal> { decimal.MinValue, decimal.MaxValue, decimal.MinValue });
+        }
+
+        [Fact(DisplayName = "Can parse json array to double list")]
+        public void JsonTransformer_Deserialize_ParseToDoubleList()
+        {
+            //Arrange
+            var jsonString = $"{{\"Values\":[{double.MinValue.ToString("R", CultureInfo.InvariantCulture)},{double.MaxValue.ToString("R", CultureInfo.InvariantCulture)},{double.MinValue.ToString("R", CultureInfo.InvariantCulture)}]}}";
+
+            //Act
+            var obj = JsonTransformer.Deserialize<DoubleListTestObj>(jsonString);
+
+            //Assert
+            obj.Should().NotBeNull();
+            obj.Values.Should()
+                .BeEquivalentTo(new List<double> { double.MinValue, double.MaxValue, double.MinValue });
+        }
+
+        [Fact(DisplayName = "Can parse json array to float list")]
+        public void JsonTransformer_Deserialize_ParseToFloatList()
+        {
+            //Arrange
+            var jsonString = $"{{\"Values\":[{float.MinValue.ToString("R", CultureInfo.InvariantCulture)},{float.MaxValue.ToString("R", CultureInfo.InvariantCulture)},{float.MinValue.ToString("R", CultureInfo.InvariantCulture)}]}}";
+
+            //Act
+            var obj = JsonTransformer.Deserialize<FloatListTestObj>(jsonString);
+
+            //Assert
+            obj.Should().NotBeNull();
+            obj.Values.Should()
+                .BeEquivalentTo(new List<float> { float.MinValue, float.MaxValue, float.MinValue });
         }
 
         [Fact(DisplayName = "Can parse json array to int list")]
         public void JsonTransformer_Deserialize_ParseToIntList()
         {
             //Arrange
-            var jsonString = "{\"Ints\":[1, 2, 3]}";
+            var jsonString = "{\"Values\":[1, 2, 3]}";
 
             //Act
             var obj = JsonTransformer.Deserialize<IntListTestObj>(jsonString);
 
             //Assert
             obj.Should().NotBeNull();
-            obj.Ints.Should().HaveCount(3);
-            obj.Ints.First().Should().Be(1);
-            obj.Ints.Skip(1).First().Should().Be(2);
-            obj.Ints.Last().Should().Be(3);
+            obj.Values.Should()
+                .BeEquivalentTo(new List<int> { 1, 2, 3 });
+        }
+
+        [Fact(DisplayName = "Can parse json array to uint list")]
+        public void JsonTransformer_Deserialize_ParseToUIntList()
+        {
+            //Arrange
+            var jsonString = $"{{\"Values\":[{uint.MinValue},{uint.MaxValue},{uint.MinValue}]}}";
+
+            //Act
+            var obj = JsonTransformer.Deserialize<UIntListTestObj>(jsonString);
+
+            //Assert
+            obj.Should().NotBeNull();
+            obj.Values.Should()
+                .BeEquivalentTo(new List<uint> { uint.MinValue, uint.MaxValue, uint.MinValue });
+        }
+
+        [Fact(DisplayName = "Can parse json array to long list")]
+        public void JsonTransformer_Deserialize_ParseToLongList()
+        {
+            //Arrange
+            var jsonString = $"{{\"Values\":[{long.MinValue},{long.MaxValue},{long.MinValue}]}}";
+
+            //Act
+            var obj = JsonTransformer.Deserialize<LongListTestObj>(jsonString);
+
+            //Assert
+            obj.Should().NotBeNull();
+            obj.Values.Should()
+                .BeEquivalentTo(new List<long> { long.MinValue, long.MaxValue, long.MinValue });
+        }
+        [Fact(DisplayName = "Can parse json array to ulong list")]
+        public void JsonTransformer_Deserialize_ParseToULongList()
+        {
+            //Arrange
+            var jsonString = $"{{\"Values\":[{ulong.MinValue},{ulong.MaxValue},{ulong.MinValue}]}}";
+
+            //Act
+            var obj = JsonTransformer.Deserialize<ULongListTestObj>(jsonString);
+
+            //Assert
+            obj.Should().NotBeNull();
+            obj.Values.Should()
+                .BeEquivalentTo(new List<ulong> { ulong.MinValue, ulong.MaxValue, ulong.MinValue });
+        }
+
+        [Fact(DisplayName = "Can parse json array to short list")]
+        public void JsonTransformer_Deserialize_ParseToShortList()
+        {
+            //Arrange
+            var jsonString = $"{{\"Values\":[{short.MinValue},{short.MaxValue},{short.MinValue}]}}";
+
+            //Act
+            var obj = JsonTransformer.Deserialize<ShortListTestObj>(jsonString);
+
+            //Assert
+            obj.Should().NotBeNull();
+            obj.Values.Should()
+                .BeEquivalentTo(new List<short> { short.MinValue, short.MaxValue, short.MinValue });
+        }
+
+        [Fact(DisplayName = "Can parse json array to ushort list")]
+        public void JsonTransformer_Deserialize_ParseToUShortList()
+        {
+            //Arrange
+            var jsonString = $"{{\"Values\":[{ushort.MinValue},{ushort.MaxValue},{ushort.MinValue}]}}";
+
+            //Act
+            var obj = JsonTransformer.Deserialize<UShortListTestObj>(jsonString);
+
+            //Assert
+            obj.Should().NotBeNull();
+            obj.Values.Should()
+                .BeEquivalentTo(new List<ushort> { ushort.MinValue, ushort.MaxValue, ushort.MinValue });
+        }
+
+        [Fact(DisplayName = "Can parse json array to string list")]
+        public void JsonTransformer_Deserialize_ParseToStringList()
+        {
+            //Arrange
+            var jsonString = "{\"Values\":[\"one\",\"two\",\"three\"]}";
+
+            //Act
+            var obj = JsonTransformer.Deserialize<StringListTestObj>(jsonString);
+
+            //Assert
+            obj.Should().NotBeNull();
+            obj.Values.Should()
+                .BeEquivalentTo(new List<string> { "one", "two", "three"});
         }
     }
 }

@@ -18,7 +18,6 @@ namespace Ferris.Json.Benchmark
         private static ValueTestObject valueTestObj = TestObjs.GetValueTestObject();
         private static MixedListTestObj listTestObj = TestObjs.GetListTestObject();
         private int count = 0;
-        private int N = 25;
 
         [Benchmark]
         [BenchmarkCategory("Single")]

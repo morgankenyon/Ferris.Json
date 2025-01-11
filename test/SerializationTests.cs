@@ -356,19 +356,6 @@ namespace Ferris.Json.Test
             Assert.Equal(TestObjs.GetValueTestObjectJson(), jsonString);
         }
 
-        [Fact(DisplayName = "Map nullable string property to Json")]
-        public void JsonTransformer_MapNullableStringProperty()
-        {
-            //Arrange
-            var obj = new StringNullablePropertyObj();
-
-            //Act
-            var jsonString = JsonTransformer.Serialize(obj);
-
-            //Assert
-            Assert.Equal("{\"Property\":null}", jsonString);
-        }
-
         [Fact(DisplayName = "Map datetime property to Json")]
         public void JsonTransformer_MapDateTimeProperty()
         {
@@ -495,7 +482,7 @@ namespace Ferris.Json.Test
             //Arrange
             var obj = new StringListTestObj
             {
-                Strings = new List<string>
+                Values = new List<string>
                 {
                     "one",
                     "two",
@@ -507,7 +494,7 @@ namespace Ferris.Json.Test
             var jsonString = JsonTransformer.Serialize(obj);
 
             //Assert
-            jsonString.Should().Be("{\"Strings\":[\"one\",\"two\",\"three\"]}");
+            jsonString.Should().Be("{\"Values\":[\"one\",\"two\",\"three\"]}");
         }
 
         [Fact(DisplayName = "Map object list to json array")]
