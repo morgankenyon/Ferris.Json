@@ -7,7 +7,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageId>Ferris.Json</PackageId>
     <Title>Ferris.Json</Title>
-    <Version>0.4.0-beta</Version>
+    <Version>0.4.0-beta-2</Version>
     <Authors>Morgan Kenyon</Authors>
     <Description>A library for serializing and deserializing json.</Description>
     <Summary>A library for serializing and deserializing json.</Summary>
