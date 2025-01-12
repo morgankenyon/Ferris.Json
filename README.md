@@ -32,6 +32,7 @@ var obj = JsonTransformer.Deserialize<TestObject>(jsonString);
 * `/src` - contains all source code for Ferris.Json
 * `/test` - contains all tests for Ferris.Json
 * `/benchmark` - contains benchmarks between Ferris.Json, Newtonsoft and System.Text.Json
+* `/testProjects` - contains projects I use to verify and test changes
 
 ## Features
 
