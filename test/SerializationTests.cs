@@ -518,5 +518,22 @@ namespace Ferris.Json.Test
             //Assert
             jsonString.Should().Be("{\"Objects\":[\"one\",23,\"2\",23.42]}");
         }
+
+        [Fact(DisplayName = "Map simple string list to json")]
+        public void JsonTransform_MapSimpleStringList()
+        {
+            var obj = new List<string>
+            {
+                "one",
+                "two",
+                "three"
+            };
+
+            //Act
+            var jsonString = JsonTransformer.Serialize(obj);
+
+            //Assert
+            jsonString.Should().Be("{\"Objects\":[\"one\",\"two\",\"three\"]}");
+        }
     }
 }
