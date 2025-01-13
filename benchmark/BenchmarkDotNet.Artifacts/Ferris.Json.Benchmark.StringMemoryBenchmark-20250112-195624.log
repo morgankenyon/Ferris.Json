@@ -1,0 +1,63 @@
+// Validating benchmarks:
+// ***** BenchmarkRunner: Start   *****
+// ***** Found 2 benchmark(s) in total *****
+// ***** Building 1 exe(s) in Parallel: Start   *****
+// start dotnet  restore /p:UseSharedCompilation=false /p:BuildInParallel=false /m:1 /p:Deterministic=true /p:Optimize=true /p:IntermediateOutputPath="C:\dev\Ferris.Json\benchmark\bin\Release\net8.0\2f4aa1bb-abd3-425f-831d-cadb00399ad7\obj\Release\net8.0/" /p:OutDir="C:\dev\Ferris.Json\benchmark\bin\Release\net8.0\2f4aa1bb-abd3-425f-831d-cadb00399ad7\bin\Release\net8.0/" /p:OutputPath="C:\dev\Ferris.Json\benchmark\bin\Release\net8.0\2f4aa1bb-abd3-425f-831d-cadb00399ad7\bin\Release\net8.0/" in C:\dev\Ferris.Json\benchmark\bin\Release\net8.0\2f4aa1bb-abd3-425f-831d-cadb00399ad7
+// command took 2.65 sec and exited with 0
+// start dotnet  build -c Release --no-restore /p:UseSharedCompilation=false /p:BuildInParallel=false /m:1 /p:Deterministic=true /p:Optimize=true /p:IntermediateOutputPath="C:\dev\Ferris.Json\benchmark\bin\Release\net8.0\2f4aa1bb-abd3-425f-831d-cadb00399ad7\obj\Release\net8.0/" /p:OutDir="C:\dev\Ferris.Json\benchmark\bin\Release\net8.0\2f4aa1bb-abd3-425f-831d-cadb00399ad7\bin\Release\net8.0/" /p:OutputPath="C:\dev\Ferris.Json\benchmark\bin\Release\net8.0\2f4aa1bb-abd3-425f-831d-cadb00399ad7\bin\Release\net8.0/" --output "C:\dev\Ferris.Json\benchmark\bin\Release\net8.0\2f4aa1bb-abd3-425f-831d-cadb00399ad7\bin\Release\net8.0/" in C:\dev\Ferris.Json\benchmark\bin\Release\net8.0\2f4aa1bb-abd3-425f-831d-cadb00399ad7
+// command took 16.51 sec and exited with 0
+// ***** Done, took 00:00:19 (19.31 sec)   *****
+// Found 2 benchmarks:
+//   StringMemoryBenchmark.TenBaseline: DefaultJob
+//   StringMemoryBenchmark.TenFerris: DefaultJob
+
+Setup power plan (GUID: 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c FriendlyName: High performance)
+// **************************
+// Benchmark: StringMemoryBenchmark.TenBaseline: DefaultJob
+// *** Execute ***
+// Launch: 1 / 1
+// Execute: dotnet 2f4aa1bb-abd3-425f-831d-cadb00399ad7.dll --anonymousPipes 1532 2248 --benchmarkName Ferris.Json.Benchmark.StringMemoryBenchmark.TenBaseline --job Default --benchmarkId 0 in C:\dev\Ferris.Json\benchmark\bin\Release\net8.0\2f4aa1bb-abd3-425f-831d-cadb00399ad7\bin\Release\net8.0
+// BeforeAnythingElse
+
+// Benchmark Process Environment Information:
+// BenchmarkDotNet v0.14.0
+// Runtime=.NET 8.0.11 (8.0.1124.51707), X64 RyuJIT AVX2
+// GC=Concurrent Workstation
+// HardwareIntrinsics=AVX2,AES,BMI1,BMI2,FMA,LZCNT,PCLMUL,POPCNT VectorSize=256
+// Job: DefaultJob
+
+OverheadJitting  1: 1 op, 285400.00 ns, 285.4000 us/op
+WorkloadJitting  1: 1 op, 115327000.00 ns, 115.3270 ms/op
+
+WorkloadPilot    1: 2 op, 127400.00 ns, 63.7000 us/op
+WorkloadPilot    2: 3 op, 124200.00 ns, 41.4000 us/op
+WorkloadPilot    3: 4 op, 138200.00 ns, 34.5500 us/op
+WorkloadPilot    4: 5 op, 136100.00 ns, 27.2200 us/op
+WorkloadPilot    5: 6 op, 136100.00 ns, 22.6833 us/op
+WorkloadPilot    6: 7 op, 157100.00 ns, 22.4429 us/op
+WorkloadPilot    7: 8 op, 209400.00 ns, 26.1750 us/op
+WorkloadPilot    8: 9 op, 208100.00 ns, 23.1222 us/op
+WorkloadPilot    9: 10 op, 187300.00 ns, 18.7300 us/op
+WorkloadPilot   10: 11 op, 281000.00 ns, 25.5455 us/op
+WorkloadPilot   11: 12 op, 264800.00 ns, 22.0667 us/op
+WorkloadPilot   12: 13 op, 463100.00 ns, 35.6231 us/op
+WorkloadPilot   13: 14 op, 247500.00 ns, 17.6786 us/op
+WorkloadPilot   14: 15 op, 221300.00 ns, 14.7533 us/op
+WorkloadPilot   15: 16 op, 222000.00 ns, 13.8750 us/op
+WorkloadPilot   16: 32 op, 439700.00 ns, 13.7406 us/op
+WorkloadPilot   17: 64 op, 936000.00 ns, 14.6250 us/op
+WorkloadPilot   18: 128 op, 1649300.00 ns, 12.8852 us/op
+WorkloadPilot   19: 256 op, 4450400.00 ns, 17.3844 us/op
+WorkloadPilot   20: 512 op, 6551800.00 ns, 12.7965 us/op
+WorkloadPilot   21: 1024 op, 12085700.00 ns, 11.8024 us/op
+WorkloadPilot   22: 2048 op, 22519000.00 ns, 10.9956 us/op
+WorkloadPilot   23: 4096 op, 42624100.00 ns, 10.4063 us/op
+WorkloadPilot   24: 8192 op, 104160500.00 ns, 12.7149 us/op
+WorkloadPilot   25: 16384 op, 168108500.00 ns, 10.2605 us/op
+WorkloadPilot   26: 32768 op, 102137200.00 ns, 3.1170 us/op
+WorkloadPilot   27: 65536 op, 179458200.00 ns, 2.7383 us/op
+WorkloadPilot   28: 131072 op, 337804300.00 ns, 2.5772 us/op
+WorkloadPilot   29: 262144 op, 932380400.00 ns, 3.5567 us/op
+
+WorkloadWarmup   1: 262144 op, 1217350900.00 ns, 4.6438 us/op
+WorkloadWarmup   2: 262144 op, 964957500.00 ns, 3.6810 us/op

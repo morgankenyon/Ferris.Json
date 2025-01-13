@@ -6,7 +6,7 @@ namespace Ferris.Json.Benchmark
     {
         static void Main(string[] args)
         {
-            var summary = BenchmarkRunner.Run<SimpleJsonBenchmark>();
+            var summary = BenchmarkRunner.Run<StringMemoryBenchmark>();
         }
     }
 }
