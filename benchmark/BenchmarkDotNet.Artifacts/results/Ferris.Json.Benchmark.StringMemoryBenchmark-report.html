@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='utf-8' />
+<title>Ferris.Json.Benchmark.StringMemoryBenchmark-20250112-202824</title>
+
+<style type="text/css">
+	table { border-collapse: collapse; display: block; width: 100%; overflow: auto; }
+	td, th { padding: 6px 13px; border: 1px solid #ddd; text-align: right; }
+	tr { background-color: #fff; border-top: 1px solid #ccc; }
+	tr:nth-child(even) { background: #f8f8f8; }
+</style>
+</head>
+<body>
+<pre><code>
+BenchmarkDotNet v0.14.0, Windows 11 (10.0.22631.4602/23H2/2023Update/SunValley3)
+Intel Core i7-8565U CPU 1.80GHz (Whiskey Lake), 1 CPU, 8 logical and 4 physical cores
+.NET SDK 8.0.307
+  [Host]     : .NET 8.0.11 (8.0.1124.51707), X64 RyuJIT AVX2
+  DefaultJob : .NET 8.0.11 (8.0.1124.51707), X64 RyuJIT AVX2
+</code></pre>
+<pre><code>Categories=10  
+</code></pre>
+
+<table>
+<thead><tr><th>Method</th><th>Mean</th><th>Error</th><th>StdDev</th><th>Ratio</th><th>RatioSD</th><th>Code Size</th><th>Allocated</th><th>Alloc Ratio</th>
+</tr>
+</thead><tbody><tr><td>TestBaseline</td><td>3.329 &mu;s</td><td>0.1007 &mu;s</td><td>0.2954 &mu;s</td><td>1.01</td><td>0.12</td><td>328 B</td><td>-</td><td>NA</td>
+</tr><tr><td>TestCast</td><td>3.110 &mu;s</td><td>0.0572 &mu;s</td><td>0.1016 &mu;s</td><td>0.94</td><td>0.08</td><td>324 B</td><td>-</td><td>NA</td>
+</tr><tr><td>TestToString</td><td>3.162 &mu;s</td><td>0.0631 &mu;s</td><td>0.1487 &mu;s</td><td>0.96</td><td>0.09</td><td>328 B</td><td>-</td><td>NA</td>
+</tr></tbody></table>
+</body>
+</html>
