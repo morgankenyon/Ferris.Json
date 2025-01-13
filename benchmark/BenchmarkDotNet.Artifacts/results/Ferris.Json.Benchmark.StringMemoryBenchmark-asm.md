@@ -6,12 +6,12 @@
        sub       rsp,28
        mov       rbx,rcx
        mov       esi,[rbx+8]
-       mov       rcx,1D580208708
-       mov       edx,37E
+       mov       rcx,1BD80208708
+       mov       edx,22FE
        add       rcx,0C
-       mov       r8d,0F6F6C4C5
-       mov       r9d,0A9C8B360
-       call      qword ptr [7FFCD86E5BD8]; System.Marvin.ComputeHash32(Byte ByRef, UInt32, UInt32, UInt32)
+       mov       r8d,0D921A51F
+       mov       r9d,5D0291E6
+       call      qword ptr [7FFCD86BFAF8]; System.Marvin.ComputeHash32(Byte ByRef, UInt32, UInt32, UInt32)
        add       eax,esi
        mov       [rbx+8],eax
        add       rsp,28
@@ -127,11 +127,11 @@ M01_L06:
        sub       rsp,28
        mov       rbx,rcx
        mov       esi,[rbx+8]
-       mov       rcx,21A00208714
-       mov       edx,37E
-       mov       r8d,8650B1A5
-       mov       r9d,0D3B4CF4F
-       call      qword ptr [7FFCD869FE10]; System.Marvin.ComputeHash32(Byte ByRef, UInt32, UInt32, UInt32)
+       mov       rcx,19A00308714
+       mov       edx,22FE
+       mov       r8d,54BEBE0F
+       mov       r9d,4C3C3827
+       call      qword ptr [7FFCD868FE10]; System.Marvin.ComputeHash32(Byte ByRef, UInt32, UInt32, UInt32)
        add       eax,esi
        mov       [rbx+8],eax
        add       rsp,28
@@ -246,14 +246,14 @@ M01_L06:
        push      rbx
        sub       rsp,28
        mov       rbx,rcx
-       mov       rdx,1F800208708
+       mov       rdx,19580208708
        mov       esi,[rbx+8]
        lea       rcx,[rdx+0C]
        mov       edx,[rdx+8]
        add       edx,edx
-       mov       r8d,47CBB7BB
-       mov       r9d,0EFC17234
-       call      qword ptr [7FFCD86AFE10]; System.Marvin.ComputeHash32(Byte ByRef, UInt32, UInt32, UInt32)
+       mov       r8d,4EAC582E
+       mov       r9d,0C41FDB2
+       call      qword ptr [7FFCD86AFAF8]; System.Marvin.ComputeHash32(Byte ByRef, UInt32, UInt32, UInt32)
        add       eax,esi
        mov       [rbx+8],eax
        add       rsp,28
