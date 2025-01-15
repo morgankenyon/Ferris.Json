@@ -519,7 +519,7 @@ namespace Ferris.Json.Test
             jsonString.Should().Be("{\"Objects\":[\"one\",23,\"2\",23.42]}");
         }
 
-        [Fact(DisplayName = "Map simple string list to json", Skip = "Not intended to work yet")]
+        [Fact(DisplayName = "Map simple string list to json")]
         public void JsonTransform_MapSimpleStringList()
         {
             var obj = new List<string>
@@ -533,7 +533,51 @@ namespace Ferris.Json.Test
             var jsonString = JsonTransformer.Serialize(obj);
 
             //Assert
-            jsonString.Should().Be("{\"Objects\":[\"one\",\"two\",\"three\"]}");
+            jsonString.Should().Be("[\"one\",\"two\",\"three\"]");
+        }
+
+        [Fact(DisplayName = "Map string object list to json")]
+        public void JsonTransform_MapListOfStringObjects()
+        {
+            var obj = new List<StringPropertyObj>
+            {
+                new StringPropertyObj
+                {
+                    Property = "Test"
+                },
+                new StringPropertyObj
+                {
+                    Property = "Test2"
+                }
+            };
+
+            //Act
+            var jsonString = JsonTransformer.Serialize(obj);
+
+            //Assert
+            jsonString.Should().Be("[{\"Property\":\"Test\"},{\"Property\":\"Test2\"}]");
+        }
+
+        [Fact(DisplayName = "Map int object list to json")]
+        public void JsonTransform_MapListOfIntObjects()
+        {
+            var obj = new List<IntPropertyObj>
+            {
+                new IntPropertyObj
+                {
+                    Property = 123
+                },
+                new IntPropertyObj
+                {
+                    Property = 234
+                }
+            };
+
+            //Act
+            var jsonString = JsonTransformer.Serialize(obj);
+
+            //Assert
+            jsonString.Should().Be("[{\"Property\":123},{\"Property\":234}]");
         }
     }
 }
