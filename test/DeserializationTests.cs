@@ -950,5 +950,35 @@ namespace Ferris.Json.Test
             obj.Should()
                 .BeEquivalentTo(new string[] { "one", "two", "three" });
         }
+
+        [Fact(DisplayName = "Can parse json array to dictionary")]
+        public void JsonTransformer_Deserialize_ParseArrayToDictionary()
+        {
+            //Arrange
+            var jsonString = "{\"apple\":33,\"lol\":2,\"test\":1}";
+
+            //Act
+            var obj = JsonTransformer.Deserialize<Dictionary<string, int>>(jsonString);
+
+            //Assert
+            obj.Should().NotBeNull();
+            obj.Should()
+                .BeEquivalentTo(new Dictionary<string, int> { { "apple", 33 }, { "lol", 2 }, { "test", 1 } });
+        }
+
+        [Fact(DisplayName = "Can parse json array to dictionary obj")]
+        public void JsonTransformer_Deserialize_ParseArrayToDictObj()
+        {
+            //Arrange
+            var jsonString = "{\"Values\":{\"apple\":33,\"lol\":2,\"test\":1}}";
+
+            //Act
+            var obj = JsonTransformer.Deserialize<DictObj<string>>(jsonString);
+
+            //Assert
+            obj.Should().NotBeNull();
+            obj.Values.Should()
+                .BeEquivalentTo(new Dictionary<string, int> { { "apple", 33 }, { "lol", 2 }, { "test", 1 } });
+        }
     }
 }

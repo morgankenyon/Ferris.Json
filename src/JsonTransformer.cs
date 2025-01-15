@@ -346,10 +346,6 @@ namespace Ferris.Json
                 {
                     Libs.MapValue(propertyInfo, instance, propertyValueInfo);
                 }
-                else
-                {
-                    //some error message
-                }
 
                 //Case for nested json object
                 if (token.IsOpenBrace() && previousToken.IsColon())
@@ -379,128 +375,20 @@ namespace Ferris.Json
                         && propertiesDict.TryGetValue((string)propertyNameInfo.Data, out var arrayInfo))
                     {
                         var arrayType = arrayInfo.PropertyType;
-                        //if it's a list
-                        if (arrayType.IsGenericType && arrayType.GetGenericTypeDefinition() == typeof(List<>))
-                        {
-                            var elementType = arrayType.GetGenericArguments()[0];
-                            var nextListToken = Token.None;
-                            //make new list
-                            var listInstance = (System.Collections.IList)Activator.CreateInstance(type);
-                            do
-                            {
-                                //convert all elements to C# objects
-                                jsonSpan = jsonSpan.Slice(1);
-                                //if ()
-                                var spanData = GetElementValue(elementType, jsonSpan);
-                                jsonSpan = spanData.JsonSpan;
-                                nextListToken = GetNextToken(Token.None, jsonSpan);
-                                listInstance.Add(spanData.Value);
-                            } while (nextListToken.IsComma());
-
-                            if (nextListToken.IsCloseBracket())
-                            {
-                                jsonSpan = jsonSpan.Slice(1);
-                            }
-
-                            propertyValueInfo = new TokenInfo(Token.PropertyValue, 0, listInstance);
-                            previousToken = Token.PropertyValue;
-                            continue;
-                        }
-                        else if (arrayType.IsArray)
-                        {
-                            var elementType = arrayType.GetElementType();
-                            Type listType = typeof(List<>).MakeGenericType(elementType);
-                            var elementList = (System.Collections.IList)Activator.CreateInstance(listType);
-
-                            var nextListToken = Token.None;
-                            do
-                            {
-                                jsonSpan = jsonSpan.Slice(1);
-                                var spanData = Deserialize(elementType, jsonSpan);
-                                jsonSpan = spanData.JsonSpan;
-                                nextListToken = GetNextToken(Token.None, jsonSpan);
-                                elementList.Add(spanData.Value);
-                            } while (nextListToken.IsComma());
-
-                            if (nextListToken.IsCloseBracket())
-                            {
-                                jsonSpan = jsonSpan.Slice(1);
-                            }
-                            Array array = Array.CreateInstance(elementType, elementList.Count);
-                            elementList.CopyTo(array, 0);
-
-                            propertyValueInfo = new TokenInfo(Token.PropertyValue, 0, array);
-                            previousToken = Token.PropertyValue;
-                            continue;
-
-
-                        }
-                        else
-                        {
-                            var elementType = arrayType.GetElementType();
-                        }
+                        (propertyValueInfo, previousToken) = DeserializeBracketTypeArray(arrayType, ref jsonSpan);
+                        continue;
+                    }
+                    else
+                    {
+                        //need an error something
                     }
                 }
                 else if (token.IsOpenBracket())
                 {
                     //just a data structure
-                    if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
-                    {
-                        var elementType = type.GetGenericArguments()[0];
-                        var nextListToken = Token.None;
-                        //make new list
-                        var listInstance = (System.Collections.IList)instance;
-                        do
-                        {
-                            //convert all elements to C# objects
-                            jsonSpan = jsonSpan.Slice(1);
-                            //if ()
-                            var spanData = GetElementValue(elementType, jsonSpan);
-                            jsonSpan = spanData.JsonSpan;
-                            nextListToken = GetNextToken(Token.None, jsonSpan);
-                            listInstance.Add(spanData.Value);
-                        } while (nextListToken.IsComma());
-
-                        if (nextListToken.IsCloseBracket())
-                        {
-                            jsonSpan = jsonSpan.Slice(1);
-                        }
-
-
-                        propertyValueInfo = new TokenInfo(Token.PropertyValue, 0, listInstance);
-                        previousToken = Token.PropertyValue;
-                        continue;
-                    }
-                    else if (type.IsArray)
-                    {
-                        var elementType = type.GetElementType();
-                        Type listType = typeof(List<>).MakeGenericType(elementType);
-                        var elementList = (System.Collections.IList)Activator.CreateInstance(listType);
-
-                        var nextListToken = Token.None;
-                        do
-                        {
-                            jsonSpan = jsonSpan.Slice(1);
-                            var spanData = GetElementValue(elementType, jsonSpan);
-                            jsonSpan = spanData.JsonSpan;
-                            nextListToken = GetNextToken(Token.None, jsonSpan);
-                            elementList.Add(spanData.Value);
-                        } while (nextListToken.IsComma());
-
-                        if (nextListToken.IsCloseBracket())
-                        {
-                            jsonSpan = jsonSpan.Slice(1);
-                        }
-                        Array array = Array.CreateInstance(elementType, elementList.Count);
-                        elementList.CopyTo(array, 0);
-
-                        instance = array;
-                        propertyValueInfo = new TokenInfo(Token.PropertyValue, 0, array);
-                        previousToken = Token.PropertyValue;
-                        continue;
-
-
-                    }
+                    (propertyValueInfo, previousToken) = DeserializeBracketTypeArray(type, ref jsonSpan);
+                    instance = propertyValueInfo.Data;
+                    continue;
                 }
                 else if (token.IsCloseBrace())
                 {
@@ -550,6 +438,83 @@ namespace Ferris.Json
             }
 
             return new SpanData(jsonSpan, instance);
+        }
+
+        internal static (TokenInfo arrayInfo, Token previousToken) DeserializeBracketTypeArray(
+            Type arrayType, ref ReadOnlySpan<char> jsonSpan)
+        {
+            TokenInfo propertyValueInfo = null;
+            Token previousToken = Token.None;
+            if (arrayType.IsGenericType && arrayType.GetGenericTypeDefinition() == typeof(List<>))
+            {
+                var elementType = arrayType.GetGenericArguments()[0];
+                var listInstance = (System.Collections.IList)Activator.CreateInstance(arrayType);
+
+                DeserializeList(listInstance, arrayType, ref jsonSpan);
+
+                propertyValueInfo = new TokenInfo(Token.PropertyValue, 0, listInstance);
+                previousToken = Token.PropertyValue;
+            }
+            else if (arrayType.IsArray)
+            {
+                Array array = DeserializeArray(arrayType, ref jsonSpan);
+
+                propertyValueInfo = new TokenInfo(Token.PropertyValue, 0, array);
+                previousToken = Token.PropertyValue;
+            }
+            else
+            {
+                var elementType = arrayType.GetElementType();
+            }
+
+            return (propertyValueInfo, previousToken);
+        }
+
+        internal static void DeserializeList(object instance, Type type, ref ReadOnlySpan<char> jsonSpan)
+        {
+            var elementType = type.GetGenericArguments()[0];
+            var nextListToken = Token.None;
+            //make new list
+            var listInstance = (System.Collections.IList)instance;
+            do
+            {
+                jsonSpan = jsonSpan.Slice(1);
+                var spanData = GetElementValue(elementType, jsonSpan);
+                jsonSpan = spanData.JsonSpan;
+                nextListToken = GetNextToken(Token.None, jsonSpan);
+                listInstance.Add(spanData.Value);
+            } while (nextListToken.IsComma());
+
+            if (nextListToken.IsCloseBracket())
+            {
+                jsonSpan = jsonSpan.Slice(1);
+            }
+        }
+
+        internal static Array DeserializeArray(Type type, ref ReadOnlySpan<char> jsonSpan)
+        {
+            var elementType = type.GetElementType();
+            Type listType = typeof(List<>).MakeGenericType(elementType);
+            var elementList = (System.Collections.IList)Activator.CreateInstance(listType);
+
+            var nextListToken = Token.None;
+            do
+            {
+                jsonSpan = jsonSpan.Slice(1);
+                var spanData = GetElementValue(elementType, jsonSpan);
+                jsonSpan = spanData.JsonSpan;
+                nextListToken = GetNextToken(Token.None, jsonSpan);
+                elementList.Add(spanData.Value);
+            } while (nextListToken.IsComma());
+
+            if (nextListToken.IsCloseBracket())
+            {
+                jsonSpan = jsonSpan.Slice(1);
+            }
+            Array array = Array.CreateInstance(elementType, elementList.Count);
+            elementList.CopyTo(array, 0);
+
+            return array;
         }
 
         internal static List<TokenInfo> TokenizeString(
