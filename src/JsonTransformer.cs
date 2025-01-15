@@ -1,8 +1,8 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
 
 namespace Ferris.Json
@@ -14,6 +14,7 @@ namespace Ferris.Json
     {
         internal static bool IsPrimitiveType(Type type)
         {
+            //needs a char check as well
             if (type == typeof(string))
             {
                 return true;
@@ -24,6 +25,21 @@ namespace Ferris.Json
             }
             return false;
         }
+
+        internal static bool IsIEnumerable(object obj, out IEnumerable enumerable)
+        {
+            if (obj is IEnumerable)
+            {
+                enumerable = obj as IEnumerable;
+            }
+            else
+            {
+                enumerable = null;
+            }
+
+            return enumerable != null;
+        }
+
         /// <summary>
         /// Serialize a C# object into a json string
         /// </summary>
@@ -31,14 +47,49 @@ namespace Ferris.Json
         /// <returns></returns>
         public static string Serialize(object obj)
         {
-            var properties = obj.GetType().GetProperties();
+            //need a null check
+            if (IsIEnumerable(obj, out var enumerable))
+            {
+                return MapList(enumerable);
+            }
+            else
+            {
+                var properties = obj.GetType().GetProperties();
 
-            var combinedProperties = MapProperties(properties, obj);
+                var combinedProperties = MapObject(properties, obj);
+
+                return combinedProperties;
+            }
+        }
+
+        internal static string MapList(IEnumerable enumerable)
+        {
+            var jsonProperties = new List<string>();
+            foreach (var item in enumerable)
+            {
+                var itemType = item.GetType();
+                if (itemType == typeof(System.String)
+                    || itemType == typeof(System.Char))
+                {
+                    jsonProperties.Add($"\"{item.ToString()}\"");
+                }
+                else if (itemType.BaseType == typeof(object))
+                {
+                    var listItemProperties = item.GetType().GetProperties();
+                    var listItemJson = MapObject(listItemProperties, item);
+                    jsonProperties.Add(listItemJson);
+                }
+                else
+                {
+                    jsonProperties.Add(item.ToString());
+                }
+            }
+            var combinedProperties = $"[{string.Join(",", jsonProperties)}]";
 
             return combinedProperties;
         }
 
-        internal static string MapProperties(PropertyInfo[] propertyInfos, object obj)
+        internal static string MapObject(PropertyInfo[] propertyInfos, object obj)
         {
             var jsonProperties = new List<string>(propertyInfos.Length);
             foreach (var propertyInfo in propertyInfos)
@@ -54,46 +105,27 @@ namespace Ferris.Json
                 {
                     jsonProperties.Add($"\"{propertyInfo.Name}\":\"{propertyValue}\"");
                 }
-                else if (typeof(System.Collections.IEnumerable).IsAssignableFrom(propertyType))
+                else if (typeof(IEnumerable).IsAssignableFrom(propertyType))
                 {
-                    var generatedListJson = new List<string>();
                     var listValue = propertyInfo.GetValue(obj);
+                    var listJson = string.Empty;
 
-                    if (listValue is System.Collections.IEnumerable enumerable)
+                    if (IsIEnumerable(listValue, out var enumerable))
                     {
-                        foreach (var item in enumerable)
-                        {
-                            var listItemType = item.GetType();
-                            if (listItemType == typeof(System.String)
-                                || listItemType == typeof(System.Char))
-                            {
-                                generatedListJson.Add($"\"{item.ToString()}\"");
-                            }
-                            else if (listItemType.BaseType == typeof(object))
-                            {
-                                var listItemProperties = item.GetType().GetProperties();
-                                var listItemJson = MapProperties(listItemProperties, item);
-                                generatedListJson.Add(listItemJson);
-                            }
-                            else
-                            {
-                                generatedListJson.Add(item.ToString());
-                            }
-                        }
+                        listJson = MapList(enumerable);
                     }
                     else
                     {
                         //need something here
                     }
-                    var joinedChildren = string.Join(",", generatedListJson);
-                    jsonProperties.Add($"\"{propertyInfo.Name}\":[{joinedChildren}]");
+                    jsonProperties.Add($"\"{propertyInfo.Name}\":{listJson}");
                 }
                 else if (propertyType.BaseType == typeof(object)
                     && propertyType.GetProperties().Length > 0)
                 {
                     //calls GetProperties() twice, potential performance regression
                     var childPropertyInfos = propertyType.GetProperties();
-                    var childJson = MapProperties(childPropertyInfos, propertyValue);
+                    var childJson = MapObject(childPropertyInfos, propertyValue);
                     jsonProperties.Add($"\"{propertyInfo.Name}\":{childJson}");
                 }
                 else if (propertyType == typeof(System.Int16)
