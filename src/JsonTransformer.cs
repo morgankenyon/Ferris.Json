@@ -26,6 +26,20 @@ namespace Ferris.Json
             return false;
         }
 
+        internal static bool IsIDictionary(object obj, out IDictionary dict)
+        {
+            if (obj is IDictionary)
+            {
+                dict = obj as IDictionary;
+            }
+            else
+            {
+                dict = null;
+            }
+
+            return dict != null;
+        }
+
         internal static bool IsIEnumerable(object obj, out IEnumerable enumerable)
         {
             if (obj is IEnumerable)
@@ -48,7 +62,11 @@ namespace Ferris.Json
         public static string Serialize(object obj)
         {
             //need a null check
-            if (IsIEnumerable(obj, out var enumerable))
+            if (IsIDictionary(obj, out var dict))
+            {
+                return MapDictionary(dict);
+            }
+            else if (IsIEnumerable(obj, out var enumerable))
             {
                 return MapList(enumerable);
             }
@@ -60,6 +78,41 @@ namespace Ferris.Json
 
                 return combinedProperties;
             }
+        }
+
+        internal static string MapDictionary(IDictionary dict)
+        {
+            var dictEnumerator = dict.GetEnumerator();
+            var jsonProperties = new List<string>();
+            while (dictEnumerator.MoveNext())
+            {
+                var entry = dictEnumerator.Entry;
+                var key = entry.Key;
+                var value = entry.Value;
+                var valueString = string.Empty;
+
+                var valueType = value.GetType();
+                if (valueType == typeof(System.String)
+                    || valueType == typeof(System.Char))
+                {
+                    valueString = $"\"{value.ToString()}\"";
+                }
+                else if (valueType.BaseType == typeof(object))
+                {
+                    var listItemProperties = value.GetType().GetProperties();
+                    var listItemJson = MapObject(listItemProperties, value);
+                    valueString = listItemJson;
+                }
+                else
+                {
+                    valueString = value.ToString();
+                }
+
+                jsonProperties.Add($"\"{key.ToString()}\":{valueString}");
+            }
+            var combinedProperties = $"{{{string.Join(",", jsonProperties)}}}";
+
+            return combinedProperties;
         }
 
         internal static string MapList(IEnumerable enumerable)
@@ -104,6 +157,21 @@ namespace Ferris.Json
                     || propertyType == typeof(System.Char))
                 {
                     jsonProperties.Add($"\"{propertyInfo.Name}\":\"{propertyValue}\"");
+                }
+                else if (typeof(IDictionary).IsAssignableFrom(propertyType))
+                {
+                    var dictValue = propertyInfo.GetValue(obj);
+                    var dictJson = string.Empty;
+
+                    if (IsIDictionary(dictValue, out var dict))
+                    {
+                        dictJson = MapDictionary(dict);
+                    }
+                    else
+                    {
+                        //need something here
+                    }
+                    jsonProperties.Add($"\"{propertyInfo.Name}\":{dictJson}");
                 }
                 else if (typeof(IEnumerable).IsAssignableFrom(propertyType))
                 {
