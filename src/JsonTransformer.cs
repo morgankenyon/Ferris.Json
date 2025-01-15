@@ -80,6 +80,25 @@ namespace Ferris.Json
             }
         }
 
+        internal static string SerializeItem(object item, Type itemType)
+        {
+            if (itemType == typeof(System.String)
+                || itemType == typeof(System.Char))
+            {
+                return $"\"{item.ToString()}\"";
+            }
+            else if (itemType.BaseType == typeof(object))
+            {
+                var listItemProperties = item.GetType().GetProperties();
+                var listItemJson = MapObject(listItemProperties, item);
+                return listItemJson;
+            }
+            else
+            {
+                return item.ToString();
+            }
+        }
+
         internal static string MapDictionary(IDictionary dict)
         {
             var dictEnumerator = dict.GetEnumerator();
@@ -89,24 +108,9 @@ namespace Ferris.Json
                 var entry = dictEnumerator.Entry;
                 var key = entry.Key;
                 var value = entry.Value;
-                var valueString = string.Empty;
 
                 var valueType = value.GetType();
-                if (valueType == typeof(System.String)
-                    || valueType == typeof(System.Char))
-                {
-                    valueString = $"\"{value.ToString()}\"";
-                }
-                else if (valueType.BaseType == typeof(object))
-                {
-                    var listItemProperties = value.GetType().GetProperties();
-                    var listItemJson = MapObject(listItemProperties, value);
-                    valueString = listItemJson;
-                }
-                else
-                {
-                    valueString = value.ToString();
-                }
+                var valueString = SerializeItem(value, valueType);
 
                 jsonProperties.Add($"\"{key.ToString()}\":{valueString}");
             }
@@ -121,21 +125,8 @@ namespace Ferris.Json
             foreach (var item in enumerable)
             {
                 var itemType = item.GetType();
-                if (itemType == typeof(System.String)
-                    || itemType == typeof(System.Char))
-                {
-                    jsonProperties.Add($"\"{item.ToString()}\"");
-                }
-                else if (itemType.BaseType == typeof(object))
-                {
-                    var listItemProperties = item.GetType().GetProperties();
-                    var listItemJson = MapObject(listItemProperties, item);
-                    jsonProperties.Add(listItemJson);
-                }
-                else
-                {
-                    jsonProperties.Add(item.ToString());
-                }
+                var itemString = SerializeItem(item, itemType);
+                jsonProperties.Add(itemString);
             }
             var combinedProperties = $"[{string.Join(",", jsonProperties)}]";
 
