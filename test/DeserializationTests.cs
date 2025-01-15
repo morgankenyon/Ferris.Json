@@ -906,8 +906,8 @@ namespace Ferris.Json.Test
                 .BeEquivalentTo(new List<ushort> { ushort.MinValue, ushort.MaxValue, ushort.MinValue });
         }
 
-        [Fact(DisplayName = "Can parse json array to string list")]
-        public void JsonTransformer_Deserialize_ParseToStringList()
+        [Fact(DisplayName = "Can parse nested json array to string list")]
+        public void JsonTransformer_Deserialize_ParseArrayToNestedStringList()
         {
             //Arrange
             var jsonString = "{\"Values\":[\"one\",\"two\",\"three\"]}";
@@ -918,7 +918,37 @@ namespace Ferris.Json.Test
             //Assert
             obj.Should().NotBeNull();
             obj.Values.Should()
-                .BeEquivalentTo(new List<string> { "one", "two", "three"});
+                .BeEquivalentTo(new List<string> { "one", "two", "three" });
+        }
+
+        [Fact(DisplayName = "Can parse json array to string list")]
+        public void JsonTransformer_Deserialize_ParseArrayToStringList()
+        {
+            //Arrange
+            var jsonString = "[\"one\",\"two\",\"three\"]";
+
+            //Act
+            var obj = JsonTransformer.Deserialize<List<string>>(jsonString);
+
+            //Assert
+            obj.Should().NotBeNull();
+            obj.Should()
+                .BeEquivalentTo(new List<string> { "one", "two", "three" });
+        }
+
+        [Fact(DisplayName = "Can parse json array to string array")]
+        public void JsonTransformer_Deserialize_ParseArrayToStringArray()
+        {
+            //Arrange
+            var jsonString = "[\"one\",\"two\",\"three\"]";
+
+            //Act
+            var obj = JsonTransformer.Deserialize<string[]>(jsonString);
+
+            //Assert
+            obj.Should().NotBeNull();
+            obj.Should()
+                .BeEquivalentTo(new string[] { "one", "two", "three" });
         }
     }
 }
