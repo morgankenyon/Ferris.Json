@@ -419,10 +419,8 @@ namespace Ferris.Json
                             nextListToken = GetNextToken(valueTokenInfo.Token, jsonSpan);
                         } while (nextListToken.IsComma());
 
-                        if (nextListToken.IsCloseBrace())
-                        {
-                            jsonSpan = jsonSpan.Slice(1);
-                        }
+                        propertyValueInfo = new TokenInfo(Token.PropertyValue, 0, instance);
+                        previousToken = Token.PropertyValue;
                         continue;
                     }
                 }
@@ -435,7 +433,9 @@ namespace Ferris.Json
                     else
                     {
                         //log error case about invalid json
+                        //not always invalid, Dictionary inside object hits this
                     }
+
                     jsonSpan = jsonSpan.Slice(tokenLength);
                     break;
                 }

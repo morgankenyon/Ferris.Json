@@ -973,7 +973,7 @@ namespace Ferris.Json.Test
             var jsonString = "{\"Values\":{\"apple\":33,\"lol\":2,\"test\":1}}";
 
             //Act
-            var obj = JsonTransformer.Deserialize<DictObj<string>>(jsonString);
+            var obj = JsonTransformer.Deserialize<DictObj<int>>(jsonString);
 
             //Assert
             obj.Should().NotBeNull();
