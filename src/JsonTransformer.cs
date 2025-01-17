@@ -390,6 +390,42 @@ namespace Ferris.Json
                     instance = propertyValueInfo.Data;
                     continue;
                 }
+                else if (token.IsOpenBrace() && IsIDictionary(instance, out var dict))
+                {
+                    if (type.IsGenericType)
+                    {
+                        var keyType = type.GetGenericArguments()[0];
+                        var valueType = type.GetGenericArguments()[1];
+
+                        var nextListToken = Token.None;
+                        //open brace
+                        do
+                        {
+                            jsonSpan = jsonSpan.Slice(1);
+                            var keyTokenInfo = GetNextTokenAndData(previousToken, jsonSpan);
+                            jsonSpan = jsonSpan.Slice(keyTokenInfo.Length);
+                            var colonToken = GetNextToken(keyTokenInfo.Token, jsonSpan);
+                            jsonSpan = jsonSpan.Slice(1);
+                            var valueTokenInfo = GetNextTokenAndData(colonToken, jsonSpan);
+                            jsonSpan = jsonSpan.Slice(valueTokenInfo.Length);
+
+                            var (mappedKey, mappedKeyError) = Libs.MapValue(keyType, keyTokenInfo.Data);
+                            var (mappedValue, mappedValueError) = Libs.MapValue(valueType, valueTokenInfo.Data);
+                            if (string.IsNullOrWhiteSpace(mappedKeyError)
+                                && string.IsNullOrWhiteSpace(mappedValueError))
+                            {
+                                dict.Add(mappedKey, mappedValue);
+                            }
+                            nextListToken = GetNextToken(valueTokenInfo.Token, jsonSpan);
+                        } while (nextListToken.IsComma());
+
+                        if (nextListToken.IsCloseBrace())
+                        {
+                            jsonSpan = jsonSpan.Slice(1);
+                        }
+                        continue;
+                    }
+                }
                 else if (token.IsCloseBrace())
                 {
                     if (openBraceInfo != null)
