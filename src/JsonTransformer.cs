@@ -26,6 +26,20 @@ namespace Ferris.Json
             return false;
         }
 
+        internal static bool IsIDictionary(object obj, out IDictionary dict)
+        {
+            if (obj is IDictionary)
+            {
+                dict = obj as IDictionary;
+            }
+            else
+            {
+                dict = null;
+            }
+
+            return dict != null;
+        }
+
         internal static bool IsIEnumerable(object obj, out IEnumerable enumerable)
         {
             if (obj is IEnumerable)
@@ -48,7 +62,11 @@ namespace Ferris.Json
         public static string Serialize(object obj)
         {
             //need a null check
-            if (IsIEnumerable(obj, out var enumerable))
+            if (IsIDictionary(obj, out var dict))
+            {
+                return MapDictionary(dict);
+            }
+            else if (IsIEnumerable(obj, out var enumerable))
             {
                 return MapList(enumerable);
             }
@@ -62,27 +80,53 @@ namespace Ferris.Json
             }
         }
 
+        internal static string SerializeItem(object item, Type itemType)
+        {
+            if (itemType == typeof(System.String)
+                || itemType == typeof(System.Char))
+            {
+                return $"\"{item.ToString()}\"";
+            }
+            else if (itemType.BaseType == typeof(object))
+            {
+                var listItemProperties = item.GetType().GetProperties();
+                var listItemJson = MapObject(listItemProperties, item);
+                return listItemJson;
+            }
+            else
+            {
+                return item.ToString();
+            }
+        }
+
+        internal static string MapDictionary(IDictionary dict)
+        {
+            var dictEnumerator = dict.GetEnumerator();
+            var jsonProperties = new List<string>();
+            while (dictEnumerator.MoveNext())
+            {
+                var entry = dictEnumerator.Entry;
+                var key = entry.Key;
+                var value = entry.Value;
+
+                var valueType = value.GetType();
+                var valueString = SerializeItem(value, valueType);
+
+                jsonProperties.Add($"\"{key.ToString()}\":{valueString}");
+            }
+            var combinedProperties = $"{{{string.Join(",", jsonProperties)}}}";
+
+            return combinedProperties;
+        }
+
         internal static string MapList(IEnumerable enumerable)
         {
             var jsonProperties = new List<string>();
             foreach (var item in enumerable)
             {
                 var itemType = item.GetType();
-                if (itemType == typeof(System.String)
-                    || itemType == typeof(System.Char))
-                {
-                    jsonProperties.Add($"\"{item.ToString()}\"");
-                }
-                else if (itemType.BaseType == typeof(object))
-                {
-                    var listItemProperties = item.GetType().GetProperties();
-                    var listItemJson = MapObject(listItemProperties, item);
-                    jsonProperties.Add(listItemJson);
-                }
-                else
-                {
-                    jsonProperties.Add(item.ToString());
-                }
+                var itemString = SerializeItem(item, itemType);
+                jsonProperties.Add(itemString);
             }
             var combinedProperties = $"[{string.Join(",", jsonProperties)}]";
 
@@ -104,6 +148,21 @@ namespace Ferris.Json
                     || propertyType == typeof(System.Char))
                 {
                     jsonProperties.Add($"\"{propertyInfo.Name}\":\"{propertyValue}\"");
+                }
+                else if (typeof(IDictionary).IsAssignableFrom(propertyType))
+                {
+                    var dictValue = propertyInfo.GetValue(obj);
+                    var dictJson = string.Empty;
+
+                    if (IsIDictionary(dictValue, out var dict))
+                    {
+                        dictJson = MapDictionary(dict);
+                    }
+                    else
+                    {
+                        //need something here
+                    }
+                    jsonProperties.Add($"\"{propertyInfo.Name}\":{dictJson}");
                 }
                 else if (typeof(IEnumerable).IsAssignableFrom(propertyType))
                 {
@@ -254,9 +313,12 @@ namespace Ferris.Json
             PropertyInfo[] properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
             var propertiesDict = properties.ToDictionary(p => p.Name, p => p);
-            var instance = Activator.CreateInstance(type);
 
-            if (instance == null)
+            object instance = null;
+            if (!type.IsArray)
+                instance = Activator.CreateInstance(type);
+
+            if (instance == null && !type.IsArray)
             {
                 //need some general error case here
                 return new SpanData(jsonSpan, null);
@@ -283,10 +345,6 @@ namespace Ferris.Json
                     && propertiesDict.TryGetValue((string)propertyNameInfo.Data, out var propertyInfo))
                 {
                     Libs.MapValue(propertyInfo, instance, propertyValueInfo);
-                }
-                else
-                {
-                    //some error message
                 }
 
                 //Case for nested json object
@@ -317,66 +375,53 @@ namespace Ferris.Json
                         && propertiesDict.TryGetValue((string)propertyNameInfo.Data, out var arrayInfo))
                     {
                         var arrayType = arrayInfo.PropertyType;
-                        //if it's a list
-                        if (arrayType.IsGenericType && arrayType.GetGenericTypeDefinition() == typeof(List<>))
-                        {
-                            var elementType = arrayType.GetGenericArguments()[0];
-                            var nextListToken = Token.None;
-                            //make new list
-                            var listInstance = (System.Collections.IList)Activator.CreateInstance(arrayType);
-                            do
-                            {
-                                //convert all elements to C# objects
-                                jsonSpan = jsonSpan.Slice(1);
-                                //if ()
-                                var spanData = GetElementValue(elementType, jsonSpan);
-                                jsonSpan = spanData.JsonSpan;
-                                nextListToken = GetNextToken(Token.None, jsonSpan);
-                                listInstance.Add(spanData.Value);
-                            } while (nextListToken.IsComma());
+                        (propertyValueInfo, previousToken) = DeserializeBracketTypeArray(arrayType, ref jsonSpan);
+                        continue;
+                    }
+                    else
+                    {
+                        //need an error something
+                    }
+                }
+                else if (token.IsOpenBracket())
+                {
+                    //just a data structure
+                    (propertyValueInfo, previousToken) = DeserializeBracketTypeArray(type, ref jsonSpan);
+                    instance = propertyValueInfo.Data;
+                    continue;
+                }
+                else if (token.IsOpenBrace() && IsIDictionary(instance, out var dict))
+                {
+                    if (type.IsGenericType)
+                    {
+                        var keyType = type.GetGenericArguments()[0];
+                        var valueType = type.GetGenericArguments()[1];
 
-                            if (nextListToken.IsCloseBracket())
+                        var nextListToken = Token.None;
+                        //open brace
+                        do
+                        {
+                            jsonSpan = jsonSpan.Slice(1);
+                            var keyTokenInfo = GetNextTokenAndData(previousToken, jsonSpan);
+                            jsonSpan = jsonSpan.Slice(keyTokenInfo.Length);
+                            var colonToken = GetNextToken(keyTokenInfo.Token, jsonSpan);
+                            jsonSpan = jsonSpan.Slice(1);
+                            var valueTokenInfo = GetNextTokenAndData(colonToken, jsonSpan);
+                            jsonSpan = jsonSpan.Slice(valueTokenInfo.Length);
+
+                            var (mappedKey, mappedKeyError) = Libs.MapValue(keyType, keyTokenInfo.Data);
+                            var (mappedValue, mappedValueError) = Libs.MapValue(valueType, valueTokenInfo.Data);
+                            if (string.IsNullOrWhiteSpace(mappedKeyError)
+                                && string.IsNullOrWhiteSpace(mappedValueError))
                             {
-                                jsonSpan = jsonSpan.Slice(1);
+                                dict.Add(mappedKey, mappedValue);
                             }
+                            nextListToken = GetNextToken(valueTokenInfo.Token, jsonSpan);
+                        } while (nextListToken.IsComma());
 
-                            propertyValueInfo = new TokenInfo(Token.PropertyValue, 0, listInstance);
-                            previousToken = Token.PropertyValue;
-                            continue;
-                        }
-                        else if (arrayType.IsArray)
-                        {
-                            var elementType = arrayType.GetElementType();
-                            Type listType = typeof(List<>).MakeGenericType(elementType);
-                            var elementList = (System.Collections.IList)Activator.CreateInstance(listType);
-
-                            var nextListToken = Token.None;
-                            do
-                            {
-                                jsonSpan = jsonSpan.Slice(1);
-                                var spanData = Deserialize(elementType, jsonSpan);
-                                jsonSpan = spanData.JsonSpan;
-                                nextListToken = GetNextToken(Token.None, jsonSpan);
-                                elementList.Add(spanData.Value);
-                            } while (nextListToken.IsComma());
-
-                            if (nextListToken.IsCloseBracket())
-                            {
-                                jsonSpan = jsonSpan.Slice(1);
-                            }
-                            Array array = Array.CreateInstance(elementType, elementList.Count);
-                            elementList.CopyTo(array, 0);
-
-                            propertyValueInfo = new TokenInfo(Token.PropertyValue, 0, array);
-                            previousToken = Token.PropertyValue;
-                            continue;
-
-
-                        }
-                        else
-                        {
-                            var elementType = arrayType.GetElementType();
-                        }
+                        propertyValueInfo = new TokenInfo(Token.PropertyValue, 0, instance);
+                        previousToken = Token.PropertyValue;
+                        continue;
                     }
                 }
                 else if (token.IsCloseBrace())
@@ -388,7 +433,9 @@ namespace Ferris.Json
                     else
                     {
                         //log error case about invalid json
+                        //not always invalid, Dictionary inside object hits this
                     }
+
                     jsonSpan = jsonSpan.Slice(tokenLength);
                     break;
                 }
@@ -427,6 +474,83 @@ namespace Ferris.Json
             }
 
             return new SpanData(jsonSpan, instance);
+        }
+
+        internal static (TokenInfo arrayInfo, Token previousToken) DeserializeBracketTypeArray(
+            Type arrayType, ref ReadOnlySpan<char> jsonSpan)
+        {
+            TokenInfo propertyValueInfo = null;
+            Token previousToken = Token.None;
+            if (arrayType.IsGenericType && arrayType.GetGenericTypeDefinition() == typeof(List<>))
+            {
+                var elementType = arrayType.GetGenericArguments()[0];
+                var listInstance = (System.Collections.IList)Activator.CreateInstance(arrayType);
+
+                DeserializeList(listInstance, arrayType, ref jsonSpan);
+
+                propertyValueInfo = new TokenInfo(Token.PropertyValue, 0, listInstance);
+                previousToken = Token.PropertyValue;
+            }
+            else if (arrayType.IsArray)
+            {
+                Array array = DeserializeArray(arrayType, ref jsonSpan);
+
+                propertyValueInfo = new TokenInfo(Token.PropertyValue, 0, array);
+                previousToken = Token.PropertyValue;
+            }
+            else
+            {
+                var elementType = arrayType.GetElementType();
+            }
+
+            return (propertyValueInfo, previousToken);
+        }
+
+        internal static void DeserializeList(object instance, Type type, ref ReadOnlySpan<char> jsonSpan)
+        {
+            var elementType = type.GetGenericArguments()[0];
+            var nextListToken = Token.None;
+            //make new list
+            var listInstance = (System.Collections.IList)instance;
+            do
+            {
+                jsonSpan = jsonSpan.Slice(1);
+                var spanData = GetElementValue(elementType, jsonSpan);
+                jsonSpan = spanData.JsonSpan;
+                nextListToken = GetNextToken(Token.None, jsonSpan);
+                listInstance.Add(spanData.Value);
+            } while (nextListToken.IsComma());
+
+            if (nextListToken.IsCloseBracket())
+            {
+                jsonSpan = jsonSpan.Slice(1);
+            }
+        }
+
+        internal static Array DeserializeArray(Type type, ref ReadOnlySpan<char> jsonSpan)
+        {
+            var elementType = type.GetElementType();
+            Type listType = typeof(List<>).MakeGenericType(elementType);
+            var elementList = (System.Collections.IList)Activator.CreateInstance(listType);
+
+            var nextListToken = Token.None;
+            do
+            {
+                jsonSpan = jsonSpan.Slice(1);
+                var spanData = GetElementValue(elementType, jsonSpan);
+                jsonSpan = spanData.JsonSpan;
+                nextListToken = GetNextToken(Token.None, jsonSpan);
+                elementList.Add(spanData.Value);
+            } while (nextListToken.IsComma());
+
+            if (nextListToken.IsCloseBracket())
+            {
+                jsonSpan = jsonSpan.Slice(1);
+            }
+            Array array = Array.CreateInstance(elementType, elementList.Count);
+            elementList.CopyTo(array, 0);
+
+            return array;
         }
 
         internal static List<TokenInfo> TokenizeString(

@@ -519,6 +519,18 @@ namespace Ferris.Json.Test
             jsonString.Should().Be("{\"Objects\":[\"one\",23,\"2\",23.42]}");
         }
 
+        [Fact(DisplayName = "Map empty list to json")]
+        public void JsonTransform_MapEmptyList()
+        {
+            var obj = new List<string>();
+
+            //Act
+            var jsonString = JsonTransformer.Serialize(obj);
+
+            //Assert
+            jsonString.Should().Be("[]");
+        }
+
         [Fact(DisplayName = "Map simple string list to json")]
         public void JsonTransform_MapSimpleStringList()
         {
@@ -578,6 +590,137 @@ namespace Ferris.Json.Test
 
             //Assert
             jsonString.Should().Be("[{\"Property\":123},{\"Property\":234}]");
+        }
+
+        [Fact(DisplayName = "Map basic dictionary object to json")]
+        public void JsonTransform_CanMapDictObjString()
+        {
+            var obj = new DictObj<string>
+            {
+                Values = new Dictionary<string, string>()
+            };
+            obj.Values.Add("test", "value");
+            obj.Values.Add("test2", "value2");
+            obj.Values.Add("test3", "value3");
+
+            //Act
+            var jsonString = JsonTransformer.Serialize(obj);
+
+            //Assert
+            jsonString.Should().Be("{\"Values\":{\"test\":\"value\",\"test2\":\"value2\",\"test3\":\"value3\"}}");
+        }
+
+        [Fact(DisplayName = "Map double dictionary object to json")]
+        public void JsonTransform_CanMapDictObjDouble()
+        {
+            var obj = new DictObj<double>
+            {
+                Values = new Dictionary<string, double>()
+            };
+            obj.Values.Add("test", 23.22);
+            obj.Values.Add("test2", 982.28);
+            obj.Values.Add("test3", 783.39);
+
+            //Act
+            var jsonString = JsonTransformer.Serialize(obj);
+
+            //Assert
+            jsonString.Should().Be("{\"Values\":{\"test\":23.22,\"test2\":982.28,\"test3\":783.39}}");
+        }
+
+        [Fact(DisplayName = "Map string dictionary to json")]
+        public void JsonTransform_CanMapDictionary()
+        {
+            var obj = new Dictionary<string, object>
+            {
+                { "test", "value" },
+                { "test2", "value2" },
+                { "test3", "value3" }
+            };
+
+            //Act
+            var jsonString = JsonTransformer.Serialize(obj);
+
+            //Assert
+            jsonString.Should().Be("{\"test\":\"value\",\"test2\":\"value2\",\"test3\":\"value3\"}");
+        }
+
+        [Fact(DisplayName = "Map int dictionary to json")]
+        public void JsonTransform_CanMapIntDictionary()
+        {
+            var obj = new Dictionary<string, int>
+            {
+                { "test", 1 },
+                { "test2", 2 },
+                { "test3", 33 }
+            };
+
+            //Act
+            var jsonString = JsonTransformer.Serialize(obj);
+
+            //Assert
+            jsonString.Should().Be("{\"test\":1,\"test2\":2,\"test3\":33}");
+        }
+
+        [Fact(DisplayName = "Map empty dictionary to json")]
+        public void JsonTransform_CanMapEmptyDictionary()
+        {
+            var obj = new Dictionary<string, int>();
+
+            //Act
+            var jsonString = JsonTransformer.Serialize(obj);
+
+            //Assert
+            jsonString.Should().Be("{}");
+        }
+
+        [Fact(DisplayName = "Map object dictionary to json")]
+        public void JsonTransform_CanMapObjectDictionary()
+        {
+            var obj = new Dictionary<string, StringPropertyObj>
+            {
+                {
+                    "test", new StringPropertyObj
+                    {
+                        Property = "value1"
+                    }
+                },
+                {
+                    "test2", new StringPropertyObj
+                    {
+                        Property = "value2"
+                    }
+                },
+                {
+                    "test3", new StringPropertyObj
+                    {
+                        Property = "value3"
+                    }
+                }
+            };
+
+            //Act
+            var jsonString = JsonTransformer.Serialize(obj);
+
+            //Assert
+            jsonString.Should().Be("{\"test\":{\"Property\":\"value1\"},\"test2\":{\"Property\":\"value2\"},\"test3\":{\"Property\":\"value3\"}}");
+        }
+
+        [Fact(DisplayName = "Map sorted int dictionary to json")]
+        public void JsonTransform_CanMapSortedIntDictionary()
+        {
+            var obj = new SortedDictionary<string, int>
+            {
+                { "test", 1 },
+                { "lol", 2 },
+                { "apple", 33 }
+            };
+
+            //Act
+            var jsonString = JsonTransformer.Serialize(obj);
+
+            //Assert
+            jsonString.Should().Be("{\"apple\":33,\"lol\":2,\"test\":1}");
         }
     }
 }
